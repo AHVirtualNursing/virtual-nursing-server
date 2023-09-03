@@ -3,9 +3,12 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const passport = require('./bin/passport');
+const session = require('express-session');
 
 /* ROUTES */
-const deviceRoutes = require('./routes/device');
+const deviceRoutes = require('./lib/routes/device');
+const authRoutes = require('./lib/routes/auth');
 
 const app = express();
 
@@ -18,6 +21,15 @@ mongoose
 
 /* MIDDLEWARE */
 app.use(bodyParser.json());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 /* Test Connection */
 app.get('/api', (req, res) => {
@@ -26,6 +38,7 @@ app.get('/api', (req, res) => {
 
 /* APP USE */
 app.use('/devices', deviceRoutes);
+app.use('/auth', authRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
