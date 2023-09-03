@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const passport = require('../../bin/passport');
+const passport = require('../middleware/passport');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/user');
 

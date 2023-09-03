@@ -3,12 +3,12 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const passport = require('./bin/passport');
+const passport = require('./middleware/passport');
 const session = require('express-session');
 
 /* ROUTES */
-const deviceRoutes = require('./lib/routes/device');
-const authRoutes = require('./lib/routes/auth');
+const deviceRoutes = require('./routes/device');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
