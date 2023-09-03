@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 /* ROUTES */
-const deviceRoutes = require('./lib/routes/device');
+const deviceRoutes = require('./routes/device');
 
 const app = express();
 
