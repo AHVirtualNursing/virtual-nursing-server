@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('./middleware/passport');
 const session = require('express-session');
+const cors = require('cors');
 
 /* ROUTES */
 const deviceRoutes = require('./routes/device');
@@ -30,6 +31,13 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  })
+);
 
 /* Test Connection */
 app.get('/api', (req, res) => {
