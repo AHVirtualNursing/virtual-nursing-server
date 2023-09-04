@@ -10,6 +10,7 @@ const cors = require('cors');
 /* ROUTES */
 const deviceRoutes = require('./routes/device');
 const authRoutes = require('./routes/auth');
+const smartbedRoutes = require('./routes/smartbed');
 
 const app = express();
 
@@ -18,7 +19,11 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(console.log('MongoDB connected'));
+  .then(() => {
+    console.log('MongoDB connected')
+  }).catch((error) => {
+    console.error('Error connecting to MongoDB:', error)
+  });
 
 /* MIDDLEWARE */
 app.use(bodyParser.json());
@@ -47,6 +52,7 @@ app.get('/api', (req, res) => {
 /* APP USE */
 app.use('/devices', deviceRoutes);
 app.use('/auth', authRoutes);
+app.use('/smartbeds', smartbedRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
