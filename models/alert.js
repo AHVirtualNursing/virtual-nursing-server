@@ -4,11 +4,6 @@ const alertStatusEnum = ['open', 'handling', 'complete'];
 
 const alertSchema = new mongoose.Schema(
   {
-    smartBed: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'SmartBed',
-      required: true,
-    },
     status: {
       type: String,
       enum: alertStatusEnum,
