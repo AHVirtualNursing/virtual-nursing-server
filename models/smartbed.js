@@ -19,6 +19,7 @@ const smartBedSchema = new mongoose.Schema({
   },
   occupied: {
     type: Boolean,
+    default: false,
     required: true,
   },
   heartRate: {
@@ -42,6 +43,29 @@ const smartBedSchema = new mongoose.Schema({
   note: {
     type: String,
   },
+  alerts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Alert'
+    }
+  ],
+  alertConfig:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref:'AlertConfig',
+  },
+  reminders: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref:'Reminder'
+    }
+  ],
+  reports: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref:'Report'
+    }
+  ]
+      
 });
 
 const VitalsReading = new mongoose.Schema(
