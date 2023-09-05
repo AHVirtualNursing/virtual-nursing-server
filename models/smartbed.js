@@ -1,5 +1,17 @@
 const mongoose = require('mongoose');
 
+const VitalsReading = new mongoose.Schema(
+  {
+    reading: {
+      type: Number,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
 const smartBedSchema = new mongoose.Schema({
   bedNum: {
     type: Number,
@@ -67,18 +79,6 @@ const smartBedSchema = new mongoose.Schema({
   ]
       
 });
-
-const VitalsReading = new mongoose.Schema(
-  {
-    reading: {
-      type: Number,
-      required: true,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
 
 module.exports =
   mongoose.models.SmartBed || mongoose.model('SmartBed', smartBedSchema);
