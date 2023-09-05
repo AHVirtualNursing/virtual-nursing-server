@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const Smartbed = require('../models/smartbed');
+const Alert = require('../models/alert');
 
 router.get('/', async (req, res) => {
     try {
-      const smartbeds = await Smartbed.find({});
-      res.status(200).json({ success: true, data: smartbeds });
+      const alerts = await Alert.find({});
+      res.status(200).json({ success: true, data: alerts });
     } catch (e) {
       res.status(400).json({ success: false });
     }
@@ -14,11 +14,11 @@ router.get('/', async (req, res) => {
 router.get('/:id', async(req, res) => {
     try {
         const {id} = req.params;
-        const smartbed = await Smartbed.findById(id);
-        if (!smartbed) {
-            return res.status(404).json({message: `cannot find any smartbed with ID ${id}`})
+        const alert = await Alert.findById(id);
+        if (!alert) {
+            return res.status(404).json({message: `cannot find any alert with ID ${id}`})
         }
-        res.status(200).json(smartbed);
+        res.status(200).json(alert);
     } catch (e) {
         res.status(400).json({ success: false });
     }
@@ -26,8 +26,8 @@ router.get('/:id', async(req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const newSmartbed = await Smartbed.create(req.body);
-    res.status(200).json({ success: true, data: newSmartbed });
+    const newAlert = await Alert.create(req.body);
+    res.status(200).json({ success: true, data: newAlert });
   } catch (e) {
     if (e.name === 'ValidationError') {
         const validationErrors = Object.values(e.errors).map((e) => e.message);
@@ -41,16 +41,16 @@ router.post('/', async (req, res) => {
 router.put('/:id', async(req, res) => {
     try {
         const {id} = req.params;
-        const smartbed = await Smartbed.findOneAndUpdate(
+        const alert = await Alert.findOneAndUpdate(
             {_id: id},
             req.body,
             {new: true, runValidators: true}
         );
-        if (!smartbed) {
-            return res.status(404).json({message: `cannot find any smartbed with ID ${id}`})
+        if (!alert) {
+            return res.status(404).json({message: `cannot find any alert with ID ${id}`})
         }
-        const updatedSmartbed = await Smartbed.findById(id);
-        res.status(200).json(updatedSmartbed);
+        const updatedAlert = await Alert.findById(id);
+        res.status(200).json(updatedAlert);
     } catch (e) {
         if (e.name === 'ValidationError') {
             const validationErrors = Object.values(e.errors).map((e) => e.message);
@@ -64,11 +64,11 @@ router.put('/:id', async(req, res) => {
 router.delete('/:id', async(req, res) => {
     try {
         const {id} = req.params;
-        const smartbed = await Smartbed.findByIdAndDelete(id);
-        if (!smartbed) {
-            return res.status(404).json({message: `cannot find any smartbed with ID ${id}`})
+        const alert = await Alert.findByIdAndDelete(id);
+        if (!alert) {
+            return res.status(404).json({message: `cannot find any alert with ID ${id}`})
         }
-        res.status(200).json(smartbed);
+        res.status(200).json(alert);
     } catch (e) {
         res.status(400).json({ success: false }); 
     }

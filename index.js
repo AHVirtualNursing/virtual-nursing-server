@@ -11,6 +11,7 @@ const cors = require('cors');
 const deviceRoutes = require('./routes/device');
 const authRoutes = require('./routes/auth');
 const smartbedRoutes = require('./routes/smartbed');
+const alertRoutes = require('./routes/alert');
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.get('/api', (req, res) => {
 app.use('/devices', deviceRoutes);
 app.use('/auth', authRoutes);
 app.use('/smartbeds', smartbedRoutes);
+app.use('/alerts', alertRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

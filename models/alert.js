@@ -6,7 +6,10 @@ const alertSchema = new mongoose.Schema(
   {
     status: {
       type: String,
-      enum: alertStatusEnum,
+      enum: {
+        values: alertStatusEnum,
+        message: 'Invalid alert status: {VALUE}'
+      },
       default: 'open',
       required: true,
     },
