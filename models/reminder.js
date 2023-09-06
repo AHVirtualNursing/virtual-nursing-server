@@ -11,4 +11,6 @@ const reminderSchema = new mongoose.Schema(
     }
   );
   
-  module.exports = mongoose.models.Reminder || mongoose.model('Reminder', reminderSchema);
+  const dvsDB = mongoose.connection.useDb('dvs');
+
+  module.exports = dvsDB.models.Reminder || dvsDB.model('Reminder', reminderSchema);

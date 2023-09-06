@@ -10,5 +10,7 @@ const reportSchema = new mongoose.Schema(
       timestamps: true,
     }
   );
+
+  const dvsDB = mongoose.connection.useDb('dvs');
   
-  module.exports = mongoose.models.Report || mongoose.model('Report', reportSchema);
+  module.exports = dvsDB.models.Report || dvsDB.model('Report', reportSchema);

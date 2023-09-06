@@ -23,4 +23,6 @@ const nurseSchema = new mongoose.Schema({
 
 nurseSchema.add(User.schema);
 
-module.exports =mongoose.models.Nurse || mongoose.model('Nurse', nurseSchema);
+const dvsDB = mongoose.connection.useDb('dvs');
+
+module.exports =dvsDB.models.Nurse || dvsDB.model('Nurse', nurseSchema);
