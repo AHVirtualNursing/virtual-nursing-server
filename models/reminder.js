@@ -1,16 +1,31 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const reminderSchema = new mongoose.Schema(
-    {
-      content: {
-        type: String,
-      },
+  {
+    content: {
+      type: String,
     },
-    {
-      timestamps: true,
+    isComplete: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    picture: {
+      type: String,
+      default: null,
+      required: false
+    },
+    createdBy: {
+      type: String,
+      default: null,
+      required: true
     }
-  );
-  
-  const dvsDB = mongoose.connection.useDb('dvs');
+  },
+  {
+    timestamps: true,
+  }
+);
 
-  module.exports = dvsDB.models.Reminder || dvsDB.model('Reminder', reminderSchema);
+module.exports =
+  mongoose.models.Reminder || mongoose.model("Reminder", reminderSchema);
+
