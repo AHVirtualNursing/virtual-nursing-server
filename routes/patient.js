@@ -28,6 +28,22 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.get("/name/:name", async (req, res) => {
+    try {
+      const { name } = req.params;
+      const patient = await Patient.findOne({name: name});
+      if (!patient) {
+        return res
+          .status(404)
+          .json({ message: `cannot find any patient with name ${name}` });
+      }
+      res.status(200).json(patient);
+    } catch (e) {
+      console.error(e);
+      res.status(400).json({ success: false });
+    }
+  });
+
 router.post("/", async (req, res) => {
   try {
     const newPatient = await Patient.create(req.body);

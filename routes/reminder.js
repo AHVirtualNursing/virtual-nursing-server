@@ -28,6 +28,22 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.get("/createdFor/:name", async (req, res) => {
+    try {
+      const { name } = req.params;
+      const reminders = await Reminder.find({createdFor: name});
+      if (!reminders) {
+        return res
+          .status(404)
+          .json({ message: `cannot find any reminders with createdFor ${name}` });
+      }
+      res.status(200).json(reminders);
+    } catch (e) {
+      console.error(e);
+      res.status(400).json({ success: false });
+    }
+  });
+
 router.post("/", async (req, res) => {
   try {
     const newReminder = await Reminder.create(req.body);
