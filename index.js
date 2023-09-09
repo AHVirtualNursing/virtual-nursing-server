@@ -1,17 +1,18 @@
 /* IMPORTS */
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const passport = require('./middleware/passport');
-const session = require('express-session');
-const cors = require('cors');
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const passport = require("./middleware/passport");
+const session = require("express-session");
+const cors = require("cors");
 
 /* ROUTES */
-const deviceRoutes = require('./routes/device');
-const authRoutes = require('./routes/auth');
-const smartbedRoutes = require('./routes/smartbed');
-const alertRoutes = require('./routes/alert');
+const deviceRoutes = require("./routes/device");
+const authRoutes = require("./routes/auth");
+const smartbedRoutes = require("./routes/smartbed");
+const alertRoutes = require("./routes/alert");
+const reminderRoutes = require("./routes/reminder");
 
 const app = express();
 
@@ -21,9 +22,10 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log('MongoDB connected')
-  }).catch((error) => {
-    console.error('Error connecting to MongoDB:', error)
+    console.log("MongoDB connected");
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
   });
 
 /* MIDDLEWARE */
@@ -39,22 +41,23 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(
   cors({
-    origin: 'http://localhost:3000',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: "http://localhost:3000",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
 );
 
 /* Test Connection */
-app.get('/api', (req, res) => {
-  res.json({ message: 'Hello from server!' });
+app.get("/api", (req, res) => {
+  res.json({ message: "Hello from server!" });
 });
 
 /* APP USE */
-app.use('/devices', deviceRoutes);
-app.use('/auth', authRoutes);
-app.use('/smartbeds', smartbedRoutes);
-app.use('/alerts', alertRoutes);
+app.use("/devices", deviceRoutes);
+app.use("/auth", authRoutes);
+app.use("/smartbeds", smartbedRoutes);
+app.use("/alerts", alertRoutes);
+app.use("/reminders", reminderRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
