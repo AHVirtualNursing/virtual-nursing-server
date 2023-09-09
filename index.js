@@ -3,9 +3,11 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const passport = require('./middleware/passport');
 const session = require('express-session');
 const cors = require('cors');
+
+/* MIDDLEWARE IMPORTS */
+const passport = require('./middleware/passport');
 
 /* ROUTES */
 const deviceRoutes = require('./routes/device');
@@ -21,9 +23,10 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log('MongoDB connected')
-  }).catch((error) => {
-    console.error('Error connecting to MongoDB:', error)
+    console.log('MongoDB connected');
+  })
+  .catch((error) => {
+    console.error('Error connecting to MongoDB:', error);
   });
 
 /* MIDDLEWARE */

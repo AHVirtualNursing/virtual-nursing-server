@@ -1,8 +1,9 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const passport = require('../middleware/passport');
 const { body, validationResult } = require('express-validator');
-const User = require('../models/user');
+const { getUserModel } = require('../helper/auth');
 
 router.post(
   '/register',
@@ -18,15 +19,17 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
+    const userType = req.headers['x-usertype'];
+    const userModel = getUserModel(userType);
+
     const { username, email, password } = req.body;
-    const existingUser = await User.findOne({ email });
+    const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
-    const newUser = new User({ username, email, password });
-
+    const newUser = new userModel({ username, email, password });
     try {
       await newUser.save();
       res.status(201).json({ message: 'User registered successfully' });
@@ -56,6 +59,11 @@ router.post('/login', (req, res, next) => {
       return res.status(200).json({ message: 'Login successful', user: user });
     });
   })(req, res, next);
+});
+
+router.post('/logout', (req, res) => {
+  req.logout();
+  res.status(200).json({ message: 'Logged out successfully' });
 });
 
 module.exports = router;
