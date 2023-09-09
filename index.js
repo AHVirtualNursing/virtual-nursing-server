@@ -13,6 +13,7 @@ const authRoutes = require("./routes/auth");
 const smartbedRoutes = require("./routes/smartbed");
 const alertRoutes = require("./routes/alert");
 const reminderRoutes = require("./routes/reminder");
+const patientRoutes = require("./routes/patient");
 
 const app = express();
 
@@ -58,6 +59,7 @@ app.use("/auth", authRoutes);
 app.use("/smartbeds", smartbedRoutes);
 app.use("/alerts", alertRoutes);
 app.use("/reminders", reminderRoutes);
+app.use("/patients", patientRoutes)
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
