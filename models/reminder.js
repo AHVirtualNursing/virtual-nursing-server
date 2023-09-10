@@ -4,6 +4,7 @@ const reminderSchema = new mongoose.Schema(
   {
     content: {
       type: String,
+      required: true,
     },
     isComplete: {
       type: Boolean,
@@ -19,6 +20,10 @@ const reminderSchema = new mongoose.Schema(
       type: String,
       default: null,
       required: true
+    },
+    createdFor: {
+      type: String,
+      required: true,
     }
   },
   {

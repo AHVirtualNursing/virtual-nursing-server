@@ -15,6 +15,7 @@ const alertRoutes = require('./routes/alert');
 const nurseRoutes = require('./routes/nurse');
 const alertConfigRoutes = require('./routes/alertConfig');
 const reminderRoutes = require("./routes/reminder");
+const patientRoutes = require("./routes/patient");
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.use('/alerts', alertRoutes);
 app.use('/nurses', nurseRoutes);
 app.use('/alertConfigs', alertConfigRoutes);
 app.use("/reminders", reminderRoutes);
+app.use("/patients", patientRoutes)
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

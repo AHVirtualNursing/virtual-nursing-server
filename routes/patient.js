@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const Reminder = require("../models/reminder");
+const Patient = require("../models/patient");
 
 router.get("/", async (req, res) => {
   try {
-    const reminders = await Reminder.find({});
-    res.status(200).json({ success: true, data: reminders });
+    const patients = await Patient.find({});
+    res.status(200).json({ success: true, data: patients });
   } catch (e) {
-    console.eror(e);
+    console.error(e);
     res.status(400).json({ success: false });
   }
 });
@@ -15,29 +15,29 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const reminder = await Reminder.findById(id);
-    if (!reminder) {
+    const patient = await Patient.findById(id);
+    if (!patient) {
       return res
         .status(404)
-        .json({ message: `cannot find any reminder with ID ${id}` });
+        .json({ message: `cannot find any patient with ID ${id}` });
     }
-    res.status(200).json(reminder);
+    res.status(200).json(patient);
   } catch (e) {
-    console.eror(e);
+    console.error(e);
     res.status(400).json({ success: false });
   }
 });
 
-router.get("/createdFor/:name", async (req, res) => {
+router.get("/name/:name", async (req, res) => {
     try {
       const { name } = req.params;
-      const reminders = await Reminder.find({createdFor: name});
-      if (!reminders) {
+      const patient = await Patient.findOne({name: name});
+      if (!patient) {
         return res
           .status(404)
-          .json({ message: `cannot find any reminders with createdFor ${name}` });
+          .json({ message: `cannot find any patient with name ${name}` });
       }
-      res.status(200).json(reminders);
+      res.status(200).json(patient);
     } catch (e) {
       console.error(e);
       res.status(400).json({ success: false });
@@ -46,14 +46,13 @@ router.get("/createdFor/:name", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const newReminder = await Reminder.create(req.body);
-    res.status(200).json({ success: true, data: newReminder });
+    const newPatient = await Patient.create(req.body);
+    res.status(200).json({ success: true, data: newPatient });
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(400).json({ validationErrors });
     } else {
-      console.eror(e);
       res.status(400).json({ success: false });
     }
   }
@@ -62,23 +61,22 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const reminder = await Reminder.findOneAndUpdate({ _id: id }, req.body, {
+    const patient = await Patient.findOneAndUpdate({ _id: id }, req.body, {
       new: true,
       runValidators: true,
     });
-    if (!reminder) {
+    if (!patient) {
       return res
         .status(404)
-        .json({ message: `cannot find any reminder with ID ${id}` });
+        .json({ message: `cannot find any patient with ID ${id}` });
     }
-    const updatedReminder = await Reminder.findById(id);
-    res.status(200).json(updatedReminder);
+    const updatedPatient = await Patient.findById(id);
+    res.status(200).json(updatedPatient);
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(400).json({ validationErrors });
     } else {
-      console.eror(e);
       res.status(400).json({ success: false });
     }
   }
@@ -87,15 +85,15 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const reminder = await Reminder.findByIdAndDelete(id);
-    if (!reminder) {
+    const patient = await Patient.findByIdAndDelete(id);
+    if (!patient) {
       return res
         .status(404)
-        .json({ message: `cannot find any reminder with ID ${id}` });
+        .json({ message: `cannot find any patient with ID ${id}` });
     }
-    res.status(200).json(reminder);
+    res.status(200).json(patient);
   } catch (e) {
-    console.eror(e);
+    console.error(e);
     res.status(400).json({ success: false });
   }
 });
