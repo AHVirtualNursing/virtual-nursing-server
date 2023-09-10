@@ -8,7 +8,7 @@ const reportSchema = new mongoose.Schema(
     },
     {
       timestamps: true,
-    }
+    },
   );
 
   const dvsDB = mongoose.connection.useDb('dvs');

@@ -21,10 +21,11 @@ const reminderSchema = new mongoose.Schema(
       default: null,
       required: true
     },
-    createdFor: {
-      type: String,
-      required: true,
-    }
+    patient: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref:'Patient',
+      required: true
+    },
   },
   {
     timestamps: true,

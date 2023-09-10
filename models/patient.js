@@ -18,6 +18,10 @@ const patientSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    addInfo: {
+      type: String,
+      required: false,
+    },
     copd: {
       type: Boolean,
       default: false,
@@ -41,10 +45,22 @@ const patientSchema = new mongoose.Schema(
         type: Number,
         required: false,
     },
+    news2Score: {
+      type: Number,
+      required: false,
+    },
+    alerts: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Alert"
+    }],
     reminders: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Reminder"
-    }]
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Reminder"
+    }],
+    nurses: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Nurse"
+    }],
   },
   {
     timestamps: true,
