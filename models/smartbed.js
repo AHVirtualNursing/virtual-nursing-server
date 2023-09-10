@@ -21,10 +21,6 @@ const smartBedSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  wardNum: {
-    type: Number,
-    required: true,
-  },
   patientName: {
     type: String,
     required: true,
@@ -80,5 +76,7 @@ const smartBedSchema = new mongoose.Schema({
       
 });
 
+const dvsDB = mongoose.connection.useDb('dvs');
+
 module.exports =
-  mongoose.models.SmartBed || mongoose.model('SmartBed', smartBedSchema);
+  dvsDB.models.SmartBed || dvsDB.model('SmartBed', smartBedSchema);

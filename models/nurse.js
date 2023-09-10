@@ -1,15 +1,28 @@
 const mongoose = require('mongoose');
 const User = require('./user');
 
+const nurseStatusEnum = ['normal', 'head'];
+
 const nurseSchema = new mongoose.Schema({
-    smartBeds: [
+    wards: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref:'SmartBed'
+            ref:'Ward'
         }
-    ]
+    ],
+    nurseStatus: {
+        type: String,
+        enum: {
+            values: nurseStatusEnum,
+            message: 'Invalid nurse status: {VALUE}'
+        },
+        default: 'normal',
+        required: true,
+    }
   });
 
 nurseSchema.add(User.schema);
 
-module.exports =mongoose.models.Nurse || mongoose.model('Nurse', nurseSchema);
+const dvsDB = mongoose.connection.useDb('dvs');
+
+module.exports =dvsDB.models.Nurse || dvsDB.model('Nurse', nurseSchema);
