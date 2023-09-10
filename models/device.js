@@ -16,7 +16,5 @@ const deviceSchema = new mongoose.Schema(
 
 const sdmsDB = mongoose.connection.useDb('sdms');
 
-const sdmsDB = mongoose.connection.useDb('sdms');
-
 module.exports =
   sdmsDB.models.Device || sdmsDB.model('Device', deviceSchema);

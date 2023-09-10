@@ -16,6 +16,9 @@ const vitalSchema = new mongoose.Schema({
       pulse: {
         type: Object,
       }
+  },
+  {
+    timestamps: true,
   });
 
 module.exports =mongoose.models.Vital || mongoose.model('Vital', vitalSchema);

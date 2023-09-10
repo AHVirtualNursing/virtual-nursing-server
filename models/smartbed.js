@@ -35,6 +35,9 @@ const smartBedSchema = new mongoose.Schema({
     ref: 'Ward',
     required: true,
   }      
+},
+{
+  timestamps: true,
 });
 
 const dvsDB = mongoose.connection.useDb('dvs');
