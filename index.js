@@ -8,10 +8,12 @@ const session = require("express-session");
 const cors = require("cors");
 
 /* ROUTES */
-const deviceRoutes = require("./routes/device");
-const authRoutes = require("./routes/auth");
-const smartbedRoutes = require("./routes/smartbed");
-const alertRoutes = require("./routes/alert");
+const deviceRoutes = require('./routes/device');
+const authRoutes = require('./routes/auth');
+const smartbedRoutes = require('./routes/smartbed');
+const alertRoutes = require('./routes/alert');
+const nurseRoutes = require('./routes/nurse');
+const alertConfigRoutes = require('./routes/alertConfig');
 const reminderRoutes = require("./routes/reminder");
 const patientRoutes = require("./routes/patient");
 
@@ -54,10 +56,12 @@ app.get("/api", (req, res) => {
 });
 
 /* APP USE */
-app.use("/devices", deviceRoutes);
-app.use("/auth", authRoutes);
-app.use("/smartbeds", smartbedRoutes);
-app.use("/alerts", alertRoutes);
+app.use('/devices', deviceRoutes);
+app.use('/auth', authRoutes);
+app.use('/smartbeds', smartbedRoutes);
+app.use('/alerts', alertRoutes);
+app.use('/nurses', nurseRoutes);
+app.use('/alertConfigs', alertConfigRoutes);
 app.use("/reminders", reminderRoutes);
 app.use("/patients", patientRoutes)
 

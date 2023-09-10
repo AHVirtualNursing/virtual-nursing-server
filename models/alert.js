@@ -30,4 +30,6 @@ const alertSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.models.Alert || mongoose.model('Alert', alertSchema);
+const dvsDB = mongoose.connection.useDb('dvs');
+
+module.exports = dvsDB.models.Alert || dvsDB.model('Alert', alertSchema);
