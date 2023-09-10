@@ -4,10 +4,10 @@ const User = require('./user');
 const nurseStatusEnum = ['normal', 'head'];
 
 const nurseSchema = new mongoose.Schema({
-    smartBeds: [
+    wards: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref:'SmartBed'
+            ref:'Ward'
         }
     ],
     nurseStatus: {
