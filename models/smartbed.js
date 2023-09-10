@@ -21,10 +21,6 @@ const smartBedSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  wardNum: {
-    type: Number,
-    required: true,
-  },
   patientName: {
     type: String,
     required: true,
