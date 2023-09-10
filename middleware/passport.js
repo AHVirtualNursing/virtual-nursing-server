@@ -1,6 +1,6 @@
 const passport = require('passport');
+const { getUserModel } = require('../helper/auth');
 const LocalStrategy = require('passport-local').Strategy;
-const User = require('../models/user');
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -17,10 +17,11 @@ passport.deserializeUser(async (id, done) => {
 
 passport.use(
   new LocalStrategy(
-    { usernameField: 'identifier' },
-    async (identifier, password, done) => {
+    { usernameField: 'identifier', passReqToCallback: true },
+    async (req, identifier, password, done) => {
+      const userType = getUserModel(req.headers['x-usertype']);
       try {
-        const user = await User.findOne({
+        const user = await userType.findOne({
           $or: [{ email: identifier }, { username: identifier }],
         });
 
@@ -36,7 +37,7 @@ passport.use(
 
         return done(null, user);
       } catch (err) {
-        return done(err);
+        console.log(err);
       }
     }
   )

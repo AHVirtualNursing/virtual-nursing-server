@@ -34,4 +34,12 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   }
 };
 
-module.exports = mongoose.models.User || mongoose.model('User', userSchema);
+const DVSUser = mongoose.model('DVSUser', userSchema, 'dvs_users');
+const SDMSUser = mongoose.model('SDMSUser', userSchema, 'sdms_users');
+const MobileUser = mongoose.model('MobileUser', userSchema, 'mobile_users');
+
+module.exports = {
+  DVSUser,
+  SDMSUser,
+  MobileUser,
+};

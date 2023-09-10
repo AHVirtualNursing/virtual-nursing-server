@@ -1,16 +1,18 @@
 const mongoose = require('mongoose');
 
-const wardSchema = new mongoose.Schema(
-    {
-      num: {
-        type: Number,
-      },
+const wardSchema = new mongoose.Schema({
+    num: {
+        type: String,
+        required: true,
     },
-    {
-      timestamps: true,
-    },
-  );
-
-  const dvsDB = mongoose.connection.useDb('dvs');
+    smartBeds: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref:'SmartBed'
+        }
+    ]
   
-  module.exports = dvsDB.models.Report || dvsDB.model('Ward', wardSchema);
+  });
+
+module.exports =mongoose.models.Ward || mongoose.model('Ward', wardSchema);
+

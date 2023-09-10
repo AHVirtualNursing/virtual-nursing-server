@@ -25,7 +25,7 @@ const nurseSchema = new mongoose.Schema(
             ref:'Nurse',
             default: null,
         },
-        assignedWard: {
+        ward: {
             type: mongoose.Schema.Types.ObjectId,
             ref:'Ward',
             default: null,
@@ -35,6 +35,7 @@ const nurseSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
+
 
 nurseSchema.add(User.schema);
 
