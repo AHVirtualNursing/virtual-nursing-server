@@ -26,7 +26,6 @@ router.get('/bed/:id', async(req, res) => {
 })
 
 router.get('/beds', async (req, res) => {
-    console.log('2')
     const idsToRetrieve = req.query.ids.split(',');
     
     try {
