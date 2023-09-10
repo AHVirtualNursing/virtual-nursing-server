@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Ward = require('./ward');
 
 const wardSchema = new mongoose.Schema({
     num: {
