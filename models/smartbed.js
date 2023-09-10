@@ -1,16 +1,6 @@
 const mongoose = require('mongoose');
 
-const VitalsReading = new mongoose.Schema(
-  {
-    reading: {
-      type: Number,
-      required: true,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+const bedStatusEnum = ['occupied','vacant', 'ready'];
 
 const smartBedSchema = new mongoose.Schema({
   bedNum: {
@@ -21,59 +11,30 @@ const smartBedSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  patientName: {
+  bedStatus: {
     type: String,
+    enum: {
+      values: bedStatusEnum,
+      message: 'Invalid bed status: {VALUE}'
+    },
+    default: 'vacant',
     required: true,
   },
-  occupied: {
+  railStatus: {
     type: Boolean,
     default: false,
     required: true,
   },
-  heartRate: {
-    type: [VitalsReading],
-  },
-  respiratoryRate: {
-    type: [VitalsReading],
-  },
-  bloodPressure: {
-    type: [VitalsReading],
-  },
-  spo2: {
-    type: [VitalsReading],
-  },
-  temperature: {
-    type: [VitalsReading],
-  },
-  railsStatus: {
-    type: Boolean,
-  },
-  note: {
-    type: String,
-  },
-  alerts: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Alert'
-    }
-  ],
-  alertConfig:{
+  patient: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'AlertConfig',
+    ref: 'Patient',
+    required: false,
   },
-  reminders: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref:'Reminder'
-    }
-  ],
-  reports: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref:'Report'
-    }
-  ]
-      
+  ward: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Ward',
+    required: true,
+  }      
 });
 
 const dvsDB = mongoose.connection.useDb('dvs');

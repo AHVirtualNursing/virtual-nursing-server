@@ -11,6 +11,8 @@ const wardSchema = new mongoose.Schema({
             ref:'SmartBed'
         }
     ]
+  
   });
 
 module.exports =mongoose.models.Ward || mongoose.model('Ward', wardSchema);
+

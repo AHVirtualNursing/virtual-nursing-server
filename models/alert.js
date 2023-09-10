@@ -20,9 +20,9 @@ const alertSchema = new mongoose.Schema(
     notes: {
       type: String,
     },
-    delegatedNurseId: {
-      type: Number,
-      default: null,
+    patient: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Patient"
     },
   },
   {
