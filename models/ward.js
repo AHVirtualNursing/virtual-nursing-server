@@ -15,5 +15,6 @@ const wardSchema = new mongoose.Schema({
         timestamps: true,
     });
 
-module.exports =mongoose.models.Ward || mongoose.model('Ward', wardSchema);
+
+module.exports = mongoose.models.Ward || mongoose.model('Ward', wardSchema);
 

@@ -40,7 +40,6 @@ const smartBedSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-const dvsDB = mongoose.connection.useDb('dvs');
 
 module.exports =
-  dvsDB.models.SmartBed || dvsDB.model('SmartBed', smartBedSchema);
+  mongoose.models.SmartBed || mongoose.model('SmartBed', smartBedSchema);
