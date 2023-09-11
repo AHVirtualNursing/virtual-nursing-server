@@ -18,6 +18,9 @@ const nurseRoutes = require('./routes/nurse');
 const alertConfigRoutes = require('./routes/alertConfig');
 const reminderRoutes = require("./routes/reminder");
 const patientRoutes = require("./routes/patient");
+const wardRoutes = require("./routes/ward")
+const reportRoutes = require("./routes/report")
+const vitalRoutes = require("./routes/vital")
 
 const app = express();
 
@@ -60,14 +63,17 @@ app.get("/api", (req, res) => {
 });
 
 /* APP USE */
-app.use('/devices', deviceRoutes);
+app.use('/device', deviceRoutes);
 app.use('/auth', authRoutes);
-app.use('/smartbeds', smartbedRoutes);
-app.use('/alerts', alertRoutes);
-app.use('/nurses', nurseRoutes);
-app.use('/alertConfigs', alertConfigRoutes);
-app.use("/reminders", reminderRoutes);
-app.use("/patients", patientRoutes)
+app.use('/smartbed', smartbedRoutes);
+app.use('/alert', alertRoutes);
+app.use('/nurse', nurseRoutes);
+app.use('/alertConfig', alertConfigRoutes);
+app.use('/reminder', reminderRoutes);
+app.use('/patient', patientRoutes);
+app.use('/ward', wardRoutes);
+app.use('/report', reportRoutes);
+app.use('/vital', vitalRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

@@ -37,7 +37,5 @@ const alertConfigSchema = new mongoose.Schema(
       timestamps: true,
     }
   );
-
-  const dvsDB = mongoose.connection.useDb('dvs');
   
-  module.exports = dvsDB.models.AlertConfig || dvsDB.model('AlertConfig', alertConfigSchema);
+  module.exports = mongoose.models.AlertConfig || mongoose.model('AlertConfig', alertConfigSchema);
