@@ -5,10 +5,14 @@ const nurseStatusEnum = ["normal", "head"];
 
 const nurseSchema = new mongoose.Schema(
   {
-    patients: [
+    name: {
+        type: String,
+        required: true
+    },
+    smartBeds: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Patient",
+        ref: "SmartBed",
       },
     ],
     nurseStatus: {
