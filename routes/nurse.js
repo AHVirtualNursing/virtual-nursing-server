@@ -20,6 +20,12 @@ router.get("/:id", async (req, res) => {
         populate: [
           {
             path: "patient",
+            populate: [
+              {
+                path: "reminders",
+                populate: [{ path: "patient" }],
+              },
+            ],
           },
           { path: "ward" },
         ],

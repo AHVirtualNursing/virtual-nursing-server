@@ -1,18 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const Reminder = require("../models/reminder");
+const Patient = require("../models/patient");
 
 router.get("/", async (req, res) => {
   try {
-    const reminders = await Reminder.find({});
+    const reminders = await Reminder.find({}).populate({ path: "patient" });
     res.status(200).json({ success: true, data: reminders });
   } catch (e) {
-    console.eror(e);
     res.status(400).json({ success: false });
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/id/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const reminder = await Reminder.findById(id);
@@ -23,37 +23,60 @@ router.get("/:id", async (req, res) => {
     }
     res.status(200).json(reminder);
   } catch (e) {
-    console.eror(e);
     res.status(400).json({ success: false });
   }
 });
 
-router.get("/createdFor/:name", async (req, res) => {
-    try {
-      const { name } = req.params;
-      const reminders = await Reminder.find({createdFor: name});
-      if (!reminders) {
-        return res
-          .status(404)
-          .json({ message: `cannot find any reminders with createdFor ${name}` });
-      }
-      res.status(200).json(reminders);
-    } catch (e) {
-      console.error(e);
-      res.status(400).json({ success: false });
-    }
-  });
+router.get("/patients", async (req, res) => {
+  const idsToRetrieve = req.query.ids.split(",");
+  try {
+    const reminders = await Promise.all(
+      idsToRetrieve.map(async (id) => {
+        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+          const reminder = await Reminder.findOne({ patient: id }).populate({
+            path: "patient",
+          });
+          if (!reminder) {
+            return null;
+          }
+          return reminder;
+        } else {
+          res.status(500).json({ message: `${id} is in wrong format` });
+        }
+      })
+    );
+    res.status(200).json(reminders);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
 
 router.post("/", async (req, res) => {
   try {
+    const patientId = req.body.patient;
     const newReminder = await Reminder.create(req.body);
+
+    //Links new Reminder to Patient
+    const updatedPatient = await Patient.findOneAndUpdate(
+      { _id: patientId },
+      { $push: { reminders: newReminder._id } },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    if (!updatedPatient) {
+      return res
+        .status(404)
+        .json({ message: `cannot find any patient with ID ${id}` });
+    }
+
     res.status(200).json({ success: true, data: newReminder });
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(400).json({ validationErrors });
     } else {
-      console.eror(e);
       res.status(400).json({ success: false });
     }
   }
@@ -78,16 +101,31 @@ router.put("/:id", async (req, res) => {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(400).json({ validationErrors });
     } else {
-      console.eror(e);
       res.status(400).json({ success: false });
     }
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/deleteReminder/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const reminder = await Reminder.findByIdAndDelete(id);
+
+    //Remove link from Reminder to Patient
+    const updatedPatient = await Patient.findOneAndUpdate(
+      { _id: reminder.patient },
+      { $pull: { reminders: reminder._id } },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    if (!updatedPatient) {
+      return res
+        .status(404)
+        .json({ message: `cannot find any patient with ID ${id}` });
+    }
+
     if (!reminder) {
       return res
         .status(404)
@@ -95,7 +133,6 @@ router.delete("/:id", async (req, res) => {
     }
     res.status(200).json(reminder);
   } catch (e) {
-    console.eror(e);
     res.status(400).json({ success: false });
   }
 });
