@@ -3,7 +3,6 @@ const router = express.Router();
 const Smartbed = require('../models/smartbed');
 
 router.get('/', async (req, res) => {
-    console.log('1')
     try {
       const smartbeds = await Smartbed.find({});
       res.status(200).json({ success: true, data: smartbeds });
@@ -32,11 +31,9 @@ router.get('/beds', async (req, res) => {
         const smartBeds = await Promise.all(idsToRetrieve.map(async (id) => {
             if (id.match(/^[0-9a-fA-F]{24}$/)) {
                 const smartBed = await Smartbed.findById(id).populate("patient ward");
-                console.log(smartBed)
                 if (!smartBed) {
                     res.status(404).json({message: `cannot find any smartbed with ID ${id}`})
                 }
-                console.log(smartBed['bedNum'])
                 return smartBed;
             } else{
                 res.status(500).json({ message: `${id} is in wrong format`});
