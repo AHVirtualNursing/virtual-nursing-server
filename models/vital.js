@@ -1,20 +1,31 @@
 const mongoose = require('mongoose');
 
+const VitalsReading = new mongoose.Schema({
+  reading: {
+    type: Number,
+    required: true,
+  },
+  datetime: {
+    type: String,
+    required: true,
+  },
+});
+
 const vitalSchema = new mongoose.Schema({
     respRate: {
-        type: Object,
+        type: [VitalsReading],
       },
       heartRate: {
-        type: Object,
+        type: [VitalsReading],
       },
       bloodPressure: {
-        type: Object,
+        type: [VitalsReading],
       },
       spO2: {
-        type: Object,
+        type: [VitalsReading],
       },
       pulse: {
-        type: Object,
+        type: [VitalsReading],
       }
   },
   {
