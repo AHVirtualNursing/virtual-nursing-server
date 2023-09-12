@@ -31,7 +31,7 @@ router.get('/beds', async (req, res) => {
     try {
         const smartBeds = await Promise.all(idsToRetrieve.map(async (id) => {
             if (id.match(/^[0-9a-fA-F]{24}$/)) {
-                const smartBed = await Smartbed.findById(id);
+                const smartBed = await Smartbed.findById(id).populate("patient ward");
                 console.log(smartBed)
                 if (!smartBed) {
                     res.status(404).json({message: `cannot find any smartbed with ID ${id}`})
