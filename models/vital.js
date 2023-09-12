@@ -14,11 +14,14 @@ const VitalsReading = new mongoose.Schema({
 const vitalSchema = new mongoose.Schema({
     respRate: {
         type: [VitalsReading],
-      },
+    },
       heartRate: {
         type: [VitalsReading],
+      }, 
+      bloodPressureSys: {
+        type: [VitalsReading],
       },
-      bloodPressure: {
+      bloodPressureDia: {
         type: [VitalsReading],
       },
       spO2: {
