@@ -34,7 +34,12 @@ const smartBedSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Ward',
     required: true,
-  }      
+  },
+  nurses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Nurse',
+    required: false,
+  }],     
 },
 {
   timestamps: true,
