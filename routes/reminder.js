@@ -27,24 +27,13 @@ router.get("/id/:id", async (req, res) => {
   }
 });
 
-router.get("/patients", async (req, res) => {
-  const idsToRetrieve = req.query.ids.split(",");
+//Get all Reminders of this Patient
+router.get("/patient/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    const reminders = await Promise.all(
-      idsToRetrieve.map(async (id) => {
-        if (id.match(/^[0-9a-fA-F]{24}$/)) {
-          const reminder = await Reminder.findOne({ patient: id }).populate({
-            path: "patient",
-          });
-          if (!reminder) {
-            return null;
-          }
-          return reminder;
-        } else {
-          res.status(500).json({ message: `${id} is in wrong format` });
-        }
-      })
-    );
+    const reminders = await Reminder.find({ patient: id }).populate({
+      path: "patient",
+    });
     res.status(200).json(reminders);
   } catch (e) {
     res.status(500).json({ message: e.message });
