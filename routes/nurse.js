@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Nurse = require("../models/nurse");
-
+const nurse = require("../controllers/nurseController");
 router.get("/", async (req, res) => {
   try {
     const nurses = await Nurse.find({});
@@ -61,19 +61,21 @@ router.get("/getNursesOfBed/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
-  try {
-    const newNurse = await Nurse.create(req.body);
-    res.status(200).json({ success: true, data: newNurse });
-  } catch (e) {
-    if (e.name === "ValidationError") {
-      const validationErrors = Object.values(e.errors).map((e) => e.message);
-      return res.status(400).json({ validationErrors });
-    } else {
-      res.status(400).json({ success: false });
-    }
-  }
-});
+router.post("/",  nurse.createNurse);
+
+// router.post("/",  async (req, res) => {
+//   try {
+//     const newNurse = await Nurse.create(req.body);
+//     res.status(200).json({ success: true, data: newNurse });
+//   } catch (e) {
+//     if (e.name === "ValidationError") {
+//       const validationErrors = Object.values(e.errors).map((e) => e.message);
+//       return res.status(400).json({ validationErrors });
+//     } else {
+//       res.status(400).json({ success: false });
+//     }
+//   }
+// });
 
 router.put("/:id", async (req, res) => {
   try {
