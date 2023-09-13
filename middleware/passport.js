@@ -1,14 +1,15 @@
 const passport = require("passport");
 const { getUserModel } = require("../helper/auth");
+const user = require("../models/user");
 const LocalStrategy = require("passport-local").Strategy;
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-passport.deserializeUser(async (req, id, done) => {
+passport.deserializeUser(async (id, done) => {
   try {
-    const user = await getUserModel(req.headers["x-usertype"]).findById(id);
+    user.findById(id);
     done(null, user);
   } catch (err) {
     done(err);
