@@ -29,6 +29,12 @@ const vitalSchema = new mongoose.Schema({
       },
       pulse: {
         type: [VitalsReading],
+      },
+      news2Score: {
+        type: [VitalsReading]
+      },
+      temperature: {
+        type: [VitalsReading],
       }
   },
   {

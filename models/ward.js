@@ -1,8 +1,21 @@
 const mongoose = require('mongoose');
 
+const wardTypeEnum = ["A1", "B1", "B2", "C"]
+
 const wardSchema = new mongoose.Schema({
-    num: {
+    wardNum: {
         type: String,
+        required: true,
+    },
+    wardType: {
+        enum: {
+            values: wardTypeEnum,
+            message: "Invalid ward type status: {VALUE}",
+          },
+          required: false,
+    },
+    numRooms: {
+        type: Number,
         required: true,
     },
     smartBeds: [
