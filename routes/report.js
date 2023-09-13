@@ -64,12 +64,14 @@ router.put('/:id', async(req, res) => {
 router.delete('/:id', async(req, res) => {
     try {
         const {id} = req.params;
-        const report = await Reminder.findByIdAndDelete(id);
+        const report = await Report.findByIdAndDelete(id);
         if (!report) {
             return res.status(404).json({message: `cannot find any report with ID ${id}`})
         }
-        res.status(200).json(alert);
+        res.status(200).json(report);
     } catch (e) {
         res.status(500).json({message: e.message});
     }
 })
+
+module.exports = router;

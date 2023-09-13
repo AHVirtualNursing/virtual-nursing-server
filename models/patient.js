@@ -10,6 +10,10 @@ const patientSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    nric: {
+      type:String,
+      required: true
+    },
     picture: {
       type: String,
       required: false,
@@ -46,21 +50,33 @@ const patientSchema = new mongoose.Schema(
         required: false,
     },
     news2Score: {
-      type: Number,
+      type: Object,
       required: false,
+    },
+    isDischarged: {
+      type: Boolean,
+      default: false
     },
     alerts: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Alert"
     }],
+    alertConfig: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "AlertConfig"
+    },
     reminders: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Reminder"
     }],
-    nurses: [{
+    vital: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Nurse"
-    }],
+      ref: "Vital"
+    },
+    reports: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Report"
+    }]
   },
   {
     timestamps: true,

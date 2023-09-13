@@ -1,19 +1,17 @@
-const { DVSUser, SDMSUser, MobileUser } = require('../models/user');
+const nurse = require("../models/nurse");
+const { virtualNurse, itAdmin } = require("../models/webUser");
 
 function getUserModel(userType) {
-  let userModel = '';
+  let userModel = "";
 
   switch (userType) {
-    case 'dvs':
-      userModel = DVSUser;
-      break;
-    case 'sdms':
-      userModel = SDMSUser;
-      break;
-    case 'mobile':
-      userModel = MobileUser;
-      break;
-    case '':
+    case "virtual-nurse":
+      return virtualNurse;
+    case "it-admin":
+      return itAdmin;
+    case "mobile":
+      return nurse;
+    case "":
       return Error;
   }
 
