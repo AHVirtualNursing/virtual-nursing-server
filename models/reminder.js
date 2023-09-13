@@ -26,6 +26,10 @@ const reminderSchema = new mongoose.Schema(
       ref:'Patient',
       required: true
     },
+    time: {
+      type: Date,
+      required: true
+    }
   },
   {
     timestamps: true,
