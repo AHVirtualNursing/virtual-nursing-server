@@ -53,22 +53,30 @@ const patientSchema = new mongoose.Schema(
       type: Object,
       required: false,
     },
-    alerts: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Alert"
-    }],
-    reminders: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Reminder"
-    }],
     isDischarged: {
       type: Boolean,
       default: false
     },
+    alerts: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Alert"
+    }],
+    alertConfig: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "AlertConfig"
+    },
+    reminders: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Reminder"
+    }],
     vital: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vital"
-    }
+    },
+    reports: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Report"
+    }]
   },
   {
     timestamps: true,

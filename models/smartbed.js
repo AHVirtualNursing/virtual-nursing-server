@@ -4,11 +4,11 @@ const bedStatusEnum = ['occupied','vacant', 'ready'];
 
 const smartBedSchema = new mongoose.Schema({
   bedNum: {
-    type: Number,
+    type: String,
     required: true,
   },
   roomNum: {
-    type: Number,
+    type: String,
     required: true,
   },
   bedStatus: {
@@ -34,7 +34,12 @@ const smartBedSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Ward',
     required: true,
-  }      
+  },
+  nurses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Nurse',
+    required: false,
+  }],     
 },
 {
   timestamps: true,
