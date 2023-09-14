@@ -25,6 +25,10 @@ router.get("/:id", async (req, res) => {
                 path: "reminders",
                 populate: [{ path: "patient" }],
               },
+              {
+                path: "alerts",
+                populate: [{ path: "patient" }],
+              },
             ],
           },
           { path: "ward" },
