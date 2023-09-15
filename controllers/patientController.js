@@ -9,14 +9,14 @@ const createPatient = async(req, res) => {
             "nric": req.body.nric,
             "condition": req.body.condition,
             "addInfo": req.body.addInfo,
-            "copd": req.body.copd,            
+            "copd": req.body.copd      
         }) 
-        const res = await Patient.create(patient);
-        res.status(res.status).json({ success: true, data: patient });
+        await Patient.create(patient);
+        res.status(200).json({ success: true, data: patient });
       } catch (e) {
         if (e.name === "ValidationError") {
           const validationErrors = Object.values(e.errors).map((e) => e.message);
-          return res.status(400).json({ validationErrors });
+          return res.status(500).json({ validationErrors });
         } else {
           res.status(500).json({ success: e.message });
         }
@@ -38,13 +38,10 @@ const getPatientById = async(req, res) => {
         const { id } = req.params;
         const patient = await Patient.findById(id);
         if (!patient) {
-          return res
-            .status(404)
-            .json({ message: `cannot find any patient with ID ${id}` });
+          return res.status(200).json({ message: `cannot find any patient with ID ${id}` });
         }
         res.status(200).json(patient);
       } catch (e) {
-        console.error(e);
         res.status(500).json({ success: e.message });
       }
 }
@@ -58,9 +55,7 @@ const getPatientsByIds = async(req, res) => {
           const patient = await Patient.findById(id);
           console.log(patient);
           if (!patient) {
-            res
-              .status(404)
-              .json({ message: `cannot find any patient with ID ${id}` });
+            res.status(500).json({ message: `cannot find any patient with ID ${id}` });
           }
           return patient;
         } else {
@@ -112,7 +107,7 @@ const updatePatientById = async(req, res) => {
             const smartBed = await SmartBed.findById({ patient: id });
             if(!smartBed) {
               if (!smartbed) {
-                return res.status(404).json({message: `cannot find any smartbed with Patient ID ${id}`});
+                return res.status(500).json({message: `cannot find any smartbed with Patient ID ${id}`});
               }
             }
             smartBed.status = bedStatusEnum[1]
@@ -125,7 +120,7 @@ const updatePatientById = async(req, res) => {
       } catch (e) {
         if (e.name === "ValidationError") {
           const validationErrors = Object.values(e.errors).map((e) => e.message);
-          return res.status(400).json({ validationErrors });
+          return res.status(500).json({ validationErrors });
         } else {
           res.status(500).json({ success: e.message });
         }
