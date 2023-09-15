@@ -25,6 +25,7 @@ const patientSchema = new mongoose.Schema(
     addInfo: {
       type: String,
       required: false,
+      default: ""
     },
     copd: {
       type: Boolean,
