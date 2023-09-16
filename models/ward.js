@@ -8,11 +8,12 @@ const wardSchema = new mongoose.Schema({
         required: true,
     },
     wardType: {
+        type: String,
         enum: {
             values: wardTypeEnum,
-            message: "Invalid ward type status: {VALUE}",
-          },
-          required: false,
+            message: 'Invalid ward type status: {VALUE}',
+        },
+        required: false,
     },
     numRooms: {
         type: Number,
