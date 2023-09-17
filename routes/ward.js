@@ -11,6 +11,8 @@ router.post('/', Ward.createWard);
 
 router.put('/:id', Ward.updateWardById);
 
+router.put('/:id/nurse', Ward.assignNurseToWard);
+
 router.delete('/:id', Ward.deleteWardById);
 
 module.exports = router;
