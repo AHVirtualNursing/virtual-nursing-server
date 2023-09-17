@@ -106,13 +106,13 @@ const updatePatientById = async(req, res) => {
         }
 
         if (alertConfig){       
-            const alertConfigObj = await AlertConfig.findById({ _id: alertConfig });
-            if(!alertConfigObj) {
-                return res.status(500).json({message: `cannot find any alertConfig with ID ${alertConfig}`});
-            }
-            patient.alertConfig = alertConfig;
+          const alertConfigObj = await AlertConfig.findById({ _id: alertConfig });
+          if(!alertConfigObj) {
+              return res.status(500).json({message: `cannot find any alertConfig with ID ${alertConfig}`});
+          }
+          patient.alertConfig = alertConfig;
         }
-        
+
         const updatedPatient = await patient.save();
         res.status(200).json(updatedPatient);
         
@@ -125,6 +125,36 @@ const updatePatientById = async(req, res) => {
 
         }
       }
+}
+
+
+const dischargePatientById = async(req, res) => {
+  try{
+        const { id } = req.params;
+        const patient = await Patient.findById(id);
+        if (!patient) {
+          return res.status(500).json({ message: `cannot find any patient with ID ${id}` });
+        }
+
+        patient.isDischarged = true;
+
+        const smartBed = await SmartBed.findOne({ patient: id });
+        
+        console.log(smartBed);
+        if(!smartBed) {
+          return res.status(500).json({message: `cannot find any smartbed with Patient ID ${id}`});   
+        }
+        smartBed.status = bedStatusEnum[1]
+        smartBed.patient = null
+        await smartBed.save();
+  } catch (e) {
+    if (e.name === "ValidationError") {
+      const validationErrors = Object.values(e.errors).map((e) => e.message);
+      return res.status(500).json({ validationErrors });
+    } else {
+      res.status(500).json({ success: e.message });
+    }
+  }
 }
 
 const deletePatientById = async(req, res) => {
@@ -147,5 +177,6 @@ module.exports = {
     getPatientById,
     getPatientsByIds,
     updatePatientById,
+    dischargePatientById,
     deletePatientById
 }
