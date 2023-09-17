@@ -27,9 +27,6 @@ const vitalSchema = new mongoose.Schema({
       spO2: {
         type: [VitalsReading],
       },
-      pulse: {
-        type: [VitalsReading],
-      },
       news2Score: {
         type: [VitalsReading]
       },

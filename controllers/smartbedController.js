@@ -6,12 +6,22 @@ const Ward = require("../models/ward");
 const createSmartBed = async(req, res) => {
 
     try{
+        const ward = await Ward.findById({ _id: req.body.ward });
+        if(!ward) {
+            return res.status(500).json({message: `cannot find any ward with Ward ID ${req.body.ward}`});
+        }
+
         const smartbed = new SmartBed({
             bedNum: req.body.bedNum,
-            roomNum: req.body.roomNum
+            roomNum: req.body.roomNum,
+            ward: req.body.ward
         })
     
         await smartbed.save();
+
+        ward.smartBeds.push(smartbed._id)
+        await ward.save();
+
         res.status(200).json({ success: true, data: smartbed });
     } catch(e){
         if (e.name === "ValidationError") {
@@ -130,7 +140,7 @@ const updateSmartBedById = async(req, res) => {
 const deleteSmartBedById = async(req, res) => {
     try {
         const {id} = req.params;
-        const smartbed = await Smartbed.findByIdAndDelete(id);
+        const smartbed = await SmartBed.findByIdAndDelete(id);
         if (!smartbed) {
             return res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
         }

@@ -137,7 +137,8 @@ const updatePatientById = async(req, res) => {
 
         const updatedPatient = await patient.save();
         res.status(200).json(updatedPatient);
-      } catch (e) {
+        
+    } catch (e) {
         if (e.name === "ValidationError") {
           const validationErrors = Object.values(e.errors).map((e) => e.message);
           return res.status(500).json({ validationErrors });

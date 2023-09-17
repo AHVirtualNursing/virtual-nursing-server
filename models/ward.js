@@ -26,17 +26,12 @@ const wardSchema = new mongoose.Schema({
             ref:'SmartBed'
         }
     ],
-    wardType: {
-        type: String,
-        enum: {
-          values: wardTypeEnum,
-          message: "Invalid Ward Type: {VALUE}",
-        },
-    },
-    nurses: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:'Nurse'
-    }]},
+    nurses: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref:'Nurse'    
+        }
+    ]},
     {
         timestamps: true
     });
