@@ -17,9 +17,7 @@ const getReminderById = async (req, res) => {
       const { id } = req.params;
       const reminder = await Reminder.findById(id);
       if (!reminder) {
-        return res
-          .status(404)
-          .json({ message: `cannot find any reminder with ID ${id}` });
+        return res.status(500).json({ message: `cannot find any reminder with ID ${id}` });
       }
       res.status(200).json(reminder);
     } catch (e) {
@@ -43,38 +41,34 @@ const getRemindersOfPatient = async (req, res) => {
 
 const createReminder = async (req, res) => {
     try {
-        const patientId = req.body.patient;
-  
-        //Links new Reminder to Patient
-        const updatedPatient = await Patient.findOneAndUpdate(
-            { _id: patientId },
-            { $push: { reminders: newReminder._id } },
-            {
-            new: true,
-            runValidators: true,
-            }
-        );
-        if (!updatedPatient) {
-            return res
-            .status(404)
-            .json({ message: `cannot find any patient with ID ${id}` });
+        const patient = await Patient.findById({ _id: req.body.patient });
+        if(!patient) {
+            return res.status(500).json({message: `cannot find any patient with Patient ID ${req.body.patient}`});
         }
-
+        
         const reminder = new Reminder({
             content: req.body.content,
             createdBy: req.body.createdBy,
             patient: req.body.patient  //verify if patient exists first
         })
-            await alert.save();
-        const newReminder = await Reminder.create(req.body);
-    
-        res.status(200).json({ success: true, data: newReminder });
+        await reminder.save();
+
+        //Links new Reminder to Patient
+        const updatedPatient = await Patient.findOneAndUpdate(
+            { _id: patientId },
+            { $push: { reminders: reminder._id } },
+            {
+            new: true,
+            runValidators: true,
+            }
+        );
+        res.status(200).json({ success: true, data: reminder });
     } catch (e) {
         if (e.name === "ValidationError") {
             const validationErrors = Object.values(e.errors).map((e) => e.message);
-            return res.status(400).json({ validationErrors });
+            return res.status(500).json({ validationErrors });
         } else {
-            res.status(400).json({ success: false });
+            res.status(500).json({ message: e.message });
         }
     }
   }
@@ -84,10 +78,10 @@ const updateReminderById = async (req, res) => {
         const { id } = req.params;
         const reminder = await Reminder.findById(id);
         if (!reminder) {
-            return res.status(404).json({ message: `cannot find any reminder with ID ${id}` });
+            return res.status(500).json({ message: `cannot find any reminder with ID ${id}` });
         }
 
-        const { content, isComplete, picture, createdBy, patient } = req.body;
+        const { content, isComplete, picture} = req.body;
         if (content){
             reminder.content = content
         }
@@ -97,32 +91,10 @@ const updateReminderById = async (req, res) => {
         if (picture){
             reminder.picture = picture
         }
-        /*
-        // have a message saying cannot be updated?
-        if (createdBy){
-            reminder.picture = picture
-        }
-        */
+       
 
         const updatedReminder = await reminder.save();
         res.status(200).json(updatedReminder);
-        /*
-        console.log(req.body);
-        const reminder = await Reminder.findOneAndUpdate(
-            { _id: id }, 
-            req.body, {
-                new: true,
-                runValidators: true,
-            }
-        );
-        if (!reminder) {
-            return res
-            .status(404)
-            .json({ message: `cannot find any reminder with ID ${id}` });
-        }
-        const updatedReminder = await Reminder.findById(id);
-        res.status(200).json(updatedReminder);
-        */
     } catch (e) {
         if (e.name === "ValidationError") {
             const validationErrors = Object.values(e.errors).map((e) => e.message);
@@ -138,7 +110,7 @@ const deleteReminderById = async (req, res) => {
         const { id } = req.params;
         const reminder = await Reminder.findById(id);
         if (!reminder) {
-            return res.status(404).json({ message: `cannot find any reminder with ID ${id}` });
+            return res.status(500).json({ message: `cannot find any reminder with ID ${id}` });
         }
     
         //Remove link from Reminder to Patient
@@ -151,13 +123,13 @@ const deleteReminderById = async (req, res) => {
             }
         );
         if (!updatedPatient) {
-            return res.status(404).json({ message: `cannot find any patient tagged to alert with ID ${id}` });
+            return res.status(500).json({ message: `cannot find any patient tagged to alert with ID ${id}` });
         }
     
         await Reminder.deleteOne({_id: id});
         res.status(200).json(reminder);
     } catch (e) {
-        res.status(400).json({ success: false });
+        res.status(500).json({ success: false });
     }
 }
 

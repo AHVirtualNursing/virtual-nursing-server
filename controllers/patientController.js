@@ -3,6 +3,9 @@ const AlertConfig = require('../models/alertConfig');
 const Patient = require('../models/patient');
 const SmartBed = require("../models/smartbed");
 const bedStatusEnum = ['occupied','vacant'];
+const Reminder = require('../models/reminder');
+
+
 
 const createPatient = async(req, res) => {
     try {
@@ -70,6 +73,25 @@ const getPatientsByIds = async(req, res) => {
     res.status(500).json({ message: e.message });
   }
 }
+
+const getRemindersByPatientId = async (req, res) => {
+  try {
+
+      const {id} = req.params;
+      const patient = await Patient.findById(id);
+      console.log(patient)
+      if (!patient) {
+        return res.status(500).json({ message: `cannot find any patient with ID ${id}` }); 
+      }
+
+      const reminders = await Reminder.find({patient: id })
+      console.log(reminders);
+      res.status(200).json(reminders);
+  } catch (e) {
+      res.status(500).json({ message: e.message });
+  }
+}
+
 const updatePatientById = async(req, res) => {
     try {
         const { id } = req.params;
@@ -127,7 +149,6 @@ const updatePatientById = async(req, res) => {
       }
 }
 
-
 const dischargePatientById = async(req, res) => {
   try{
         const { id } = req.params;
@@ -144,9 +165,11 @@ const dischargePatientById = async(req, res) => {
         if(!smartBed) {
           return res.status(500).json({message: `cannot find any smartbed with Patient ID ${id}`});   
         }
-        smartBed.status = bedStatusEnum[1]
-        smartBed.patient = null
+        smartBed.bedStatus = bedStatusEnum[1];
+        smartBed.patient = null;
         await smartBed.save();
+
+        res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
@@ -176,6 +199,7 @@ module.exports = {
     getPatients,
     getPatientById,
     getPatientsByIds,
+    getRemindersByPatientId,
     updatePatientById,
     dischargePatientById,
     deletePatientById
