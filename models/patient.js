@@ -25,6 +25,7 @@ const patientSchema = new mongoose.Schema(
     addInfo: {
       type: String,
       required: false,
+      default: ""
     },
     copd: {
       type: Boolean,
@@ -36,6 +37,7 @@ const patientSchema = new mongoose.Schema(
         values: patientO2IntakeEnum,
         message: "Invalid patient O2 intake status: {VALUE}",
       },
+      default: patientO2IntakeEnum[0]
     },
     consciousness: {
       type: String,
@@ -43,7 +45,8 @@ const patientSchema = new mongoose.Schema(
         values: patientConsciousnessEnum,
         message: "Invalid patient consciousness status: {VALUE}",
       },
-      required: false,
+      default: patientConsciousnessEnum[0]
+      
     },
     temperature: {
         type: Number,
