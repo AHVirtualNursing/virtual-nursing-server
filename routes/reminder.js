@@ -5,15 +5,12 @@ const reminder = require("../controllers/reminderController");
 
 router.get("/", reminder.getAllReminders);
 
-router.get("/id/:id", reminder.getReminderById);
-
-//Get all Reminders of this Patient
-router.get("/patient/:id", reminder.getRemindersOfPatient );
+router.get("/:id", reminder.getReminderById);
 
 router.post("/", reminder.createReminder);
 
 router.put("/:id", reminder.updateReminderById);
 
-router.delete("/deleteReminder/:id", reminder.deleteReminderById);
+router.delete("/:id", reminder.deleteReminderById);
 
 module.exports = router;
