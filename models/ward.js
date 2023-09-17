@@ -32,7 +32,11 @@ const wardSchema = new mongoose.Schema({
           values: wardTypeEnum,
           message: "Invalid Ward Type: {VALUE}",
         },
-    }},
+    },
+    nurses: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'Nurse'
+    }]},
     {
         timestamps: true
     });
