@@ -52,10 +52,6 @@ const patientSchema = new mongoose.Schema(
         type: Number,
         required: false,
     },
-    news2Score: {
-      type: Object,
-      required: false,
-    },
     isDischarged: {
       type: Boolean,
       default: false

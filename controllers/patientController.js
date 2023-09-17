@@ -1,3 +1,5 @@
+const Alert = require('../models/alert');
+const AlertConfig = require('../models/alertConfig');
 const Patient = require('../models/patient');
 const SmartBed = require("../models/smartbed");
 const bedStatusEnum = ['occupied','vacant'];
@@ -38,7 +40,7 @@ const getPatientById = async(req, res) => {
         const { id } = req.params;
         const patient = await Patient.findById(id);
         if (!patient) {
-          return res.status(200).json({ message: `cannot find any patient with ID ${id}` });
+          return res.status(500).json({ message: `cannot find any patient with ID ${id}` }); //status 400?
         }
         res.status(200).json(patient);
       } catch (e) {
@@ -76,7 +78,8 @@ const updatePatientById = async(req, res) => {
           return res.status(500).json({ message: `cannot find any patient with ID ${id}` });
         }
 
-        const { addInfo, condition, o2Intake, consciousness, picture, alerts, reminders, reports, isDischarged} = req.body;
+        const { addInfo, condition, o2Intake, consciousness, picture, alerts, reminders, reports, alertConfig, isDischarged} = req.body;
+
         if (addInfo){
             patient.addInfo = addInfo
         }
@@ -101,19 +104,13 @@ const updatePatientById = async(req, res) => {
         if (reports){
             patient.reports = reports
         }
-        if (isDischarged){
-            patient.isDischarged = isDischarged;
 
-            const smartBed = await SmartBed.findById({ patient: id });
-            if(!smartBed) {
-              if (!smartbed) {
-                return res.status(500).json({message: `cannot find any smartbed with Patient ID ${id}`});
-              }
-            }
-            smartBed.status = bedStatusEnum[1]
-            smartBed.patient = null
-            await smartBed.save();
-        }
+        if (alertConfig){       
+          const alertConfigObj = await AlertConfig.findById({ _id: alertConfig });
+          if(!alertConfigObj) {
+              return res.status(500).json({message: `cannot find any alertConfig with ID ${alertConfig}`});
+          }
+          patient.alertConfig = alertConfig;
 
         const updatedPatient = await patient.save();
         res.status(200).json(updatedPatient);
@@ -122,7 +119,8 @@ const updatePatientById = async(req, res) => {
           const validationErrors = Object.values(e.errors).map((e) => e.message);
           return res.status(500).json({ validationErrors });
         } else {
-          res.status(500).json({ success: e.message });
+          res.status(500).json({ message: e.message });
+
         }
       }
 }
