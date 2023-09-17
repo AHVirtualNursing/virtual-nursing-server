@@ -106,15 +106,17 @@ const updatePatientById = async(req, res) => {
         }
 
         if (alertConfig){       
-          const alertConfigObj = await AlertConfig.findById({ _id: alertConfig });
-          if(!alertConfigObj) {
-              return res.status(500).json({message: `cannot find any alertConfig with ID ${alertConfig}`});
-          }
-          patient.alertConfig = alertConfig;
-
+            const alertConfigObj = await AlertConfig.findById({ _id: alertConfig });
+            if(!alertConfigObj) {
+                return res.status(500).json({message: `cannot find any alertConfig with ID ${alertConfig}`});
+            }
+            patient.alertConfig = alertConfig;
+        }
+        
         const updatedPatient = await patient.save();
         res.status(200).json(updatedPatient);
-      } catch (e) {
+        
+    } catch (e) {
         if (e.name === "ValidationError") {
           const validationErrors = Object.values(e.errors).map((e) => e.message);
           return res.status(500).json({ validationErrors });

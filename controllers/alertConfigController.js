@@ -1,11 +1,18 @@
-const mongoose = require("mongoose");
 const AlertConfig = require('../models/alertConfig');
 const Patient = require('../models/patient')
 
 const createAlertConfig = async (req, res) => {
     try {
+        const patient = await Patient.findById({ _id: req.body.patient });
+        if(!patient) {
+            return res.status(500).json({message: `cannot find any patient with Patient ID ${req.body.patient}`});
+        }
         const alertConfig = new AlertConfig({})
         await AlertConfig.create(alertConfig)
+
+        patient.alertConfig = alertConfig._id;
+        await patient.save();
+
         res.status(200).json({ success: true, data: alertConfig });
     } catch (e) {
         if (e.name === 'ValidationError') {
@@ -31,7 +38,7 @@ const getAlertConfigById = async(req, res) => {
         const {id} = req.params;
         const alertConfig = await AlertConfig.findById(id);
         if (!alertConfig) {
-            return res.status(404).json({message: `cannot find any alertConfig with ID ${id}`})
+            return res.status(500).json({message: `cannot find any alertConfig with ID ${id}`})
         }
         res.status(200).json(alertConfig);
     } catch (e) {
@@ -44,7 +51,7 @@ const updateAlertConfigById = async(req, res) => {
         const {id} = req.params;
         const alertConfig = await AlertConfig.findbyId(id)
         if (!alertConfig) {
-            return res.status(404).json({message: `cannot find any alertConfig with ID ${id}`})
+            return res.status(500).json({message: `cannot find any alertConfig with ID ${id}`})
         }
         const { rrConfig, hrConfig, bpSysConfig, bpDiaConfig, spO2Config } = req.body;
         if (rrConfig){
@@ -81,42 +88,28 @@ const deleteAlertConfigById = async(req, res) => {
         const { id } = req.params;
         const alertConfig = await AlertConfig.findById(id);
         if (!alertConfig) {
-            return res.status(404).json({ message: `cannot find any alertConfig with ID ${id}` });
+            return res.status(500).json({ message: `cannot find any alertConfig with ID ${id}` });
         }
         
         //Remove link from Patient to Alert
         const updatedPatient = await Patient.findOneAndUpdate(
             { alertConfig: id },
-            { $unset: { alertConfig: 1 }  },
+            { $unset: { alertConfig: 1 } },
             {
                 new: true,
                 runValidators: true,
             }
         );
         if (!updatedPatient) {
-            return res.status(404).json({ message: `cannot find any patient tagged to this alert with ID ${alert.patient}` });
+            return res.status(500).json({ message: `cannot find any patient tagged to this alert with ID ${alert.patient}` });
         }
         await AlertConfig.deleteOne({_id: id});
         res.status(200).json(alertConfig);
 
-        /*
-        console.log(id);
-        const patient = await Patient.findOne({ alertConfig: id }).populate('alertConfig'); 
-        if (patient) {
-            patient.alertConfig = undefined;
-            await patient.save();
-            await AlertConfig.deleteOne({_id: id});
-            res.status(200).json(alertConfig);
-        }        
-        else {
-            return res.status(404).json({ message: `cannot find any patient tagged to this alertConfig` });
-        }
-        */
     } catch (e) {
-        res.status(400).json({ error: e.message }); 
+        res.status(500).json({ error: e.message }); 
     }
 }
-
 
 module.exports = {
     createAlertConfig,
