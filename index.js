@@ -21,6 +21,7 @@ const patientRoutes = require("./routes/patient");
 const wardRoutes = require("./routes/ward")
 const reportRoutes = require("./routes/report")
 const vitalRoutes = require("./routes/vital")
+const userRoutes = require("./routes/user")
 
 const app = express();
 
@@ -74,6 +75,7 @@ app.use('/patient', patientRoutes);
 app.use('/ward', wardRoutes);
 app.use('/report', reportRoutes);
 app.use('/vital', vitalRoutes);
+app.use('/user', userRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

@@ -27,11 +27,6 @@ const alertConfigSchema = new mongoose.Schema(
         default: [95, 100],
         required: true,
       },  
-      pulseConfig:{
-        type:[Number],
-        default: [60, 100],
-        required: true,
-      },
     },
     {
       timestamps: true,

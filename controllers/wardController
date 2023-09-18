@@ -1,0 +1,149 @@
+const Ward = require('../models/ward');
+const Smartbed = require('../models/smartbed');
+const Nurse = require('../models/nurse');
+
+const createWard = async (req, res) => {
+    try {
+        const ward = new Ward({
+            "wardNum": req.body.wardNum,
+            "wardType": req.body.wardType,
+            "numRooms": req.body.numRooms,  
+        }) 
+        await Ward.create(ward);
+        res.status(200).json({ success: true, data: ward });
+    } catch (e) {
+        if (e.name === 'ValidationError') {
+            const validationErrors = Object.values(e.errors).map((e) => e.message);
+            return res.status(500).json({validationErrors});
+        } else {
+            res.status(500).json({message: e.message});
+        }
+    }
+}
+
+const getWards = async (req, res) => {
+    try {
+        const wards = await Ward.find({});
+        res.status(200).json({ success: true, data: wards });
+    } catch (e) {
+        res.status(500).json({message: e.message});
+    }
+}
+
+const getWardById = async(req, res) => {
+    try {
+        const {id} = req.params;
+        const ward = await Ward.findById(id);
+        if (!report) {
+            return res.status(404).json({message: `cannot find any ward with ID ${id}`})
+        }
+        res.status(200).json(ward);
+    } catch (e) {
+        res.status(500).json({message: e.message});
+    }
+}
+
+const updateWardById = async(req, res) => {
+    try {
+        const {id} = req.params;
+        const ward = await Ward.findById(id);
+        if (!ward) {
+            return res.status(404).json({message: `cannot find any ward with ID ${id}`})
+        }
+
+        const { wardNum, wardType, numRooms } = req.body;
+
+        if (wardNum){
+            ward.wardNum = wardNum
+        }
+        if (wardType){
+            ward.wardType = wardType
+        }
+        if (numRooms){
+            ward.numRooms = numRooms
+        }
+
+        const updatedWard = await ward.save();
+        res.status(200).json(updatedWard);
+
+    } catch (e) {
+        if (e.name === 'ValidationError') {
+            const validationErrors = Object.values(e.errors).map((e) => e.message);
+            return res.status(400).json({validationErrors});
+        } else {
+            res.status(500).json({message: e.message}); 
+        }
+    }
+}
+
+const assignNurseToWard = async(req, res) => {
+    try {
+        const {id} = req.params;
+        const ward = await Ward.findById(id);
+        if (!ward) {
+            return res.status(500).json({message: `cannot find any ward with ID ${id}`})
+        }
+
+        const nurseId = req.body.nurse;
+        const nurse = await Nurse.findById(nurseId).populate('ward');
+        if (!nurse) {
+            return res.status(500).json({message: `cannot find any nurse with ID ${nurseId}`})
+        }
+
+        ward.nurses.push(nurseId);
+        await ward.save();
+
+        const oldWard = nurse.ward;
+
+        await Ward.findOneAndUpdate(
+            { _id: oldWard },
+            { $pull: { nurses: nurseId } },
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
+
+        await Nurse.findOneAndUpdate(
+            { _id: nurseId },
+            { ward: id },
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
+        res.status(200).json(ward)
+    } catch (e) {
+        res.status(500).json({message: e.message});
+    }
+}
+
+const deleteWardById =  async(req, res) => {
+    try {
+        const {id} = req.params;
+        const ward = await Ward.findById(id);
+        if (!ward) {
+            return res.status(500).json({message: `cannot find any ward with ID ${id}`})
+        }
+
+        const { smartBeds, nurses } = ward;
+
+        if (smartBeds.lenght > 0 || nurses.length > 0) {
+            return res.status(500).json({message: `wards containing smartbeds or with nurses working in it cannot be deleted`})
+        }
+
+        await Ward.deleteOne({_id: id});
+        res.status(200).json(ward);
+    } catch (e) {
+        res.status(500).json({message: e.message});
+    }
+}
+
+module.exports = {
+    createWard,
+    getWards,
+    getWardById,
+    updateWardById,
+    assignNurseToWard,
+    deleteWardById
+}

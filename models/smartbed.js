@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const bedStatusEnum = ['occupied','vacant', 'ready'];
+const bedStatusEnum = ['occupied','vacant']
 
 const smartBedSchema = new mongoose.Schema({
   bedNum: {
