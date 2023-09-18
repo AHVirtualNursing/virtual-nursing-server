@@ -27,17 +27,6 @@ const getReminderById = async (req, res) => {
   }
 };
 
-const getRemindersOfPatient = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const reminders = await Reminder.find({ patient: id }).populate({
-      path: "patient",
-    });
-    res.status(200).json(reminders);
-  } catch (e) {
-    res.status(500).json({ message: e.message });
-  }
-};
 
 const createReminder = async (req, res) => {
   try {
@@ -145,7 +134,6 @@ module.exports = {
   createReminder,
   getAllReminders,
   getReminderById,
-  getRemindersOfPatient,
   updateReminderById,
   deleteReminderById,
 };

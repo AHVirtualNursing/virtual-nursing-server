@@ -100,22 +100,11 @@ const updatePatientById = async (req, res) => {
     const { id } = req.params;
     const patient = await Patient.findById(id);
     if (!patient) {
-      return res
-        .status(500)
-        .json({ message: `cannot find any patient with ID ${id}` });
+      return res.status(500).json({ message: `cannot find any patient with ID ${id}` });
     }
 
     const {
-      addInfo,
-      condition,
-      o2Intake,
-      consciousness,
-      picture,
-      alerts,
-      reminders,
-      reports,
-      alertConfig,
-      isDischarged,
+      addInfo, condition, o2Intake, consciousness, picture, alerts, reminders, reports, alertConfig,
     } = req.body;
 
     if (addInfo) {
@@ -182,9 +171,7 @@ const dischargePatientById = async (req, res) => {
 
     console.log(smartBed);
     if (!smartBed) {
-      return res
-        .status(500)
-        .json({ message: `cannot find any smartbed with Patient ID ${id}` });
+      return res.status(500).json({ message: `cannot find any smartbed with Patient ID ${id}` });
     }
     smartBed.bedStatus = bedStatusEnum[1];
     smartBed.patient = null;
