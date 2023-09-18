@@ -34,8 +34,8 @@ const getWardById = async(req, res) => {
     try {
         const {id} = req.params;
         const ward = await Ward.findById(id);
-        if (!report) {
-            return res.status(404).json({message: `cannot find any ward with ID ${id}`})
+        if (!ward) {
+            return res.status(500).json({message: `cannot find any ward with ID ${id}`})
         }
         res.status(200).json(ward);
     } catch (e) {
@@ -69,7 +69,7 @@ const updateWardById = async(req, res) => {
     } catch (e) {
         if (e.name === 'ValidationError') {
             const validationErrors = Object.values(e.errors).map((e) => e.message);
-            return res.status(400).json({validationErrors});
+            return res.status(500).json({validationErrors});
         } else {
             res.status(500).json({message: e.message}); 
         }
@@ -128,7 +128,7 @@ const deleteWardById =  async(req, res) => {
 
         const { smartBeds, nurses } = ward;
 
-        if (smartBeds.lenght > 0 || nurses.length > 0) {
+        if (smartBeds.length > 0 || nurses.length > 0) {
             return res.status(500).json({message: `wards containing smartbeds or with nurses working in it cannot be deleted`})
         }
 

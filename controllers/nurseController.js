@@ -6,7 +6,6 @@ const nurseStatusEnum = ["normal", "head"];
 
 const createNurse = async(req, res) => {
     try{
-
        const nurse = new Nurse({
             name: req.body.name,
             nurseStatus: req.body.nurseStatus,
@@ -66,6 +65,7 @@ const getSmartBedsByNurseId = async(req, res) => {
       }
 }
 
+//change to remove the updates of linking  
 const updateNurseById = async(req, res) => {
     try {
         const { id } = req.params;
@@ -75,7 +75,7 @@ const updateNurseById = async(req, res) => {
           return res.status(500).json({ message: `cannot find any nurse with ID ${id}` });
         }
 
-        const { ward, smartBeds, headNurse} = req.body;
+        const { ward, smartBeds, headNurse } = req.body;
 
         if (ward){
           nurse.ward = ward
