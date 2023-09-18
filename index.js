@@ -1,27 +1,27 @@
 /* IMPORTS */
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const session = require('express-session');
-const cors = require('cors');
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const session = require("express-session");
+const cors = require("cors");
 
 /* MIDDLEWARE IMPORTS */
-const passport = require('./middleware/passport');
+const passport = require("./middleware/passport");
 
 /* ROUTES */
-const deviceRoutes = require('./routes/device');
-const authRoutes = require('./routes/auth');
-const smartbedRoutes = require('./routes/smartbed');
-const alertRoutes = require('./routes/alert');
-const nurseRoutes = require('./routes/nurse');
-const alertConfigRoutes = require('./routes/alertConfig');
+const deviceRoutes = require("./routes/device");
+const authRoutes = require("./routes/auth");
+const smartbedRoutes = require("./routes/smartbed");
+const alertRoutes = require("./routes/alert");
+const nurseRoutes = require("./routes/nurse");
+const alertConfigRoutes = require("./routes/alertConfig");
 const reminderRoutes = require("./routes/reminder");
 const patientRoutes = require("./routes/patient");
-const wardRoutes = require("./routes/ward")
-const reportRoutes = require("./routes/report")
-const vitalRoutes = require("./routes/vital")
-const userRoutes = require("./routes/user")
+const wardRoutes = require("./routes/ward");
+const reportRoutes = require("./routes/report");
+const vitalRoutes = require("./routes/vital");
+const userRoutes = require("./routes/user");
 
 const app = express();
 
@@ -31,12 +31,10 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-
-    console.log('MongoDB connected');
+    console.log("MongoDB connected");
   })
   .catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
-
+    console.error("Error connecting to MongoDB:", error);
   });
 
 /* MIDDLEWARE */
@@ -64,18 +62,18 @@ app.get("/api", (req, res) => {
 });
 
 /* APP USE */
-app.use('/device', deviceRoutes);
-app.use('/auth', authRoutes);
-app.use('/smartbed', smartbedRoutes);
-app.use('/alert', alertRoutes);
-app.use('/nurse', nurseRoutes);
-app.use('/alertConfig', alertConfigRoutes);
-app.use('/reminder', reminderRoutes);
-app.use('/patient', patientRoutes);
-app.use('/ward', wardRoutes);
-app.use('/report', reportRoutes);
-app.use('/vital', vitalRoutes);
-app.use('/user', userRoutes);
+app.use("/device", deviceRoutes);
+app.use("/auth", authRoutes);
+app.use("/smartbed", smartbedRoutes);
+app.use("/alert", alertRoutes);
+app.use("/nurse", nurseRoutes);
+app.use("/alertConfig", alertConfigRoutes);
+app.use("/reminder", reminderRoutes);
+app.use("/patient", patientRoutes);
+app.use("/ward", wardRoutes);
+app.use("/report", reportRoutes);
+app.use("/vital", vitalRoutes);
+app.use("/user", userRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
