@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const wardTypeEnum = ['A1', 'B1', 'B2', 'C'];
 
-const wardTypeEnum = ["A1", "B1", "B2", "C"]
+
 
 const wardSchema = new mongoose.Schema({
     wardNum: {

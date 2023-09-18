@@ -105,8 +105,9 @@ const updateSmartBedById = async(req, res) => {
             smartbed.bedStatus = bedStatus;
         }
         if(ward){
-            const oldWard = await Ward.find({smartBeds: {$in: [id]}});
+            const oldWard = await Ward.find({smartBeds: {$in: [id]}}).populate('smartBeds');
             if (oldWard) {
+                console.log(oldWard.smartBeds);
                 oldWard.smartBeds.pull(id); // Remove the nurse's ID from the list of nurses
                 await oldWard.save();
               }
@@ -122,9 +123,10 @@ const updateSmartBedById = async(req, res) => {
         }
         if(nurses){
             
+            
         }
-        const updatedSmartbed = await SmartBed.findById(id);
-        res.status(200).json(updatedSmartbed);
+        await smartbed.save();
+        res.status(200).json(smartbed);
     } catch (e) {
         if (e.name === 'ValidationError') {
             const validationErrors = Object.values(e.errors).map((e) => e.message);

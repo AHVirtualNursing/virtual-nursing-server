@@ -1,54 +1,57 @@
-const Alert = require('../models/alert');
-const AlertConfig = require('../models/alertConfig');
-const Patient = require('../models/patient');
+const Alert = require("../models/alert");
+const AlertConfig = require("../models/alertConfig");
+const Patient = require("../models/patient");
 const SmartBed = require("../models/smartbed");
-const bedStatusEnum = ['occupied','vacant'];
+const bedStatusEnum = ["occupied", "vacant"];
+const Reminder = require("../models/reminder");
 
-const createPatient = async(req, res) => {
-    try {
-        const patient = new Patient({
-            "name": req.body.name,
-            "nric": req.body.nric,
-            "condition": req.body.condition,
-            "addInfo": req.body.addInfo,
-            "copd": req.body.copd      
-        }) 
-        await Patient.create(patient);
-        res.status(200).json({ success: true, data: patient });
-      } catch (e) {
-        if (e.name === "ValidationError") {
-          const validationErrors = Object.values(e.errors).map((e) => e.message);
-          return res.status(500).json({ validationErrors });
-        } else {
-          res.status(500).json({ success: e.message });
-        }
-      }
-}
+const createPatient = async (req, res) => {
+  try {
+    const patient = new Patient({
+      name: req.body.name,
+      nric: req.body.nric,
+      condition: req.body.condition,
+      addInfo: req.body.addInfo,
+      copd: req.body.copd,
+    });
+    await Patient.create(patient);
+    res.status(200).json({ success: true, data: patient });
+  } catch (e) {
+    if (e.name === "ValidationError") {
+      const validationErrors = Object.values(e.errors).map((e) => e.message);
+      return res.status(500).json({ validationErrors });
+    } else {
+      res.status(500).json({ success: e.message });
+    }
+  }
+};
 
-const getPatients = async(req, res) => {
-    try {
-        const patients = await Patient.find({});
-        res.status(200).json({ success: true, data: patients });
-      } catch (e) {
-        console.error(e);
-        res.status(500).json({ success: e.message });
-      }
-}
+const getPatients = async (req, res) => {
+  try {
+    const patients = await Patient.find({});
+    res.status(200).json({ success: true, data: patients });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: e.message });
+  }
+};
 
-const getPatientById = async(req, res) => {
-    try {
-        const { id } = req.params;
-        const patient = await Patient.findById(id);
-        if (!patient) {
-          return res.status(500).json({ message: `cannot find any patient with ID ${id}` }); //status 400?
-        }
-        res.status(200).json(patient);
-      } catch (e) {
-        res.status(500).json({ success: e.message });
-      }
-}
+const getPatientById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findById(id);
+    if (!patient) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any patient with ID ${id}` }); //status 400?
+    }
+    res.status(200).json(patient);
+  } catch (e) {
+    res.status(500).json({ success: e.message });
+  }
+};
 
-const getPatientsByIds = async(req, res) => {
+const getPatientsByIds = async (req, res) => {
   try {
     const idsToRetrieve = req.query.ids.split(",");
     const patients = await Promise.all(
@@ -57,7 +60,9 @@ const getPatientsByIds = async(req, res) => {
           const patient = await Patient.findById(id);
           console.log(patient);
           if (!patient) {
-            res.status(500).json({ message: `cannot find any patient with ID ${id}` });
+            res
+              .status(500)
+              .json({ message: `cannot find any patient with ID ${id}` });
           }
           return patient;
         } else {
@@ -69,84 +74,110 @@ const getPatientsByIds = async(req, res) => {
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
-}
-const updatePatientById = async(req, res) => {
-    try {
-        const { id } = req.params;
-        const patient = await Patient.findById(id);
-        if (!patient) {
-          return res.status(500).json({ message: `cannot find any patient with ID ${id}` });
-        }
+};
 
-        const { addInfo, condition, o2Intake, consciousness, picture, alerts, reminders, reports, alertConfig, isDischarged} = req.body;
+const getRemindersByPatientId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findById(id);
+    console.log(patient);
+    if (!patient) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any patient with ID ${id}` });
+    }
 
-        if (addInfo){
-            patient.addInfo = addInfo
-        }
-        if (condition){
-            patient.condition = condition
-        }
-        if (o2Intake){
-            patient.o2Intake = o2Intake
-        }
-        if (consciousness) {
-            patient.consciousness = consciousness
-        }
-        if (picture){
-            patient.picture = picture
-        }
-        if (alerts){
-            patient.alerts = alerts
-        }
-        if (reminders){
-            patient.reminders = reminders
-        }
-        if (reports){
-            patient.reports = reports
-        }
+    const reminders = await Reminder.find({ patient: id });
+    console.log(reminders);
+    res.status(200).json(reminders);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
 
-        if (alertConfig){       
-          const alertConfigObj = await AlertConfig.findById({ _id: alertConfig });
-          if(!alertConfigObj) {
-              return res.status(500).json({message: `cannot find any alertConfig with ID ${alertConfig}`});
-          }
-          patient.alertConfig = alertConfig;
-        }
+const updatePatientById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findById(id);
+    if (!patient) {
+      return res.status(500).json({ message: `cannot find any patient with ID ${id}` });
+    }
 
-        const updatedPatient = await patient.save();
-        res.status(200).json(updatedPatient);
-        
-    } catch (e) {
-        if (e.name === "ValidationError") {
-          const validationErrors = Object.values(e.errors).map((e) => e.message);
-          return res.status(500).json({ validationErrors });
-        } else {
-          res.status(500).json({ message: e.message });
+    const {
+      addInfo, condition, o2Intake, consciousness, picture, alerts, reminders, reports, alertConfig,
+    } = req.body;
 
-        }
+    if (addInfo) {
+      patient.addInfo = addInfo;
+    }
+    if (condition) {
+      patient.condition = condition;
+    }
+    if (o2Intake) {
+      patient.o2Intake = o2Intake;
+    }
+    if (consciousness) {
+      patient.consciousness = consciousness;
+    }
+    if (picture) {
+      patient.picture = picture;
+    }
+    if (alerts) {
+      patient.alerts = alerts;
+    }
+    if (reminders) {
+      patient.reminders = reminders;
+    }
+    if (reports) {
+      patient.reports = reports;
+    }
+
+    if (alertConfig) {
+      const alertConfigObj = await AlertConfig.findById({ _id: alertConfig });
+      if (!alertConfigObj) {
+        return res.status(500).json({
+          message: `cannot find any alertConfig with ID ${alertConfig}`,
+        });
       }
-}
+      patient.alertConfig = alertConfig;
+    }
 
+    const updatedPatient = await patient.save();
+    res.status(200).json(updatedPatient);
+  } catch (e) {
+    if (e.name === "ValidationError") {
+      const validationErrors = Object.values(e.errors).map((e) => e.message);
+      return res.status(500).json({ validationErrors });
+    } else {
+      res.status(500).json({ message: e.message });
+    }
+  }
+};
 
-const dischargePatientById = async(req, res) => {
-  try{
-        const { id } = req.params;
-        const patient = await Patient.findById(id);
-        if (!patient) {
-          return res.status(500).json({ message: `cannot find any patient with ID ${id}` });
-        }
+const dischargePatientById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findById(id);
+    if (!patient) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any patient with ID ${id}` });
+    }
 
-        patient.isDischarged = true;
+    patient.isDischarged = true;
+    await patient.save();
 
-        const smartBed = await SmartBed.findOne({ patient: id });
-        
-        console.log(smartBed);
-        if(!smartBed) {
-          return res.status(500).json({message: `cannot find any smartbed with Patient ID ${id}`});   
-        }
-        smartBed.status = bedStatusEnum[1]
-        smartBed.patient = null
-        await smartBed.save();
+    const smartBed = await SmartBed.findOne({ patient: id });
+
+    console.log(smartBed);
+    if (!smartBed) {
+      return res.status(500).json({ message: `cannot find any smartbed with Patient ID ${id}` });
+    }
+    smartBed.bedStatus = bedStatusEnum[1];
+    smartBed.patient = null;
+    await smartBed.save();
+
+    res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
@@ -155,28 +186,68 @@ const dischargePatientById = async(req, res) => {
       res.status(500).json({ success: e.message });
     }
   }
-}
+};
 
-const deletePatientById = async(req, res) => {
-    try {
-        const { id } = req.params;
-        const patient = await Patient.findByIdAndDelete(id);
-        if (!patient) {
-          return res.status(500).json({ message: `cannot find any patient with ID ${id}` });
-        }
-        res.status(200).json(patient);
-      } catch (e) {
-        console.error(e);
-        res.status(500).json({ success: e.message });
-      }
-}
+const admitPatientById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findById(id);
+    if (!patient) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any patient with ID ${id}` });
+    }
+
+    const { o2Intake, consciousness } = req.body;
+    patient.o2Intake = o2Intake;
+    patient.consciousness = consciousness;
+    await patient.save();
+
+    const smartBed = await SmartBed.findOne({ patient: id });
+
+    if (!smartBed) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any smartbed with Patient ID ${id}` });
+    }
+    smartBed.bedStatus = bedStatusEnum[0];
+    await smartBed.save();
+
+    res.status(200).json(patient);
+  } catch (e) {
+    if (e.name === "ValidationError") {
+      const validationErrors = Object.values(e.errors).map((e) => e.message);
+      return res.status(500).json({ validationErrors });
+    } else {
+      res.status(500).json({ success: e.message });
+    }
+  }
+};
+
+const deletePatientById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findByIdAndDelete(id);
+    if (!patient) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any patient with ID ${id}` });
+    }
+    res.status(200).json(patient);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: e.message });
+  }
+};
 
 module.exports = {
-    createPatient,
-    getPatients,
-    getPatientById,
-    getPatientsByIds,
-    updatePatientById,
-    dischargePatientById,
-    deletePatientById
-}
+  createPatient,
+  getPatients,
+  getPatientById,
+  getPatientsByIds,
+  getRemindersByPatientId,
+  updatePatientById,
+  dischargePatientById,
+  admitPatientById,
+  deletePatientById,
+};
