@@ -11,6 +11,7 @@ router.get("/:id/reminders", Patient.getRemindersByPatientId);
 router.post("/", Patient.createPatient);
 router.put("/:id", Patient.updatePatientById);
 router.put("/:id/discharge", Patient.dischargePatientById);
+router.put("/:id/admit", Patient.admitPatientById);
 router.delete("/:id", Patient.deletePatientById);
 
 module.exports = router;
