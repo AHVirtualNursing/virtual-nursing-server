@@ -76,6 +76,25 @@ const getPatientsByIds = async (req, res) => {
   }
 };
 
+getAlertsByPatientId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findById(id);
+    console.log(patient);
+    if (!patient) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any patient with ID ${id}` });
+    }
+
+    const alerts = await Alert.find({ patient: id });
+    console.log(alerts);
+    res.status(200).json(alerts);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+}
+
 const getRemindersByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
@@ -245,6 +264,7 @@ module.exports = {
   getPatients,
   getPatientById,
   getPatientsByIds,
+  getAlertsByPatientId,
   getRemindersByPatientId,
   updatePatientById,
   dischargePatientById,

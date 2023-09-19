@@ -35,7 +35,7 @@ const createSmartBed = async(req, res) => {
 
 const getSmartBeds = async(req, res) => {
     try {
-        const smartbeds = await SmartBed.find({});
+        const smartbeds = await SmartBed.find({}).populate("ward");
         res.status(200).json({ success: true, data: smartbeds });
       } catch (e) {
         res.status(500).json({ success: false, error: e.message});
