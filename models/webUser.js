@@ -5,7 +5,7 @@ const webUserSchema = new mongoose.Schema({}, { timestamps: true });
 
 webUserSchema.add(User.schema);
 
-const itAdmin = mongoose.model("itAdmin", webUserSchema, "it_admin");
+const itAdmin = mongoose.model("itAdmin", webUserSchema, "it_admins");
 const virtualNurse = mongoose.model(
   "virtualNurse",
   webUserSchema,

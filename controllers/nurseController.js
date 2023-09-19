@@ -9,7 +9,9 @@ const createNurse = async (req, res) => {
     const wardId = req.body.ward;
     const ward = Ward.findById(wardId);
     if (!ward) {
-      res.status(500).json({message: `cannot find assigned ward with ID ${wardId}`})
+      res
+        .status(500)
+        .json({ message: `cannot find assigned ward with ID ${wardId}` });
     }
 
     const nurse = new Nurse({
@@ -27,8 +29,8 @@ const createNurse = async (req, res) => {
       { _id: wardId },
       { $push: { nurses: nurse._id } },
       {
-          new: true,
-          runValidators: true,
+        new: true,
+        runValidators: true,
       }
     );
 
