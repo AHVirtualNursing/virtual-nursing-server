@@ -37,7 +37,7 @@ const getSmartBeds = async(req, res) => {
                 }}));
             res.status(200).json(smartBeds);
         } else {
-            const smartbeds = await SmartBed.find({}).populate("ward");
+            const smartbeds = await SmartBed.find({}).populate("patient ward");
             res.status(200).json({ success: true, data: smartbeds });
         }
     } catch (e) {
