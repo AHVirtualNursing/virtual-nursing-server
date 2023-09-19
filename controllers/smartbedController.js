@@ -144,7 +144,7 @@ const updateSmartBedById = async(req, res) => {
     }
 }
 
-const assignBedToNurses = async(req, res) => {
+const assignNursesToBed = async(req, res) => {
     try {
         const {id} = req.params;
         const smartbed = await SmartBed.findById(id).populate('nurses'); 
@@ -216,6 +216,6 @@ module.exports = {
     getSmartBedsByIds,
     getNursesBySmartBedId,
     updateSmartBedById,
-    assignBedToNurses,
+    assignNursesToBed,
     deleteSmartBedById
 }

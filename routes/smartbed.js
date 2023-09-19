@@ -8,7 +8,7 @@ router.get('/beds', SmartBed.getSmartBedsByIds);
 router.get('/bed/:id/nurses', SmartBed.getNursesBySmartBedId)
 router.post('/', SmartBed.createSmartBed);
 router.put('/:id', SmartBed.updateSmartBedById);
-router.put('/:id/nurses', SmartBed.assignBedToNurses) //route similar to getNursesBySmartBed
+router.put('/:id/nurses', SmartBed.assignNursesToBed) //route similar to getNursesBySmartBed
 router.delete('/:id', SmartBed.deleteSmartBedById);
 
 module.exports = router;
