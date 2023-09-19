@@ -155,7 +155,6 @@ const assignBedToNurses = async(req, res) => {
         const { newNurses } = req.body;
         const oldNurses = smartbed.nurses;
 
-        // update SmartBed
         const updatedSmartbed = await SmartBed.findOneAndUpdate(  
             { _id: id },
             { nurses: newNurses },
@@ -165,7 +164,6 @@ const assignBedToNurses = async(req, res) => {
             }
         );
         
-        // remove smartbed assignment from old nurses
         if (oldNurses !== undefined && oldNurses.length > 0) {
             for (const nurseId of oldNurses) {
                 await Nurse.findOneAndUpdate(
@@ -179,7 +177,6 @@ const assignBedToNurses = async(req, res) => {
             } 
         }
         
-        // add smartbed assignment to new nurses
         if (newNurses !== undefined && newNurses.length > 0) {
             for (const nurseId of newNurses) {
                 await Nurse.findOneAndUpdate(
