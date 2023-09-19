@@ -1,5 +1,5 @@
 const Ward = require("../models/ward");
-const Smartbed = require("../models/smartbed");
+const SmartBed = require("../models/smartbed");
 const Nurse = require("../models/nurse");
 
 const createWard = async (req, res) => {
@@ -33,16 +33,9 @@ const getWards = async (req, res) => {
 const getWardById = async(req, res) => {
     try {
         const {id} = req.params;
-        const ward = await Ward.findById(id).populate([
-            {
-                path: "smartBeds",
-                populate: [
-                    {path: "patient"}
-                ]
-            }
-        ])
+        const ward = await Ward.findById(id)
         if (!ward) {
-            return res.status(404).json({message: `cannot find any ward with ID ${id}`})
+            return res.status(500).json({message: `cannot find any ward with ID ${id}`})
         }
         res.status(200).json(ward);
     } catch (e) {
@@ -62,7 +55,7 @@ const getSmartBedsByWardId = async(req, res) => {
     
         const smartBeds = await Promise.all(idsToRetrieve.map(async (id) => {
             if (id.match(/^[0-9a-fA-F]{24}$/)) {
-                const smartBed = await Smartbed.findById(id);
+                const smartBed = await Smartbed.findById(id).populate('patient');
                 if (!smartBed) {
                     res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
                 }
@@ -77,17 +70,18 @@ const getSmartBedsByWardId = async(req, res) => {
 }
 
 
+// use this for assignment of smartbeds to ward
 const updateWardById = async (req, res) => {
   try {
     const { id } = req.params;
     const ward = await Ward.findById(id);
     if (!ward) {
       return res
-        .status(404)
+        .status(500)
         .json({ message: `cannot find any ward with ID ${id}` });
     }
 
-    const { wardNum, wardType, numRooms } = req.body;
+    const { wardNum, wardType, numRooms, smartBeds } = req.body;
 
     if (wardNum) {
       ward.wardNum = wardNum;
@@ -98,13 +92,25 @@ const updateWardById = async (req, res) => {
     if (numRooms) {
       ward.numRooms = numRooms;
     }
+    if (smartBeds) {
+      for (const smartBedId of smartBeds) {
+        const smartBed = await SmartBed.findById(smartBedId);
+        if (!smartBed) {
+          res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
+        }
+        smartBed.ward = id;
+        await smartBed.save();
+      }
+      ward.smartBeds = smartBeds;      
+    }
+
 
     const updatedWard = await ward.save();
     res.status(200).json(updatedWard);
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
-      return res.status(400).json({ validationErrors });
+      return res.status(500).json({ validationErrors });
     } else {
       res.status(500).json({ message: e.message });
     }
