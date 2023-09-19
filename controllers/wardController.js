@@ -33,14 +33,7 @@ const getWards = async (req, res) => {
 const getWardById = async(req, res) => {
     try {
         const {id} = req.params;
-        const ward = await Ward.findById(id).populate([
-            {
-                path: "smartBeds",
-                populate: [
-                    {path: "patient"}
-                ]
-            }
-        ])
+        const ward = await Ward.findById(id)
         if (!ward) {
             return res.status(500).json({message: `cannot find any ward with ID ${id}`})
         }
@@ -62,7 +55,7 @@ const getSmartBedsByWardId = async(req, res) => {
     
         const smartBeds = await Promise.all(idsToRetrieve.map(async (id) => {
             if (id.match(/^[0-9a-fA-F]{24}$/)) {
-                const smartBed = await SmartBed.findById(id);
+                const smartBed = await Smartbed.findById(id).populate('patient');
                 if (!smartBed) {
                     res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
                 }
@@ -75,6 +68,7 @@ const getSmartBedsByWardId = async(req, res) => {
         res.status(500).json({ success: e.message });
     }
 }
+
 
 // use this for assignment of smartbeds to ward
 const updateWardById = async (req, res) => {
@@ -109,6 +103,7 @@ const updateWardById = async (req, res) => {
       }
       ward.smartBeds = smartBeds;      
     }
+
 
     const updatedWard = await ward.save();
     res.status(200).json(updatedWard);
