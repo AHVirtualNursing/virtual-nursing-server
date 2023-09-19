@@ -66,8 +66,4 @@ router.post("/logout", (req, res) => {
   res.status(200).json({ message: "Logged out successfully" });
 });
 
-router.post("/changePassword", (req, res) => {
-  
-})
-
 module.exports = router;
