@@ -1,15 +1,16 @@
 const mongoose = require('mongoose');
+const Device = require("./device");
 
 const bedStatusEnum = ['occupied','vacant']
 
 const smartBedSchema = new mongoose.Schema({
   bedNum: {
     type: String,
-    required: true,
+    required: false,
   },
   roomNum: {
     type: String,
-    required: true,
+    required: false,
   },
   bedStatus: {
     type: String,
@@ -18,12 +19,12 @@ const smartBedSchema = new mongoose.Schema({
       message: 'Invalid bed status: {VALUE}'
     },
     default: 'vacant',
-    required: true,
+    required: false,
   },
   railStatus: {
     type: Boolean,
     default: false,
-    required: true,
+    required: false,
   },
   patient: {
     type: mongoose.Schema.Types.ObjectId,
@@ -33,7 +34,7 @@ const smartBedSchema = new mongoose.Schema({
   ward: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Ward',
-    required: true,
+    required: false,
   },
   nurses: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -45,6 +46,7 @@ const smartBedSchema = new mongoose.Schema({
   timestamps: true,
 });
 
+smartBedSchema.add(Device.schema)
 
 module.exports =
   mongoose.models.SmartBed || mongoose.model('SmartBed', smartBedSchema);
