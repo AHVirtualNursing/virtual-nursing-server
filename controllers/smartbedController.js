@@ -205,7 +205,6 @@ const assignNursesToBed = async(req, res) => {
     }
 }
 
-// dont allow deletion if its tagged to patient, send error msg saying theres a patient
 const deleteSmartBedById = async(req, res) => {
     try {
         const {id} = req.params;
