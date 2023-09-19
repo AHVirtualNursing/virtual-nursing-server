@@ -7,6 +7,8 @@ router.get('/', Ward.getWards);
 
 router.get('/:id', Ward.getWardById)
 
+router.get('/:id/smartbeds', Ward.getSmartBedsinWard);
+
 router.post('/', Ward.createWard);
 
 router.put('/:id', Ward.updateWardById);
