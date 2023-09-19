@@ -33,14 +33,7 @@ const getWards = async (req, res) => {
 const getWardById = async(req, res) => {
     try {
         const {id} = req.params;
-        const ward = await Ward.findById(id).populate([
-            {
-                path: "smartBeds",
-                populate: [
-                    {path: "patient"}
-                ]
-            }
-        ])
+        const ward = await Ward.findById(id)
         if (!ward) {
             return res.status(404).json({message: `cannot find any ward with ID ${id}`})
         }
