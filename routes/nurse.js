@@ -5,7 +5,6 @@ const nurse = require("../controllers/nurseController");
 
 router.get("/", nurse.getNurses);
 router.get("/:id", nurse.getNurseById);
-// router.get("/", nurse.getNursesByIds);
 router.get("/:id/headNurse", nurse.getNursesByHeadNurseId);
 router.get("/:id/smartbeds", nurse.getSmartBedsByNurseId);
 router.post("/", nurse.createNurse);
