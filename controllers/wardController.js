@@ -69,6 +69,43 @@ const getSmartBedsByWardId = async(req, res) => {
     }
 }
 
+const assignSmartBedsToWard = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ward = await Ward.findById(id);
+    if (!ward) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any ward with ID ${id}` });
+    }
+    const { smartBedIds } = req.body;
+    
+    for (const smartBedId of smartBedIds) {
+      const smartBed = await SmartBed.findById(smartBedId);
+      if (smartBed) {
+        const oldWard = await Ward.findOne({smartBeds: {$in: [id]}});
+        if ((oldWard !== null && oldWard !== undefined)) {
+          if (Object.keys(oldWard).length !== 0) {
+            oldWard.smartBeds.pull(id); 
+            await oldWard.save();
+          } 
+        }
+        smartBed.ward = id;
+        await smartBed.save();
+        ward.smartBeds.push(smartBedId);
+        await ward.save();
+      }
+    }
+    res.status(200).json(ward);
+  } catch (e) {
+    if (e.name === "ValidationError") {
+      const validationErrors = Object.values(e.errors).map((e) => e.message);
+      return res.status(500).json({ validationErrors });
+    } else {
+      res.status(500).json({ message: e.message });
+    }
+  }
+}
 
 // use this for assignment of smartbeds to ward
 const updateWardById = async (req, res) => {
@@ -81,7 +118,7 @@ const updateWardById = async (req, res) => {
         .json({ message: `cannot find any ward with ID ${id}` });
     }
 
-    const { wardNum, wardType, numRooms, smartBeds } = req.body;
+    const { wardNum, wardType, numRooms } = req.body;
 
     if (wardNum) {
       ward.wardNum = wardNum;
@@ -92,18 +129,6 @@ const updateWardById = async (req, res) => {
     if (numRooms) {
       ward.numRooms = numRooms;
     }
-    if (smartBeds) {
-      for (const smartBedId of smartBeds) {
-        const smartBed = await SmartBed.findById(smartBedId);
-        if (!smartBed) {
-          res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
-        }
-        smartBed.ward = id;
-        await smartBed.save();
-      }
-      ward.smartBeds = smartBeds;      
-    }
-
 
     const updatedWard = await ward.save();
     res.status(200).json(updatedWard);
@@ -193,6 +218,7 @@ module.exports = {
     getWards,
     getWardById,
     getSmartBedsByWardId,
+    assignSmartBedsToWard,
     updateWardById,
     assignNurseToWard,
     deleteWardById
