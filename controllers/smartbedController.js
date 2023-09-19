@@ -126,6 +126,7 @@ const updateSmartBedById = async(req, res) => {
             // check if there are alr max rooms in the ward
             const roomNums = smartBeds.map(smartBed => smartBed.roomNum);
             if (!roomNums.includes(roomNum)) {
+                const uniqueRoomNums = new Set(roomNums);
                 console.log('unique roomNums existing: ' + uniqueRoomNums);
                 const totalRooms = [...uniqueRoomNums].length;
                 if ((totalRooms + 1) > numRooms) {
