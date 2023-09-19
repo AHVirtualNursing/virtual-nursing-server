@@ -56,10 +56,10 @@ const getSmartBedById = async(req, res) => {
 }
 
 const getSmartBedsByIds = async(req, res) => {
-    const idsToRetrieve = req.query.ids.split(',');
+    const {ids} = req.body;
     
     try {
-        const smartBeds = await Promise.all(idsToRetrieve.map(async (id) => {
+        const smartBeds = await Promise.all(ids.map(async (id) => {
             if (id.match(/^[0-9a-fA-F]{24}$/)) {
                 const smartBed = await SmartBed.findById(id).populate("patient ward");
                 if (!smartBed) {
