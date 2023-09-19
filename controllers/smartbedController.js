@@ -35,7 +35,7 @@ const createSmartBed = async(req, res) => {
 
 const getSmartBeds = async(req, res) => {
     try {
-        const smartbeds = await SmartBed.find({}).populate("ward");
+        const smartbeds = await SmartBed.find({}).populate("patient ward");
         res.status(200).json({ success: true, data: smartbeds });
       } catch (e) {
         res.status(500).json({ success: false, error: e.message});
@@ -45,7 +45,7 @@ const getSmartBeds = async(req, res) => {
 const getSmartBedById = async(req, res) => {
     try {
         const {id} = req.params;
-        const smartbed = await SmartBed.findById(id).populate('patient');
+        const smartbed = await SmartBed.findById(id).populate("patient ward");
         if (!smartbed) {
             return res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
         }
