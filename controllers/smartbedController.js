@@ -72,7 +72,6 @@ const getNursesBySmartBedId = async(req, res) => {
     }
 }
 
-// search model number from unassigned (ward) smartbeds
 const updateSmartBedById = async(req, res) => {
     try {
         const {id} = req.params;
@@ -81,27 +80,8 @@ const updateSmartBedById = async(req, res) => {
             return res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
         }
         
-        const { ward, bedNum, roomNum, bedStatus, patient} = req.body;
+        const { bedNum, roomNum, bedStatus, patient } = req.body;
 
-        if(ward){
-            const newWard = await Ward.findById(ward).populate('smartBeds');
-            if (!newWard) {
-                res.status(500).json({ message: `Ward with ID: ${ward}} not found` }); 
-            }
-
-            const oldWard = await Ward.findOne({smartBeds: {$in: [id]}}).populate('smartBeds');
-            if ((oldWard !== null && oldWard !== undefined)) {
-                if (Object.keys(oldWard).length !== 0) {
-                    oldWard.smartBeds.pull(id); 
-                    await oldWard.save();
-                } 
-            }
-
-            newWard.smartBeds.push(id);
-            await newWard.save();
-
-            smartbed.ward = ward;
-        }
         if(bedNum){
             if (!smartbed.ward) {
                 return res.status(500).json({message: `smartbed needs to be assigned to ward`})
