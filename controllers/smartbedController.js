@@ -45,7 +45,7 @@ const getSmartBeds = async(req, res) => {
 const getSmartBedById = async(req, res) => {
     try {
         const {id} = req.params;
-        const smartbed = await Smartbed.findById(id).populate('patient');
+        const smartbed = await SmartBed.findById(id).populate('patient');
         if (!smartbed) {
             return res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
         }
@@ -56,12 +56,12 @@ const getSmartBedById = async(req, res) => {
 }
 
 const getSmartBedsByIds = async(req, res) => {
-    const idsToRetrieve = req.query.ids.split(',');
+    const {ids} = req.body;
     
     try {
-        const smartBeds = await Promise.all(idsToRetrieve.map(async (id) => {
+        const smartBeds = await Promise.all(ids.map(async (id) => {
             if (id.match(/^[0-9a-fA-F]{24}$/)) {
-                const smartBed = await Smartbed.findById(id).populate("patient ward");
+                const smartBed = await SmartBed.findById(id).populate("patient ward");
                 if (!smartBed) {
                     res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
                 }
@@ -90,7 +90,6 @@ const getNursesBySmartBedId = async(req, res) => {
     }
 }
 
-
 const updateSmartBedById = async(req, res) => {
     try {
         const {id} = req.params;
@@ -105,12 +104,24 @@ const updateSmartBedById = async(req, res) => {
             smartbed.bedStatus = bedStatus;
         }
         if(ward){
-            const oldWard = await Ward.find({smartBeds: {$in: [id]}}).populate('smartBeds');
-            if (oldWard) {
-                console.log(oldWard.smartBeds);
-                oldWard.smartBeds.pull(id); // Remove the nurse's ID from the list of nurses
-                await oldWard.save();
-              }
+            const newWard = await Ward.findById(ward).populate('smartBeds');
+            if (!newWard) {
+                res.status(500).json({ message: `Ward with ID: ${ward}} not found` }); 
+            }
+
+            const oldWard = await Ward.findOne({smartBeds: {$in: [id]}}).populate('smartBeds');
+            console.log(oldWard)
+            if ((oldWard !== null && oldWard !== undefined)) {
+                if (Object.keys(oldWard).length !== 0) {
+                    console.log("changing oldward tags")
+                    oldWard.smartBeds.pull(id); // Remove the nurse's ID from the list of nurses
+                    await oldWard.save();
+                } 
+            }
+
+            newWard.smartBeds.push(id);
+            await newWard.save();
+
             smartbed.ward = ward;
         }
         if(patient){
@@ -118,12 +129,8 @@ const updateSmartBedById = async(req, res) => {
             if(incomingPatient){
                 smartbed.patient = patient
             } else{
-                res.status(500).json({ message: `Patient with ${patient} not found` }); 
+                res.status(500).json({ message: `Patient with ID: ${patient} not found` }); 
             }
-        }
-        if(nurses){
-            
-            
         }
         await smartbed.save();
         res.status(200).json(smartbed);
@@ -134,6 +141,58 @@ const updateSmartBedById = async(req, res) => {
         } else {
             res.status(500).json({ success: e.message }); 
         }
+    }
+}
+
+const assignNursesToBed = async(req, res) => {
+    try {
+        const {id} = req.params;
+        const smartbed = await SmartBed.findById(id).populate('nurses'); 
+        if (!smartbed) {
+            return res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
+        }
+
+        const { newNurses } = req.body;
+        const oldNurses = smartbed.nurses;
+
+        const updatedSmartbed = await SmartBed.findOneAndUpdate(  
+            { _id: id },
+            { nurses: newNurses },
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
+        
+        if (oldNurses !== undefined && oldNurses.length > 0) {
+            for (const nurseId of oldNurses) {
+                await Nurse.findOneAndUpdate(
+                    { _id: nurseId },
+                    { $pull: { smartBeds: id } },
+                    {
+                        new: true,
+                        runValidators: true,
+                    }
+                )
+            } 
+        }
+        
+        if (newNurses !== undefined && newNurses.length > 0) {
+            for (const nurseId of newNurses) {
+                await Nurse.findOneAndUpdate(
+                    { _id: nurseId },
+                    { $push: { smartBeds: id } },
+                    {
+                        new: true,
+                        runValidators: true,
+                    }
+                )
+            } 
+        }
+ 
+        res.status(200).json(updatedSmartbed)
+    } catch (e) {
+        res.status(500).json({message: e.message});
     }
 }
 
@@ -157,5 +216,6 @@ module.exports = {
     getSmartBedsByIds,
     getNursesBySmartBedId,
     updateSmartBedById,
+    assignNursesToBed,
     deleteSmartBedById
 }

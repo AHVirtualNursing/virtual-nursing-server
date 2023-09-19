@@ -6,15 +6,32 @@ const nurseStatusEnum = ["normal", "head"];
 
 const createNurse = async (req, res) => {
   try {
+    const wardId = req.body.ward;
+    const ward = Ward.findById(wardId);
+    if (!ward) {
+      res.status(500).json({message: `cannot find assigned ward with ID ${wardId}`})
+    }
+
     const nurse = new Nurse({
       name: req.body.name,
       nurseStatus: req.body.nurseStatus,
       username: req.body.username,
       email: req.body.email,
       password: req.body.password,
+      ward: req.body.ward,
     });
 
-    const result = await nurse.save();
+    await nurse.save();
+
+    await Ward.findOneAndUpdate(
+      { _id: wardId },
+      { $push: { nurses: nurse._id } },
+      {
+          new: true,
+          runValidators: true,
+      }
+    );
+
     res.status(200).json({ success: true, data: nurse });
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -104,16 +121,13 @@ const updateNurseById = async (req, res) => {
         .json({ message: `cannot find any nurse with ID ${id}` });
     }
 
-    const { ward, smartBeds, headNurse, name, username } = req.body;
+    const { name, username, smartBeds, headNurse } = req.body;
 
     if (name) {
       nurse.name = name;
     }
     if (username) {
       nurse.username = username;
-    }
-    if (ward) {
-      nurse.ward = ward;
     }
     if (smartBeds) {
       nurse.smartBeds = smartBeds;
