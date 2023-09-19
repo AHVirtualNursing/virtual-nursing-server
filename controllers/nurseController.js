@@ -45,8 +45,8 @@ const createNurse = async (req, res) => {
 
 const getNurses = async (req, res) => {
   try {
-    const {ids} = req.body;
-    if (ids) {
+    if (req.query.ids) {
+      const ids = req.query.ids.split(',');
       const nurses = await Promise.all(ids.map(async (id) => {
         if (id.match(/^[0-9a-fA-F]{24}$/)) {
             const nurse = await Nurse.findById(id);

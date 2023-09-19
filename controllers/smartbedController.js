@@ -23,8 +23,8 @@ const createSmartBed = async(req, res) => {
 
 const getSmartBeds = async(req, res) => {
     try {
-        const {ids} = req.body;
-        if (ids) {
+        if (req.query.ids) {
+            const ids = req.query.ids.split(',');
             const smartBeds = await Promise.all(ids.map(async (id) => {
                 if (id.match(/^[0-9a-fA-F]{24}$/)) {
                     const smartBed = await SmartBed.findById(id).populate("patient ward");
@@ -37,11 +37,11 @@ const getSmartBeds = async(req, res) => {
                 }}));
             res.status(200).json(smartBeds);
         } else {
-            const smartbeds = await SmartBed.find({}).populate("ward");
+            const smartbeds = await SmartBed.find({}).populate("patient ward");
             res.status(200).json({ success: true, data: smartbeds });
         }
     } catch (e) {
-        res.status(500).json({ success: false, error: e.message});
+        res.status(500).json({ message: false, error: e.message});
     }
 }
 
