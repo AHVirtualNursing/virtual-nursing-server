@@ -36,7 +36,17 @@ const getSmartBeds = async(req, res) => {
                     res.status(500).json({ message: `${id} is in wrong format`});
                 }}));
             res.status(200).json(smartBeds);
-        } else {
+        }  else if (req.query.unassigned) {
+            if (req.query.unassigned == 'true') {
+                const smartbeds = await SmartBed.find({ ward: { $exists: false } });
+                res.status(200).json({ success: true, data: smartbeds });
+            } else {
+                const smartbeds = await SmartBed.find({ ward: { $exists: true } });
+                res.status(200).json({ success: true, data: smartbeds });
+            }
+
+        }      
+        else {
             const smartbeds = await SmartBed.find({}).populate("patient ward");
             res.status(200).json({ success: true, data: smartbeds });
         }
