@@ -8,6 +8,7 @@ const createSmartBed = async(req, res) => {
         const smartbed = new SmartBed({
             name: req.body.name
         });
+        console.log(smartbed);
         await smartbed.save();
 
         res.status(200).json({ success: true, data: smartbed });
@@ -15,9 +16,12 @@ const createSmartBed = async(req, res) => {
         if (e.name === "ValidationError") {
             const validationErrors = Object.values(e.errors).map((e) => e.message);
             return res.status(500).json({ validationErrors });
-          } else {
+        } else if (e.code === 11000 && e.keyPattern.name) {
+            return res.status(500).json({ message: 'Name of smartbed must be unique.' });
+            //console.log('Name of smartbed must be unique.'); // Handle the uniqueness error
+        } else {
             res.status(500).json({ success: false, error: e.message});
-          }
+        }
     } 
 }
 
@@ -90,7 +94,7 @@ const updateSmartBedById = async(req, res) => {
             return res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
         }
         
-        const { bedNum, roomNum, bedStatus, patient } = req.body;
+        const { bedNum, roomNum, name, bedStatus, patient } = req.body;
 
         if(bedNum){
             if (!smartbed.ward) {
@@ -137,6 +141,9 @@ const updateSmartBedById = async(req, res) => {
             }
 
             smartbed.roomNum = roomNum;
+        }
+        if(name){
+            smartbed.name = name;
         }
         if(bedStatus){
             smartbed.bedStatus = bedStatus;

@@ -4,6 +4,11 @@ const Device = require("./device");
 const bedStatusEnum = ['occupied','vacant']
 
 const smartBedSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    unique: true
+  },
   bedNum: {
     type: String,
     required: false,
