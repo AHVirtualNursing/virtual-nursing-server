@@ -48,10 +48,6 @@ const patientSchema = new mongoose.Schema(
       default: patientConsciousnessEnum[0]
       
     },
-    temperature: {
-        type: Number,
-        required: false,
-    },
     isDischarged: {
       type: Boolean,
       default: false
