@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const VitalsReading = new mongoose.Schema({
   reading: {
@@ -11,32 +11,33 @@ const VitalsReading = new mongoose.Schema({
   },
 });
 
-const vitalSchema = new mongoose.Schema({
+const vitalSchema = new mongoose.Schema(
+  {
     respRate: {
-        type: [VitalsReading],
+      type: [VitalsReading],
     },
-      heartRate: {
-        type: [VitalsReading],
-      }, 
-      bloodPressureSys: {
-        type: [VitalsReading],
-      },
-      bloodPressureDia: {
-        type: [VitalsReading],
-      },
-      spO2: {
-        type: [VitalsReading],
-      },
-      news2Score: {
-        type: [VitalsReading]
-      },
-      temperature: {
-        type: [VitalsReading],
-      }
+    heartRate: {
+      type: [VitalsReading],
+    },
+    bloodPressureSys: {
+      type: [VitalsReading],
+    },
+    bloodPressureDia: {
+      type: [VitalsReading],
+    },
+    spO2: {
+      type: [VitalsReading],
+    },
+    news2Score: {
+      type: [VitalsReading],
+    },
+    temperature: {
+      type: [VitalsReading],
+    },
   },
   {
     timestamps: true,
-  });
+  }
+);
 
-
-module.exports = mongoose.models.Vital || mongoose.model('Vital', vitalSchema);
+module.exports = mongoose.models.Vital || mongoose.model("Vital", vitalSchema);

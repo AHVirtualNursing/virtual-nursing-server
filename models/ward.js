@@ -6,6 +6,7 @@ const wardSchema = new mongoose.Schema(
     wardNum: {
       type: String,
       required: true,
+      unique: true,
     },
     wardType: {
       type: String,

@@ -6,7 +6,6 @@ const Smartbed = require("../models/smartbed");
 
 router.get("/", Patient.getPatients);
 router.get("/:id", Patient.getPatientById);
-// router.get("/patients", Patient.getPatientsByIds);
 router.get("/:id/alerts", Patient.getAlertsByPatientId);
 router.get("/:id/reminders", Patient.getRemindersByPatientId);
 router.post("/", Patient.createPatient);

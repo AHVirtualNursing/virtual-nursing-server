@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Device = require('../models/device');
+const Device = require("../models/device");
 
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const devices = await Device.find({});
     res.status(200).json({ success: true, data: devices });
@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const newDevice = await Device.create(req.body);
     res.status(200).json({ success: true, data: newDevice });
