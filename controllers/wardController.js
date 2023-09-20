@@ -69,6 +69,32 @@ const getSmartBedsByWardId = async(req, res) => {
     }
 }
 
+const getNursesByWardId = async(req, res) => {
+  try {
+      const {id} = req.params;
+      const ward = await Ward.findById(id);
+      if (!ward) {
+          return res.status(500).json({message: `cannot find any ward with ID ${id}`})
+      }
+
+      const idsToRetrieve = ward.nurses.map(id => id.toString());
+  
+      const nurses = await Promise.all(idsToRetrieve.map(async (id) => {
+          if (id.match(/^[0-9a-fA-F]{24}$/)) {
+              const nurse = await Nurse.findById(id);
+              if (!nurse) {
+                  res.status(500).json({message: `cannot find any nurse with ID ${id}`})
+              }
+              return nurse;
+          } else{
+              res.status(500).json({ message: `${id} is in wrong format`});
+          }}));
+      res.status(200).json(nurses);
+  } catch (e) {
+      res.status(500).json({ success: e.message });
+  }
+}
+
 const assignSmartBedsToWard = async (req, res) => {
   try {
     const { id } = req.params;
@@ -218,6 +244,7 @@ module.exports = {
     getWards,
     getWardById,
     getSmartBedsByWardId,
+    getNursesByWardId,
     assignSmartBedsToWard,
     updateWardById,
     assignNurseToWard,
