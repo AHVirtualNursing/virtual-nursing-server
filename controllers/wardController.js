@@ -55,7 +55,7 @@ const getSmartBedsByWardId = async(req, res) => {
     
         const smartBeds = await Promise.all(idsToRetrieve.map(async (id) => {
             if (id.match(/^[0-9a-fA-F]{24}$/)) {
-                const smartBed = await Smartbed.findById(id).populate('patient');
+                const smartBed = await SmartBed.findById(id).populate('patient');
                 if (!smartBed) {
                     res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
                 }
