@@ -101,7 +101,6 @@ const getNurseById = async (req, res) => {
       { path: "ward" },
     ]);
 
-    console.log("NURSE", nurse);
     if (!nurse) {
       return res
         .status(500)
@@ -143,7 +142,7 @@ const updateNurseById = async (req, res) => {
         .json({ message: `cannot find any nurse with ID ${id}` });
     }
 
-    const { name, username, smartBeds, headNurse } = req.body;
+    const { name, username, smartBeds, headNurse, nurseStatus } = req.body;
 
     if (name) {
       nurse.name = name;
@@ -156,6 +155,9 @@ const updateNurseById = async (req, res) => {
     }
     if (headNurse) {
       nurse.headNurse = headNurse;
+    }
+    if (nurseStatus) {
+      nurse.nurseStatus = nurseStatus;
     }
 
     const updatedNurse = await nurse.save();
