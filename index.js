@@ -26,7 +26,7 @@ const userRoutes = require("./routes/user");
 const app = express();
 
 mongoose
-  .connect(process.env.MONGODB_URI, {
+  .connect(process.env.MONGODB_LOCAL_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })

@@ -9,7 +9,9 @@ const createNurse = async (req, res) => {
     const wardId = req.body.ward;
     const ward = Ward.findById(wardId);
     if (!ward) {
-      res.status(500).json({message: `cannot find assigned ward with ID ${wardId}`})
+      res
+        .status(500)
+        .json({ message: `cannot find assigned ward with ID ${wardId}` });
     }
 
     const nurse = new Nurse({
@@ -27,8 +29,8 @@ const createNurse = async (req, res) => {
       { _id: wardId },
       { $push: { nurses: nurse._id } },
       {
-          new: true,
-          runValidators: true,
+        new: true,
+        runValidators: true,
       }
     );
 
@@ -46,18 +48,23 @@ const createNurse = async (req, res) => {
 const getNurses = async (req, res) => {
   try {
     if (req.query.ids) {
-      const ids = req.query.ids.split(',');
-      const nurses = await Promise.all(ids.map(async (id) => {
-        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      const ids = req.query.ids.split(",");
+      const nurses = await Promise.all(
+        ids.map(async (id) => {
+          if (id.match(/^[0-9a-fA-F]{24}$/)) {
             const nurse = await Nurse.findById(id);
             if (!nurse) {
-                res.status(500).json({message: `cannot find any nurse with ID ${id}`})
+              res
+                .status(500)
+                .json({ message: `cannot find any nurse with ID ${id}` });
             }
             return nurse;
-        } else{
-            res.status(500).json({ message: `${id} is in wrong format`});
-        }}));
-    res.status(200).json(nurses);
+          } else {
+            res.status(500).json({ message: `${id} is in wrong format` });
+          }
+        })
+      );
+      res.status(200).json(nurses);
     } else {
       const nurses = await Nurse.find({});
       res.status(200).json({ success: true, data: nurses });

@@ -14,22 +14,22 @@ const reminderSchema = new mongoose.Schema(
     picture: {
       type: String,
       default: null,
-      required: false
+      required: false,
     },
     createdBy: {
       type: String,
       default: null,
-      required: true
+      required: true,
     },
     patient: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:'Patient',
-      required: true
+      ref: "Patient",
+      required: true,
     },
     time: {
       type: Date,
-      required: true
-    }
+      required: true,
+    },
   },
   {
     timestamps: true,
@@ -38,4 +38,3 @@ const reminderSchema = new mongoose.Schema(
 
 module.exports =
   mongoose.models.Reminder || mongoose.model("Reminder", reminderSchema);
-

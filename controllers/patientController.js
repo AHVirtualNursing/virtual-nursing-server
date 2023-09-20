@@ -28,21 +28,25 @@ const createPatient = async (req, res) => {
 
 const getPatients = async (req, res) => {
   try {
-    if (req.query.ids){
-      const ids = req.query.ids.split(',');
+    if (req.query.ids) {
+      const ids = req.query.ids.split(",");
       const patients = await Promise.all(
         ids.map(async (id) => {
           if (id.match(/^[0-9a-fA-F]{24}$/)) {
             const patient = await Patient.findById(id);
             console.log(patient);
             if (!patient) {
-              res.status(500).json({ message: `cannot find any patient with ID ${id}` });
+              res
+                .status(500)
+                .json({ message: `cannot find any patient with ID ${id}` });
             }
             return patient;
           } else {
             res.status(500).json({ message: `${id} is in wrong format` });
-          }}));
-          res.status(200).json(patients);
+          }
+        })
+      );
+      res.status(200).json(patients);
     } else {
       const patients = await Patient.find({});
       res.status(200).json({ success: true, data: patients });
@@ -93,7 +97,7 @@ const getPatientsByIds = async (req, res) => {
   }
 };
 
-getAlertsByPatientId = async (req, res) => {
+const getAlertsByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
     const patient = await Patient.findById(id);
@@ -110,7 +114,7 @@ getAlertsByPatientId = async (req, res) => {
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
-}
+};
 
 const getRemindersByPatientId = async (req, res) => {
   try {
@@ -136,11 +140,21 @@ const updatePatientById = async (req, res) => {
     const { id } = req.params;
     const patient = await Patient.findById(id);
     if (!patient) {
-      return res.status(500).json({ message: `cannot find any patient with ID ${id}` });
+      return res
+        .status(500)
+        .json({ message: `cannot find any patient with ID ${id}` });
     }
 
     const {
-      addInfo, condition, o2Intake, consciousness, picture, alerts, reminders, reports, alertConfig,
+      addInfo,
+      condition,
+      o2Intake,
+      consciousness,
+      picture,
+      alerts,
+      reminders,
+      reports,
+      alertConfig,
     } = req.body;
 
     if (addInfo) {
@@ -207,7 +221,9 @@ const dischargePatientById = async (req, res) => {
 
     console.log(smartBed);
     if (!smartBed) {
-      return res.status(500).json({ message: `cannot find any smartbed with Patient ID ${id}` });
+      return res
+        .status(500)
+        .json({ message: `cannot find any smartbed with Patient ID ${id}` });
     }
     smartBed.bedStatus = bedStatusEnum[1];
     smartBed.patient = null;
