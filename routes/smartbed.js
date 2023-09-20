@@ -7,6 +7,7 @@ router.get('/:id', SmartBed.getSmartBedById)
 router.get('/:id/nurses', SmartBed.getNursesBySmartBedId)
 router.post('/', SmartBed.createSmartBed);
 router.put('/:id', SmartBed.updateSmartBedById);
+router.put('/:id/ward', SmartBed.unassignSmartBedFromWard);
 router.put('/:id/nurses', SmartBed.assignNursesToBed) 
 router.delete('/:id', SmartBed.deleteSmartBedById);
 

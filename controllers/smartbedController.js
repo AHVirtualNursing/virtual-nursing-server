@@ -170,6 +170,34 @@ const updateSmartBedById = async(req, res) => {
     }
 }
 
+const unassignSmartBedFromWard = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const smartBed = await SmartBed.findById(id);
+        if (!smartBed) {
+          return res
+            .status(500)
+            .json({ message: `cannot find any smartBed with ID ${id}` });
+        }
+
+        const ward = await Ward.findOne({smartBeds: {$in: [id]}});
+        ward.smartBeds.pull(id);
+        await ward.save();
+
+        smartBed.ward = undefined;
+        await smartBed.save();
+
+        res.status(200).json(smartBed)
+      } catch (e) {
+        if (e.name === "ValidationError") {
+          const validationErrors = Object.values(e.errors).map((e) => e.message);
+          return res.status(500).json({ validationErrors });
+        } else {
+          res.status(500).json({ message: e.message });
+        }
+      }
+}
+
 const assignNursesToBed = async(req, res) => {
     try {
         const {id} = req.params;
@@ -260,6 +288,7 @@ module.exports = {
     getSmartBedById,
     getNursesBySmartBedId,
     updateSmartBedById,
+    unassignSmartBedFromWard,
     assignNursesToBed,
     deleteSmartBedById
 }
