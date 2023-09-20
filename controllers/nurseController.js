@@ -48,18 +48,23 @@ const createNurse = async (req, res) => {
 const getNurses = async (req, res) => {
   try {
     if (req.query.ids) {
-      const ids = req.query.ids.split(',');
-      const nurses = await Promise.all(ids.map(async (id) => {
-        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      const ids = req.query.ids.split(",");
+      const nurses = await Promise.all(
+        ids.map(async (id) => {
+          if (id.match(/^[0-9a-fA-F]{24}$/)) {
             const nurse = await Nurse.findById(id);
             if (!nurse) {
-                res.status(500).json({message: `cannot find any nurse with ID ${id}`})
+              res
+                .status(500)
+                .json({ message: `cannot find any nurse with ID ${id}` });
             }
             return nurse;
-        } else{
-            res.status(500).json({ message: `${id} is in wrong format`});
-        }}));
-    res.status(200).json(nurses);
+          } else {
+            res.status(500).json({ message: `${id} is in wrong format` });
+          }
+        })
+      );
+      res.status(200).json(nurses);
     } else {
       const nurses = await Nurse.find({});
       res.status(200).json({ success: true, data: nurses });
@@ -96,7 +101,6 @@ const getNurseById = async (req, res) => {
       { path: "ward" },
     ]);
 
-    console.log("NURSE", nurse);
     if (!nurse) {
       return res
         .status(500)
@@ -138,7 +142,7 @@ const updateNurseById = async (req, res) => {
         .json({ message: `cannot find any nurse with ID ${id}` });
     }
 
-    const { name, username, smartBeds, headNurse } = req.body;
+    const { name, username, smartBeds, headNurse, nurseStatus } = req.body;
 
     if (name) {
       nurse.name = name;
@@ -151,6 +155,9 @@ const updateNurseById = async (req, res) => {
     }
     if (headNurse) {
       nurse.headNurse = headNurse;
+    }
+    if (nurseStatus) {
+      nurse.nurseStatus = nurseStatus;
     }
 
     const updatedNurse = await nurse.save();
