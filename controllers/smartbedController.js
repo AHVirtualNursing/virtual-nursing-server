@@ -18,7 +18,6 @@ const createSmartBed = async(req, res) => {
             return res.status(500).json({ validationErrors });
         } else if (e.code === 11000 && e.keyPattern.name) {
             return res.status(500).json({ message: 'Name of smartbed must be unique.' });
-            //console.log('Name of smartbed must be unique.'); // Handle the uniqueness error
         } else {
             res.status(500).json({ success: false, error: e.message});
         }
@@ -164,6 +163,8 @@ const updateSmartBedById = async(req, res) => {
         if (e.name === 'ValidationError') {
             const validationErrors = Object.values(e.errors).map((e) => e.message);
             return res.status(500).json({validationErrors});
+        } else if (e.code === 11000 && e.keyPattern.name) {
+            return res.status(500).json({ message: 'Name of smartbed must be unique.' });
         } else {
             res.status(500).json({ success: e.message }); 
         }
