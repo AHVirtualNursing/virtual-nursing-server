@@ -27,7 +27,6 @@ const getReminderById = async (req, res) => {
   }
 };
 
-
 const createReminder = async (req, res) => {
   try {
     const patient = await Patient.findById({ _id: req.body.patient });
