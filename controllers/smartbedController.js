@@ -118,13 +118,14 @@ const updateSmartBedById = async (req, res) => {
       const smartBeds = ward.smartBeds;
       const bedNums = smartBeds.map((smartBed) => smartBed.bedNum);
       if (bedNums.includes(bedNum)) {
-        return res
-          .status(500)
-          .json({
-            message: `bedNum ${bedNum} has already been assigned to another smartbed in the ward`,
-          });
+        return res.status(500).json({
+          message: `bedNum ${bedNum} has already been assigned to another smartbed in the ward`,
+        });
       }
       smartbed.bedNum = bedNum;
+
+      ward.beds[bedNum - 1] = 1;
+      await ward.save();
     } else {
       smartbed.bedNum = undefined;
     }
@@ -146,11 +147,9 @@ const updateSmartBedById = async (req, res) => {
         console.log("unique roomNums existing: " + uniqueRoomNums);
         const totalRooms = [...uniqueRoomNums].length;
         if (totalRooms + 1 > numRooms) {
-          return res
-            .status(500)
-            .json({
-              message: `this ward has already reached its max number of rooms`,
-            });
+          return res.status(500).json({
+            message: `this ward has already reached its max number of rooms`,
+          });
         }
       }
 
@@ -163,13 +162,10 @@ const updateSmartBedById = async (req, res) => {
         (wardType == "B2" && count >= 5) ||
         (wardType == "C" && count >= 5)
       ) {
-        return res
-          .status(500)
-          .json({
-            message: `room with roomNum ${roomNum} has already reached its max number of beds`,
-          });
+        return res.status(500).json({
+          message: `room with roomNum ${roomNum} has already reached its max number of beds`,
+        });
       }
-
       smartbed.roomNum = roomNum;
     } else {
       smartbed.roomNum = undefined;
@@ -221,6 +217,9 @@ const unassignSmartBedFromWard = async (req, res) => {
 
     const ward = await Ward.findOne({ smartBeds: { $in: [id] } });
     ward.smartBeds.pull(id);
+
+    const bedNum = smartBed.bedNum;
+    ward.beds[bedNum - 1] = 0;
     await ward.save();
 
     smartBed.ward = undefined;
@@ -314,6 +313,8 @@ const deleteSmartBedById = async (req, res) => {
     if (ward !== null && ward !== undefined) {
       if (Object.keys(ward).length !== 0) {
         ward.smartBeds.pull(id);
+        const bedNum = smartBed.bedNum;
+        ward.beds[bedNum - 1] = 0;
         await ward.save();
       }
     }
