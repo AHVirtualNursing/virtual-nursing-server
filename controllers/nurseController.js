@@ -153,7 +153,7 @@ const updateNurseById = async (req, res) => {
     if (smartBeds) {
       nurse.smartBeds = smartBeds;
     }
-    if (headNurse) {
+    if (headNurse !== undefined) {
       nurse.headNurse = headNurse;
     }
     if (nurseStatus) {
