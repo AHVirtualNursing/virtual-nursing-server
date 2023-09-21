@@ -123,7 +123,10 @@ const getSmartBedsByNurseId = async (req, res) => {
         .status(500)
         .json({ message: `cannot find any nurse with ID ${id}` });
     }
-    const smartBeds = await SmartBed.find({ nurses: { $in: [id] } });
+    const smartBeds = await SmartBed.find({ nurses: { $in: [id] } }).populate([
+      { path: "ward" },
+      { path: "patient" },
+    ]);
     console.log(smartBeds);
     res.status(200).json(smartBeds);
   } catch (e) {
