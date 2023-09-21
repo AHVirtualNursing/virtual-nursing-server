@@ -4,11 +4,32 @@ const Nurse = require("../models/nurse");
 
 const createWard = async (req, res) => {
   try {
+    const wardType = req.body.wardType;
+    const numRooms = req.body.numRooms;
+
     const ward = new Ward({
       wardNum: req.body.wardNum,
-      wardType: req.body.wardType,
-      numRooms: req.body.numRooms,
+      wardType: wardType,
+      numRooms: numRooms,
     });
+
+    function getBedsPerRoom() {
+      switch (wardType) {
+        case "A1":
+          return 1;
+        case "B1":
+          return 4;
+        case "B2":
+          return 5;
+        case "C":
+          return 5;
+      }
+    }
+
+
+    const numBeds = getBedsPerRoom() * ward.numRooms;
+    ward.beds = new Array(numBeds).fill(0);
+
     await Ward.create(ward);
     res.status(200).json({ success: true, data: ward });
   } catch (e) {
