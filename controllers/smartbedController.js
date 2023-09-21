@@ -125,6 +125,8 @@ const updateSmartBedById = async (req, res) => {
           });
       }
       smartbed.bedNum = bedNum;
+    } else {
+      smartbed.bedNum = undefined;
     }
     if (roomNum) {
       if (!smartbed.ward) {
@@ -169,7 +171,10 @@ const updateSmartBedById = async (req, res) => {
       }
 
       smartbed.roomNum = roomNum;
+    } else {
+      smartbed.roomNum = undefined;
     }
+
     if (name) {
       smartbed.name = name;
     }
