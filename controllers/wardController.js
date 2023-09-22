@@ -118,7 +118,7 @@ const getNursesByWardId = async (req, res) => {
     const nurses = await Promise.all(
       idsToRetrieve.map(async (id) => {
         if (id.match(/^[0-9a-fA-F]{24}$/)) {
-          const nurse = await Nurse.findById(id);
+          const nurse = await Nurse.findById(id).populate('headNurse');
           if (!nurse) {
             res
               .status(500)
