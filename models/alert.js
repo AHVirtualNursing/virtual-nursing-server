@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const alertStatusEnum = ['open', 'handling', 'complete'];
+const alertStatusEnum = ["open", "handling", "complete"];
 
 const alertSchema = new mongoose.Schema(
   {
@@ -8,9 +8,9 @@ const alertSchema = new mongoose.Schema(
       type: String,
       enum: {
         values: alertStatusEnum,
-        message: 'Invalid alert status: {VALUE}'
+        message: "Invalid alert status: {VALUE}",
       },
-      default: 'open',
+      default: "open",
       required: true,
     },
     description: {
@@ -22,7 +22,7 @@ const alertSchema = new mongoose.Schema(
     },
     patient: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Patient"
+      ref: "Patient",
     },
   },
   {
@@ -30,4 +30,4 @@ const alertSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.models.Alert || mongoose.model('Alert', alertSchema);
+module.exports = mongoose.models.Alert || mongoose.model("Alert", alertSchema);

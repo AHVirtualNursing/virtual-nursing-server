@@ -26,7 +26,7 @@ const userRoutes = require("./routes/user");
 const app = express();
 
 mongoose
-  .connect(process.env.MONGODB_URI, {
+  .connect(process.env.MONGODB_LOCAL_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -50,7 +50,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://localhost:3002"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })

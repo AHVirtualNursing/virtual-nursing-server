@@ -11,8 +11,8 @@ const patientSchema = new mongoose.Schema(
       required: true,
     },
     nric: {
-      type:String,
-      required: true
+      type: String,
+      required: true,
     },
     picture: {
       type: String,
@@ -25,7 +25,7 @@ const patientSchema = new mongoose.Schema(
     addInfo: {
       type: String,
       required: false,
-      default: ""
+      default: "",
     },
     copd: {
       type: Boolean,
@@ -37,7 +37,7 @@ const patientSchema = new mongoose.Schema(
         values: patientO2IntakeEnum,
         message: "Invalid patient O2 intake status: {VALUE}",
       },
-      default: patientO2IntakeEnum[0]
+      default: patientO2IntakeEnum[0],
     },
     consciousness: {
       type: String,
@@ -45,33 +45,42 @@ const patientSchema = new mongoose.Schema(
         values: patientConsciousnessEnum,
         message: "Invalid patient consciousness status: {VALUE}",
       },
-      default: patientConsciousnessEnum[0]
-      
+      default: patientConsciousnessEnum[0],
+    },
+    temperature: {
+      type: Number,
+      required: false,
     },
     isDischarged: {
       type: Boolean,
-      default: false
+      default: false,
     },
-    alerts: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Alert"
-    }],
+    alerts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Alert",
+      },
+    ],
     alertConfig: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "AlertConfig"
+      ref: "AlertConfig",
     },
-    reminders: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Reminder"
-    }],
+    reminders: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Reminder",
+      },
+    ],
     vital: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Vital"
+      ref: "Vital",
     },
-    reports: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Report"
-    }]
+    reports: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Report",
+      },
+    ],
   },
   {
     timestamps: true,

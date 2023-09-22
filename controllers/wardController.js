@@ -4,17 +4,42 @@ const Nurse = require("../models/nurse");
 
 const createWard = async (req, res) => {
   try {
+    const wardType = req.body.wardType;
+    const numRooms = req.body.numRooms;
+
     const ward = new Ward({
       wardNum: req.body.wardNum,
-      wardType: req.body.wardType,
-      numRooms: req.body.numRooms,
+      wardType: wardType,
+      numRooms: numRooms,
     });
+
+    function getBedsPerRoom() {
+      switch (wardType) {
+        case "A1":
+          return 1;
+        case "B1":
+          return 4;
+        case "B2":
+          return 5;
+        case "C":
+          return 5;
+      }
+    }
+
+
+    const numBeds = getBedsPerRoom() * ward.numRooms;
+    ward.beds = new Array(numBeds).fill(0);
+
     await Ward.create(ward);
     res.status(200).json({ success: true, data: ward });
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(500).json({ validationErrors });
+    } else if (e.code === 11000 && e.keyPattern.wardNum) {
+      return res
+        .status(500)
+        .json({ message: "WardNum of ward must be unique." });
     } else {
       res.status(500).json({ message: e.message });
     }
@@ -30,70 +55,86 @@ const getWards = async (req, res) => {
   }
 };
 
-const getWardById = async(req, res) => {
-    try {
-        const {id} = req.params;
-        const ward = await Ward.findById(id)
-        if (!ward) {
-            return res.status(500).json({message: `cannot find any ward with ID ${id}`})
-        }
-        res.status(200).json(ward);
-    } catch (e) {
-        res.status(500).json({message: e.message});
-    }
-}
-
-const getSmartBedsByWardId = async(req, res) => {
-    try {
-        const {id} = req.params;
-        const ward = await Ward.findById(id);
-        if (!ward) {
-            return res.status(500).json({message: `cannot find any ward with ID ${id}`})
-        }
-
-        const idsToRetrieve = ward.smartBeds.map(id => id.toString());
-    
-        const smartBeds = await Promise.all(idsToRetrieve.map(async (id) => {
-            if (id.match(/^[0-9a-fA-F]{24}$/)) {
-                const smartBed = await Smartbed.findById(id).populate('patient');
-                if (!smartBed) {
-                    res.status(500).json({message: `cannot find any smartbed with ID ${id}`})
-                }
-                return smartBed;
-            } else{
-                res.status(500).json({ message: `${id} is in wrong format`});
-            }}));
-        res.status(200).json(smartBeds);
-    } catch (e) {
-        res.status(500).json({ success: e.message });
-    }
-}
-
-const getNursesByWardId = async(req, res) => {
+const getWardById = async (req, res) => {
   try {
-      const {id} = req.params;
-      const ward = await Ward.findById(id);
-      if (!ward) {
-          return res.status(500).json({message: `cannot find any ward with ID ${id}`})
-      }
-
-      const idsToRetrieve = ward.nurses.map(id => id.toString());
-  
-      const nurses = await Promise.all(idsToRetrieve.map(async (id) => {
-          if (id.match(/^[0-9a-fA-F]{24}$/)) {
-              const nurse = await Nurse.findById(id);
-              if (!nurse) {
-                  res.status(500).json({message: `cannot find any nurse with ID ${id}`})
-              }
-              return nurse;
-          } else{
-              res.status(500).json({ message: `${id} is in wrong format`});
-          }}));
-      res.status(200).json(nurses);
+    const { id } = req.params;
+    const ward = await Ward.findById(id);
+    if (!ward) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any ward with ID ${id}` });
+    }
+    res.status(200).json(ward);
   } catch (e) {
-      res.status(500).json({ success: e.message });
+    res.status(500).json({ message: e.message });
   }
-}
+};
+
+const getSmartBedsByWardId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ward = await Ward.findById(id);
+    if (!ward) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any ward with ID ${id}` });
+    }
+
+    const idsToRetrieve = ward.smartBeds.map((id) => id.toString());
+
+    const smartBeds = await Promise.all(
+      idsToRetrieve.map(async (id) => {
+        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+          const smartBed = await SmartBed.findById(id).populate("patient");
+          if (!smartBed) {
+            res
+              .status(500)
+              .json({ message: `cannot find any smartbed with ID ${id}` });
+          }
+          return smartBed;
+        } else {
+          res.status(500).json({ message: `${id} is in wrong format` });
+        }
+      })
+    );
+    res.status(200).json(smartBeds);
+  } catch (e) {
+    res.status(500).json({ success: e.message });
+  }
+};
+
+const getNursesByWardId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ward = await Ward.findById(id);
+    if (!ward) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any ward with ID ${id}` });
+    }
+
+    const idsToRetrieve = ward.nurses.map((id) => id.toString());
+
+    const nurses = await Promise.all(
+      idsToRetrieve.map(async (id) => {
+        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+          const nurse = await Nurse.findById(id);
+          if (!nurse) {
+            res
+              .status(500)
+              .json({ message: `cannot find any nurse with ID ${id}` });
+          }
+          return nurse;
+        } else {
+          res.status(500).json({ message: `${id} is in wrong format` });
+        }
+      })
+    );
+    res.status(200).json(nurses);
+  } catch (e) {
+    res.status(500).json({ success: e.message });
+  }
+};
 
 const assignSmartBedsToWard = async (req, res) => {
   try {
@@ -105,16 +146,16 @@ const assignSmartBedsToWard = async (req, res) => {
         .json({ message: `cannot find any ward with ID ${id}` });
     }
     const { smartBedIds } = req.body;
-    
+
     for (const smartBedId of smartBedIds) {
       const smartBed = await SmartBed.findById(smartBedId);
       if (smartBed) {
-        const oldWard = await Ward.findOne({smartBeds: {$in: [id]}});
-        if ((oldWard !== null && oldWard !== undefined)) {
+        const oldWard = await Ward.findOne({ smartBeds: { $in: [id] } });
+        if (oldWard !== null && oldWard !== undefined) {
           if (Object.keys(oldWard).length !== 0) {
-            oldWard.smartBeds.pull(id); 
+            oldWard.smartBeds.pull(id);
             await oldWard.save();
-          } 
+          }
         }
         smartBed.ward = id;
         await smartBed.save();
@@ -131,7 +172,7 @@ const assignSmartBedsToWard = async (req, res) => {
       res.status(500).json({ message: e.message });
     }
   }
-}
+};
 
 // use this for assignment of smartbeds to ward
 const updateWardById = async (req, res) => {
@@ -162,6 +203,10 @@ const updateWardById = async (req, res) => {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(500).json({ validationErrors });
+    } else if (e.code === 11000 && e.keyPattern.wardNum) {
+      return res
+        .status(500)
+        .json({ message: "WardNum of ward must be unique." });
     } else {
       res.status(500).json({ message: e.message });
     }
@@ -240,13 +285,13 @@ const deleteWardById = async (req, res) => {
 };
 
 module.exports = {
-    createWard,
-    getWards,
-    getWardById,
-    getSmartBedsByWardId,
-    getNursesByWardId,
-    assignSmartBedsToWard,
-    updateWardById,
-    assignNurseToWard,
-    deleteWardById
-}
+  createWard,
+  getWards,
+  getWardById,
+  getSmartBedsByWardId,
+  getNursesByWardId,
+  assignSmartBedsToWard,
+  updateWardById,
+  assignNurseToWard,
+  deleteWardById,
+};
