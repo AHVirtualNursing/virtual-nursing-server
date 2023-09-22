@@ -11,17 +11,6 @@ const createSmartBed = async (req, res) => {
     console.log(smartbed);
     await smartbed.save();
 
-<<<<<<< HEAD
-        res.status(200).json({ success: true, data: smartbed });
-    } catch(e){
-        if (e.name === "ValidationError") {
-            const validationErrors = Object.values(e.errors).map((e) => e.message);
-            return res.status(500).json({ validationErrors });
-          } else if (e.code === 11000 && e.keyPattern.name) {
-            console.log('Name of smartbed must be unique.'); // Handle the uniqueness error
-        } else {
-            res.status(500).json({ success: false, error: e.message});
-=======
     res.status(200).json({ success: true, data: smartbed });
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -55,7 +44,6 @@ const getSmartBeds = async (req, res) => {
             return smartBed;
           } else {
             res.status(500).json({ message: `${id} is in wrong format` });
->>>>>>> 5629d66eb22730be19b0301436ea3a7f909ce6f8
           }
         })
       );
