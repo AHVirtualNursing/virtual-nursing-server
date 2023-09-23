@@ -9,7 +9,7 @@ router.get("/:id/smartbeds", Ward.getSmartBedsByWardId);
 router.get("/:id/nurses", Ward.getNursesByWardId);
 router.post("/", Ward.createWard);
 router.put("/:id", Ward.updateWardById);
-router.put("/:id/smartbeds", Ward.assignSmartBedsToWard);
+router.put("/:wardId/smartbed/:smartBedId", Ward.assignSmartBedsToWard);
 router.put("/:id/nurse", Ward.assignNurseToWard);
 router.delete("/:id", Ward.deleteWardById);
 
