@@ -106,70 +106,7 @@ const updateSmartBedById = async (req, res) => {
         .json({ message: `cannot find any smartbed with ID ${id}` });
     }
 
-    const { bedNum, roomNum, name, bedStatus, patient } = req.body;
-
-    if (bedNum) {
-      if (!smartbed.ward) {
-        return res
-          .status(500)
-          .json({ message: `smartbed needs to be assigned to ward` });
-      }
-      const ward = await Ward.findById(smartbed.ward).populate("smartBeds");
-      const smartBeds = ward.smartBeds;
-      const bedNums = smartBeds.map((smartBed) => smartBed.bedNum);
-      if (bedNums.includes(bedNum)) {
-        return res.status(500).json({
-          message: `bedNum ${bedNum} has already been assigned to another smartbed in the ward`,
-        });
-      }
-      smartbed.bedNum = bedNum;
-
-      ward.beds[bedNum - 1] = 1;
-      await ward.save();
-    } else {
-      smartbed.bedNum = undefined;
-    }
-    if (roomNum) {
-      if (!smartbed.ward) {
-        return res
-          .status(500)
-          .json({ message: `smartbed needs to be assigned to ward` });
-      }
-      const ward = await Ward.findById(smartbed.ward).populate("smartBeds");
-      const smartBeds = ward.smartBeds;
-      const wardType = ward.wardType;
-      const numRooms = ward.numRooms;
-
-      // check if there are alr max rooms in the ward
-      const roomNums = smartBeds.map((smartBed) => smartBed.roomNum);
-      if (!roomNums.includes(roomNum)) {
-        const uniqueRoomNums = new Set(roomNums);
-        console.log("unique roomNums existing: " + uniqueRoomNums);
-        const totalRooms = [...uniqueRoomNums].length;
-        if (totalRooms + 1 > numRooms) {
-          return res.status(500).json({
-            message: `this ward has already reached its max number of rooms`,
-          });
-        }
-      }
-
-      // check if there are alr max beds in the ward
-      const sameRoom = roomNums.filter((item) => item === roomNum);
-      const count = sameRoom.length;
-      if (
-        (wardType == "A1" && count >= 1) ||
-        (wardType == "B1" && count >= 4) ||
-        (wardType == "B2" && count >= 5) ||
-        (wardType == "C" && count >= 5)
-      ) {
-        return res.status(500).json({
-          message: `room with roomNum ${roomNum} has already reached its max number of beds`,
-        });
-      }
-      smartbed.roomNum = roomNum;
-    } else {
-      smartbed.roomNum = undefined;
-    }
+    const { name, bedStatus, patient } = req.body;
 
     if (name) {
       smartbed.name = name;
@@ -221,7 +158,9 @@ const unassignSmartBedFromWard = async (req, res) => {
     const bedNum = smartBed.bedNum;
     ward.beds[bedNum - 1] = 0;
     await ward.save();
-
+    
+    smartBed.roomNum = undefined;
+    smartBed.bedNum = undefined;
     smartBed.ward = undefined;
     await smartBed.save();
 

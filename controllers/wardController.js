@@ -138,31 +138,30 @@ const getNursesByWardId = async (req, res) => {
 
 const assignSmartBedsToWard = async (req, res) => {
   try {
-    const { id } = req.params;
-    const ward = await Ward.findById(id);
+    
+    const {wardId, smartBedId}  = req.params
+    const ward = await Ward.findById(wardId);
     if (!ward) {
       return res
         .status(500)
-        .json({ message: `cannot find any ward with ID ${id}` });
+        .json({ message: `cannot find any ward with ID ${wardId}` });
     }
-    const { smartBedIds } = req.body;
+    const { bedNum, roomNum } = req.body;
 
-    for (const smartBedId of smartBedIds) {
-      const smartBed = await SmartBed.findById(smartBedId);
-      if (smartBed) {
-        const oldWard = await Ward.findOne({ smartBeds: { $in: [id] } });
-        if (oldWard !== null && oldWard !== undefined) {
-          if (Object.keys(oldWard).length !== 0) {
-            oldWard.smartBeds.pull(id);
-            await oldWard.save();
-          }
-        }
-        smartBed.ward = id;
-        await smartBed.save();
-        ward.smartBeds.push(smartBedId);
-        await ward.save();
-      }
+
+    
+    const smartBed = await SmartBed.findById(smartBedId);
+    if (smartBed) {
+      smartBed.ward = wardId;
+      smartBed.roomNum = roomNum;
+      smartBed.bedNum = bedNum;
+      await smartBed.save();
+      ward.smartBeds.push(smartBedId);
+      ward.beds[bedNum - 1] = 1;
+
+      await ward.save();
     }
+    
     res.status(200).json(ward);
   } catch (e) {
     if (e.name === "ValidationError") {
