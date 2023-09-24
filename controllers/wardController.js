@@ -1,6 +1,7 @@
 const Ward = require("../models/ward");
 const SmartBed = require("../models/smartbed");
 const Nurse = require("../models/nurse");
+const { getBedsPerRoom } = require("../helper/ward");
 
 const createWard = async (req, res) => {
   try {
@@ -13,21 +14,7 @@ const createWard = async (req, res) => {
       numRooms: numRooms,
     });
 
-    function getBedsPerRoom() {
-      switch (wardType) {
-        case "A1":
-          return 1;
-        case "B1":
-          return 4;
-        case "B2":
-          return 5;
-        case "C":
-          return 5;
-      }
-    }
-
-
-    const numBeds = getBedsPerRoom() * ward.numRooms;
+    const numBeds = getBedsPerRoom(wardType) * numRooms;
     ward.beds = new Array(numBeds).fill(0);
 
     await Ward.create(ward);
@@ -118,7 +105,7 @@ const getNursesByWardId = async (req, res) => {
     const nurses = await Promise.all(
       idsToRetrieve.map(async (id) => {
         if (id.match(/^[0-9a-fA-F]{24}$/)) {
-          const nurse = await Nurse.findById(id).populate('headNurse');
+          const nurse = await Nurse.findById(id).populate("headNurse");
           if (!nurse) {
             res
               .status(500)
@@ -138,8 +125,7 @@ const getNursesByWardId = async (req, res) => {
 
 const assignSmartBedsToWard = async (req, res) => {
   try {
-    
-    const {wardId, smartBedId}  = req.params
+    const { wardId, smartBedId } = req.params;
     const ward = await Ward.findById(wardId);
     if (!ward) {
       return res
@@ -148,8 +134,6 @@ const assignSmartBedsToWard = async (req, res) => {
     }
     const { bedNum, roomNum } = req.body;
 
-
-    
     const smartBed = await SmartBed.findById(smartBedId);
     if (smartBed) {
       smartBed.ward = wardId;
@@ -161,7 +145,7 @@ const assignSmartBedsToWard = async (req, res) => {
 
       await ward.save();
     }
-    
+
     res.status(200).json(ward);
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -186,14 +170,23 @@ const updateWardById = async (req, res) => {
 
     const { wardNum, wardType, numRooms } = req.body;
 
+    if (ward.beds.includes(1)) {
+      return res.status(500).json({ message: "Ward has smart beds assigned" });
+    }
+
     if (wardNum) {
       ward.wardNum = wardNum;
     }
+
     if (wardType) {
       ward.wardType = wardType;
     }
     if (numRooms) {
       ward.numRooms = numRooms;
+    }
+    if (wardType && numRooms) {
+      const numBeds = getBedsPerRoom(wardType) * numRooms;
+      ward.beds = new Array(numBeds).fill(0);
     }
 
     const updatedWard = await ward.save();
