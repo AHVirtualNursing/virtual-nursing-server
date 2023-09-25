@@ -10,9 +10,9 @@ const cors = require("cors");
 const passport = require("./middleware/passport");
 
 /* ROUTES */
-const deviceRoutes = require("./routes/device");
 const authRoutes = require("./routes/auth");
 const smartbedRoutes = require("./routes/smartbed");
+const smartWearableRoutes = require("./routes/smartWearable");
 const alertRoutes = require("./routes/alert");
 const nurseRoutes = require("./routes/nurse");
 const alertConfigRoutes = require("./routes/alertConfig");
@@ -62,9 +62,9 @@ app.get("/api", (req, res) => {
 });
 
 /* APP USE */
-app.use("/device", deviceRoutes);
 app.use("/auth", authRoutes);
 app.use("/smartbed", smartbedRoutes);
+app.use("/smartwearable", smartWearableRoutes);
 app.use("/alert", alertRoutes);
 app.use("/nurse", nurseRoutes);
 app.use("/alertConfig", alertConfigRoutes);
