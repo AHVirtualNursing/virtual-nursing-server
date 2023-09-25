@@ -11,7 +11,7 @@ const createPatient = async (req, res) => {
       name: req.body.name,
       nric: req.body.nric,
       condition: req.body.condition,
-      addInfo: req.body.addInfo,
+      infoLogs: req.body.infoLogs,
       copd: req.body.copd,
     });
     await Patient.create(patient);
@@ -146,7 +146,7 @@ const updatePatientById = async (req, res) => {
     }
 
     const {
-      addInfo,
+      infoLogs,
       condition,
       o2Intake,
       consciousness,
@@ -157,8 +157,8 @@ const updatePatientById = async (req, res) => {
       alertConfig,
     } = req.body;
 
-    if (addInfo) {
-      patient.addInfo = addInfo;
+    if (infoLogs) {
+      patient.infoLogs = infoLogs;
     }
     if (condition) {
       patient.condition = condition;
