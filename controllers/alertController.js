@@ -14,7 +14,8 @@ const createAlert = async (req, res) => {
     const alert = new Alert({
       description: req.body.description,
       notes: req.body.notes,
-      patient: req.body.patient, //verify if patient exists first
+      patient: req.body.patient,
+      sentBy: req.body.sentBy
     });
     await alert.save();
 

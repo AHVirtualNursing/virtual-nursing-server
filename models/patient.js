@@ -4,6 +4,17 @@ const mongoose = require("mongoose");
 const patientO2IntakeEnum = ["air", "oxygen"];
 const patientConsciousnessEnum = ["alert", "cvpu"];
 
+const infoLog = new mongoose.Schema({
+  info: {
+    type: String,
+    required: true,
+  },
+  datetime: {
+    type: String,
+    required: true,
+  },
+});
+
 const patientSchema = new mongoose.Schema(
   {
     name: {
@@ -22,10 +33,8 @@ const patientSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    addInfo: {
-      type: String,
-      required: false,
-      default: "",
+    infoLogs: {
+      type: [infoLog]
     },
     copd: {
       type: Boolean,
