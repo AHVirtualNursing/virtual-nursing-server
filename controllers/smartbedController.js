@@ -146,10 +146,15 @@ const unassignSmartBedFromWard = async (req, res) => {
   try {
     const { id } = req.params;
     const smartBed = await SmartBed.findById(id);
-    if (!smartBed) {
+    if (!smartBed ) {
       return res
         .status(500)
         .json({ message: `cannot find any smartBed with ID ${id}` });
+    }
+    if(smartBed.patient != undefined){
+        return res
+        .status(500)
+        .json({ message: `there is a patient on the smartbed` });
     }
 
     const ward = await Ward.findOne({ smartBeds: { $in: [id] } });
