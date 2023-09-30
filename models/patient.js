@@ -13,6 +13,10 @@ const infoLog = new mongoose.Schema({
     type: String,
     required: true,
   },
+  addedBy: {
+    type: String,
+    required: true,
+  }
 });
 
 const patientSchema = new mongoose.Schema(

@@ -65,7 +65,7 @@ const updateAlertById = async (req, res) => {
         .json({ message: `cannot find any alert with ID ${id}` });
     }
 
-    const { status, description, notes } = req.body;
+    const { status, description, notes, handledBy } = req.body;
     if (status) {
       alert.status = status;
     }
@@ -74,6 +74,9 @@ const updateAlertById = async (req, res) => {
     }
     if (notes) {
       alert.notes = notes;
+    }
+    if (handledBy) {
+      alert.handledBy = handledBy;
     }
 
     const updatedAlert = await alert.save();
@@ -87,6 +90,53 @@ const updateAlertById = async (req, res) => {
     }
   }
 };
+
+const createFollowUpForAlert = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const alert = await Alert.findById(id);
+    if (!alert) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any alert with ID ${id}` });
+    }
+    
+    const { respRate, heartRate, bloodPressureSys, bloodPressureDia, spO2, temperature } = req.body;
+
+    const followUp = {};
+
+    if (respRate) {
+      followUp.respRate = respRate;
+    }
+    if (heartRate) {
+      followUp.heartRate = heartRate;
+    }
+    if (bloodPressureSys) {
+      followUp.bloodPressureSys = bloodPressureSys;
+    }
+    if (bloodPressureDia) {
+      followUp.bloodPressureDia = bloodPressureDia;
+    }
+    if (spO2) {
+      followUp.spO2 = spO2;
+    }
+    if (temperature) {
+      followUp.temperature = temperature;
+    }
+    
+    alert.followUps.push(followUp);
+    await alert.save();
+
+    res.status(200).json({ success: true, data: alert });
+  } catch (e) {
+    if (e.name === "ValidationError") {
+      const validationErrors = Object.values(e.errors).map((e) => e.message);
+      res.status(500).json({ validationErrors });
+    } else {
+      res.status(500).json({ success: false });
+    }
+  }
+}
 
 const deleteAlertById = async (req, res) => {
   try {
@@ -127,5 +177,6 @@ module.exports = {
   getAllAlerts,
   getAlertById,
   updateAlertById,
+  createFollowUpForAlert,
   deleteAlertById,
 };

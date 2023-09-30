@@ -2,6 +2,37 @@ const mongoose = require("mongoose");
 
 const alertStatusEnum = ["open", "handling", "complete"];
 
+const followUpLog = new mongoose.Schema({
+  respRate: {
+    type: Number,
+    required: false,
+  },
+  heartRate: {
+    type: Number,
+    required: false,
+  },
+  bloodPressureSys: {
+    type: Number,
+    required: false,
+  },
+  bloodPressureDia: {
+    type: Number,
+    required: false,
+  },
+  spO2: {
+    type: Number,
+    required: false,
+  },
+  temperature: {
+    type: Number,
+    required: false,
+  },
+  datetime: {
+    type: String,
+    required: true,
+  },
+});
+
 const alertSchema = new mongoose.Schema(
   {
     status: {
@@ -25,12 +56,14 @@ const alertSchema = new mongoose.Schema(
       ref: "Patient",
     },
     sentBy: {
-      type: String
+      type: String,
     },
     handledBy: {
-      type: String
-    }
-
+      type: String,
+    },
+    followUps: {
+      type: [followUpLog],
+    },
   },
   {
     timestamps: true,
