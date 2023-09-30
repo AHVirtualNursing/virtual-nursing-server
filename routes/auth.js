@@ -2,15 +2,16 @@ const express = require("express");
 const mongoose = require("mongoose");
 const router = express.Router();
 const passport = require("../middleware/passport");
+const generator = require("generate-password");
 const { body, validationResult } = require("express-validator");
 const { getUserModel } = require("../helper/auth");
+const { sendWelcomeEmail } = require('../helper/email');
 
 router.post(
   "/register",
   [
     body("username").trim().isLength({ min: 1 }).escape(),
     body("email").trim().isEmail().normalizeEmail().escape(),
-    body("password").trim().isLength({ min: 6 }).escape(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -22,15 +23,25 @@ router.post(
     const userType = req.headers["x-usertype"];
     const userModel = getUserModel(userType);
 
-    const { username, email, password } = req.body;
+    const { username, email } = req.body;
     const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({ message: "Email already registered" });
     }
 
+    const password = generator.generate({
+      length: 8,
+      numbers: true,
+      symbols: true,
+      excludeSimilarCharacters: true,
+      strict: true,
+    });
+
     const newWebUser = new userModel({ username, email, password });
     try {
+      console.log(newWebUser);
+      await sendWelcomeEmail(email, username, password);
       await newWebUser.save();
       res.status(201).json({ message: "User registered successfully" });
     } catch (error) {
