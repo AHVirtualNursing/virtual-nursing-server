@@ -109,7 +109,7 @@ const getAlertsByPatientId = async (req, res) => {
     }
 
     const alerts = await Alert.find({ patient: id });
-    console.log(alerts);
+    //console.log(alerts);
     res.status(200).json(alerts);
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -130,6 +130,26 @@ const getRemindersByPatientId = async (req, res) => {
     const reminders = await Reminder.find({ patient: id });
     console.log(reminders);
     res.status(200).json(reminders);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+
+const getVitalByPatientId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findById(id).populate('vital');
+    console.log(patient);
+    if (!patient) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any patient with ID ${id}` });
+    }
+
+    const vital = await patient.vital
+    //console.log(vital);
+    res.status(200).json(vital);
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
@@ -299,6 +319,7 @@ module.exports = {
   getPatientsByIds,
   getAlertsByPatientId,
   getRemindersByPatientId,
+  getVitalByPatientId,
   updatePatientById,
   dischargePatientById,
   admitPatientById,

@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const Reminder = require("../models/reminder");
 const Patient = require("../models/patient");
 
-//populate patients here?
 const getAllReminders = async (req, res) => {
   try {
     const reminders = await Reminder.find({}).populate({ path: "patient" });
@@ -119,7 +118,7 @@ const deleteReminderById = async (req, res) => {
     );
     if (!updatedPatient) {
       return res.status(500).json({
-        message: `cannot find any patient tagged to alert with ID ${id}`,
+        message: `cannot find any patient tagged to reminder with ID ${id}`,
       });
     }
 
