@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const cors = require("cors");
+//const WebSocket = require("ws");
+const socket = require("socket.io");
 
 /* MIDDLEWARE IMPORTS */
 const passport = require("./middleware/passport");
@@ -25,8 +27,24 @@ const userRoutes = require("./routes/user");
 
 const app = express();
 
+// const wss = new WebSocket.Server({ port: 3003 });
+
+// wss.on("connection", (ws) => {
+//   console.log("WebSocket client connected");
+
+//   ws.on("message", (message) => {
+//     console.log("Received message from client:", message);
+
+//     ws.send("From websocket server");
+//   });
+
+//   ws.on("close", () => {
+//     console.log("WebSocket client disconnected");
+//   });
+// });
+
 mongoose
-  .connect(process.env.MONGODB_URI, {
+  .connect(process.env.MONGODB_LOCAL_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -76,6 +94,22 @@ app.use("/vital", vitalRoutes);
 app.use("/user", userRoutes);
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
+});
+
+const io = socket(server);
+
+io.on("connection", (socket) => {
+  console.log("SocketIO client connected");
+
+  socket.on('watchData', (data) => {
+    const time = data["time"]
+    const heartRate = data["heartrate"]
+    console.log(`Your heart rate is ${heartRate} BPM at ${time}`)
+  })
+
+  socket.on("disconnect", () => {
+    console.log("SocketIO client disconnected");
+  });
 });
