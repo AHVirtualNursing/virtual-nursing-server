@@ -5,7 +5,6 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const cors = require("cors");
-const socket = require("socket.io");
 
 /* MIDDLEWARE IMPORTS */
 const passport = require("./middleware/passport");
@@ -81,18 +80,38 @@ const server = app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
 
-const io = socket(server);
+const socket = require("socket.io");
+const io = socket(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+  },
+});
+
+const smartWatchConnections = new Map();
+const dashboardConnections = new Map();
 
 io.on("connection", (socket) => {
-  console.log("SocketIO client connected");
+  socket.on("connectSmartWatch", (patientId) => {
+    smartWatchConnections.set(patientId, socket);
+  });
 
-  socket.on('watchData', (data) => {
-    const time = data["time"]
-    const heartRate = data["heartrate"]
-    console.log(`Your heart rate is ${heartRate} BPM at ${time}`)
-  })
+  socket.on("connectDashboard", (dashboardId) => {
+    dashboardConnections.set(dashboardId, socket);
+  });
+
+  socket.on("watchData", (vitals) => {
+    const patientId = vitals["patientId"];
+    const dashboardSocket = dashboardConnections.get(patientId);
+    if (dashboardSocket) {
+      dashboardSocket.emit("updateVitals", vitals);
+    } else {
+      console.log(`No dashboard found for patient ID ${patientId}`);
+    }
+  });
 
   socket.on("disconnect", () => {
-    console.log("SocketIO client disconnected");
+    smartWatchConnections.delete(socket.id);
+    dashboardConnections.delete(socket.id);
   });
 });
