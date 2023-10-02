@@ -5,7 +5,6 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const cors = require("cors");
-//const WebSocket = require("ws");
 const socket = require("socket.io");
 
 /* MIDDLEWARE IMPORTS */
@@ -26,22 +25,6 @@ const vitalRoutes = require("./routes/vital");
 const userRoutes = require("./routes/user");
 
 const app = express();
-
-// const wss = new WebSocket.Server({ port: 3003 });
-
-// wss.on("connection", (ws) => {
-//   console.log("WebSocket client connected");
-
-//   ws.on("message", (message) => {
-//     console.log("Received message from client:", message);
-
-//     ws.send("From websocket server");
-//   });
-
-//   ws.on("close", () => {
-//     console.log("WebSocket client disconnected");
-//   });
-// });
 
 mongoose
   .connect(process.env.MONGODB_LOCAL_URI, {
