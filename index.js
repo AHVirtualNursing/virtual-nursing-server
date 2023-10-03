@@ -92,8 +92,10 @@ const smartWatchConnections = new Map();
 const dashboardConnections = new Map();
 
 io.on("connection", (socket) => {
-  socket.on("connectSmartWatch", (patientId) => {
-    smartWatchConnections.set(patientId, socket);
+  socket.on("connectSmartWatch", (watchId) => {
+    console.log(watchId);
+    // fetch patient id from watch
+    smartWatchConnections.set(watchId, socket);
   });
 
   socket.on("connectDashboard", (dashboardId) => {
