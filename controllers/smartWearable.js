@@ -46,6 +46,11 @@ const getSmartWearables = async (req, res) => {
         })
       );
       res.status(200).json(smartWearables);
+    } else if (req.query.unassigned) {
+      const smartWearables = await SmartWearable.find({
+        patient: { $exists: false },
+      });
+      res.status(200).json({ success: true, data: smartWearables });
     } else {
       const smartWearables = await SmartWearable.find({}).populate("patient");
       res.status(200).json({ success: true, data: smartWearables });
@@ -77,7 +82,7 @@ const updateSmartWearableById = async (req, res) => {
     if (!smartWearable) {
       return res
         .status(500)
-        .json({ message: `cannot find any smart earable with ID ${id}` });
+        .json({ message: `cannot find any smart wearable with ID ${id}` });
     }
 
     const { name, serialNumber, patient } = req.body;
