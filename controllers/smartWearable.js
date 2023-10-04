@@ -5,6 +5,7 @@ const createSmartWearable = async (req, res) => {
   try {
     const smartWearable = new SmartWearable({
       name: req.body.name,
+      serialNumber: req.body.serialNumber,
     });
     await smartWearable.save();
 
@@ -34,9 +35,9 @@ const getSmartWearables = async (req, res) => {
               "patient"
             );
             if (!smartWearable) {
-              res
-                .status(500)
-                .json({ message: `cannot find any smart wearable with ID ${id}` });
+              res.status(500).json({
+                message: `cannot find any smart wearable with ID ${id}`,
+              });
             }
             return smartWearable;
           } else {
@@ -79,10 +80,14 @@ const updateSmartWearableById = async (req, res) => {
         .json({ message: `cannot find any smart earable with ID ${id}` });
     }
 
-    const { name, patient } = req.body;
+    const { name, serialNumber, patient } = req.body;
 
     if (name) {
-        smartWearable.name = name;
+      smartWearable.name = name;
+    }
+
+    if (serialNumber) {
+      smartWearable.serialNumber = serialNumber;
     }
 
     // dont call this unless testing
@@ -121,11 +126,9 @@ const deleteSmartWearableById = async (req, res) => {
         .json({ message: `cannot find any smart wearable with ID ${id}` });
     }
     if (smartWearable.patient) {
-      return res
-        .status(500)
-        .json({
-          message: `smartWearable with ID ${id} has a patient and cannot be deleted`,
-        });
+      return res.status(500).json({
+        message: `smartWearable with ID ${id} has a patient and cannot be deleted`,
+      });
     }
     await SmartWearable.deleteOne({ _id: id });
     res.status(200).json(smartWearable);
