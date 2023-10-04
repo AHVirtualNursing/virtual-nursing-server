@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const intervalEnum = ["hourly", "daily", "weekly"];
+const intervalEnum = ["once", "hourly", "daily"];
 const reminderSchema = new mongoose.Schema(
   {
     content: {

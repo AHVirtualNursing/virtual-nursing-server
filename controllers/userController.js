@@ -112,7 +112,9 @@ const changePassword = async (req, res) => {
     if (!passwordMatch) {
       return res.status(401).json({ message: "Old password is incorrect" });
     }
-
+    if (!user.passwordReset){
+      user.passwordReset = true;
+    }
     user.password = newPassword;
     await user.save();
 

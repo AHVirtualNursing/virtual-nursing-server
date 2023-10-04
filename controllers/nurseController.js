@@ -4,7 +4,7 @@ const SmartBed = require("../models/smartbed");
 const Ward = require("../models/ward");
 const nurseStatusEnum = ["normal", "head"];
 
-/* Use auth/register API instead to create New Nurse
+// Use auth/register API instead to create New Nurse
 const createNurse = async (req, res) => {
   try {
     const wardId = req.body.ward;
@@ -45,7 +45,7 @@ const createNurse = async (req, res) => {
     }
   }
 };
-*/
+
 
 const getNurses = async (req, res) => {
   try {
