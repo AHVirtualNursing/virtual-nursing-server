@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const router = express.Router();
 const passport = require("../middleware/passport");
 const generator = require("generate-password");
+const Ward = require("../models/ward");
 const { body, validationResult } = require("express-validator");
 const { getUserModel } = require("../helper/auth");
 const { sendWelcomeEmail } = require('../helper/email');
@@ -24,6 +25,7 @@ router.post(
     const userModel = getUserModel(userType);
 
     const { username, email } = req.body;
+    
     const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
@@ -38,14 +40,37 @@ router.post(
       strict: true,
     });
 
-    const newWebUser = new userModel({ username, email, password });
+    let newUser;
+    if (userType == 'mobile') {
+      const { name, nurseStatus, ward } = req.body;
+      
+      const wardInstance = await Ward.findById(ward);
+      if (!wardInstance) {
+        return res
+          .status(500)
+          .json({ message: `cannot find assigned ward with ID ${ward}` });
+      }
+      newUser = new userModel({ name, nurseStatus, ward, username, email, password });
+      
+      await Ward.findOneAndUpdate(
+        { _id: ward },
+        { $push: { nurses: newUser._id } },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+    } else {
+      newUser = new userModel({ username, email, password });
+    }
+
     try {
-      console.log(newWebUser);
       await sendWelcomeEmail(email, username, password);
-      await newWebUser.save();
+      await newUser.save();
       res.status(201).json({ message: "User registered successfully" });
     } catch (error) {
       res.status(500).json({ message: "Registration failed" });
+      console.log(error);
     }
   }
 );
