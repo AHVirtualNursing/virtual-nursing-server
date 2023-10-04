@@ -4,7 +4,6 @@ const SmartBed = require("../models/smartbed");
 const Ward = require("../models/ward");
 const nurseStatusEnum = ["normal", "head"];
 
-// Use auth/register API instead to create New Nurse
 const createNurse = async (req, res) => {
   try {
     const wardId = req.body.ward;
@@ -231,6 +230,7 @@ const getNursesByHeadNurseId = async (req, res) => {
 };
 
 module.exports = {
+  createNurse,
   getNurses,
   getNurseById,
   getSmartBedsByNurseId,
