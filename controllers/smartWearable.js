@@ -71,9 +71,24 @@ const getSmartWearableById = async (req, res) => {
     }
     res.status(200).json(smartWearable);
   } catch (e) {
-    res.status(500).json({ success: e.message });
+    res.status(500).json({ error: e.message });
   }
 };
+
+const getSmartWearableBySerialNumber = async (req, res) => {
+  try {
+    const { serialNumber} = req.params;
+    const smartWearable = await SmartWearable.findOne({ serialNumber: serialNumber})
+    if (!smartWearable) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any smart wearable with serial number ${serialNumber}` });
+    }
+    res.status(200).json(smartWearable);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
 
 const updateSmartWearableById = async (req, res) => {
   try {
@@ -146,6 +161,7 @@ module.exports = {
   createSmartWearable,
   getSmartWearables,
   getSmartWearableById,
+  getSmartWearableBySerialNumber,
   updateSmartWearableById,
   deleteSmartWearableById,
 };
