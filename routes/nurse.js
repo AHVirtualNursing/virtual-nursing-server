@@ -3,11 +3,11 @@ const router = express.Router();
 const Nurse = require("../models/nurse");
 const nurse = require("../controllers/nurseController");
 
+router.post("/", nurse.createNurse);
 router.get("/", nurse.getNurses);
 router.get("/:id", nurse.getNurseById);
 router.get("/:id/headNurse", nurse.getNursesByHeadNurseId);
 router.get("/:id/smartbeds", nurse.getSmartBedsByNurseId);
-router.post("/", nurse.createNurse);
 router.put("/:id", nurse.updateNurseById);
 router.delete("/:id", nurse.deleteNurseById);
 

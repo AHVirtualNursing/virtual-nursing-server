@@ -16,7 +16,7 @@ const infoLog = new mongoose.Schema({
   addedBy: {
     type: String,
     required: true,
-  }
+  },
 });
 
 const layoutSchema = new mongoose.Schema({
@@ -84,7 +84,7 @@ const patientSchema = new mongoose.Schema(
       required: true,
     },
     infoLogs: {
-      type: [infoLog]
+      type: [infoLog],
     },
     copd: {
       type: Boolean,

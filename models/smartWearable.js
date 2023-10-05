@@ -7,10 +7,15 @@ const smartWearableSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    serialNumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     patient: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Patient",
-        required: false,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Patient",
+      required: false,
     },
   },
   {

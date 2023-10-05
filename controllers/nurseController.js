@@ -45,6 +45,7 @@ const createNurse = async (req, res) => {
   }
 };
 
+
 const getNurses = async (req, res) => {
   try {
     if (req.query.ids) {
