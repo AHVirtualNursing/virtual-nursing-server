@@ -29,6 +29,7 @@ const createNurse = async (req, res, session) => {
       {
         new: true,
         runValidators: true,
+        session
       }
     );
 
