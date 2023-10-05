@@ -2,6 +2,7 @@ const Alert = require("../models/alert");
 const AlertConfig = require("../models/alertConfig");
 const Patient = require("../models/patient");
 const SmartBed = require("../models/smartbed");
+const SmartWearable = require("../models/smartWearable");
 const bedStatusEnum = ["occupied", "vacant"];
 const Reminder = require("../models/reminder");
 
@@ -66,9 +67,14 @@ const getPatientById = async (req, res) => {
         .status(500)
         .json({ message: `cannot find any patient with ID ${id}` }); //status 400?
     }
-    res.status(200).json(patient);
+    const smartWearable = await SmartWearable.findOne({ patient: id });
+    const response = patient.toObject()
+    if (smartWearable) {
+      response.smartWearable = smartWearable;
+    }
+    res.status(200).json(response);
   } catch (e) {
-    res.status(500).json({ success: e.message });
+    res.status(500).json({ error: e.message });
   }
 };
 
@@ -135,7 +141,6 @@ const getRemindersByPatientId = async (req, res) => {
   }
 };
 
-
 const getVitalByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
@@ -147,7 +152,7 @@ const getVitalByPatientId = async (req, res) => {
         .json({ message: `cannot find any patient with ID ${id}` });
     }
 
-    const vital = await patient.vital
+    const vital = await patient.vital;
     //console.log(vital);
     res.status(200).json(vital);
   } catch (e) {
@@ -239,7 +244,6 @@ const dischargePatientById = async (req, res) => {
 
     const smartBed = await SmartBed.findOne({ patient: id });
 
-    console.log(smartBed);
     if (!smartBed) {
       return res
         .status(500)
@@ -248,6 +252,19 @@ const dischargePatientById = async (req, res) => {
     smartBed.bedStatus = bedStatusEnum[1];
     smartBed.patient = null;
     await smartBed.save();
+
+    const smartWearable = await SmartWearable.findOne({ patient: id });
+
+    if (!smartWearable) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any smart wearable with Patient ID ${id}` });
+    }
+
+    if (smartWearable.patient != undefined) {
+      smartWearable.patient = undefined;
+      await smartWearable.save();
+    }
 
     res.status(200).json(patient);
   } catch (e) {
@@ -270,7 +287,7 @@ const admitPatientById = async (req, res) => {
         .json({ message: `cannot find any patient with ID ${id}` });
     }
 
-    const { o2Intake, consciousness } = req.body;
+    const { o2Intake, consciousness, smartWearableId } = req.body;
     patient.o2Intake = o2Intake;
     patient.consciousness = consciousness;
     await patient.save();
@@ -284,6 +301,15 @@ const admitPatientById = async (req, res) => {
     }
     smartBed.bedStatus = bedStatusEnum[0];
     await smartBed.save();
+
+    const smartWearable = await SmartWearable.findById(smartWearableId);
+    if (!smartWearable) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any smartWearable with SmartWearable ID ${id}` });
+    }
+    smartWearable.patient = id;
+    await smartWearable.save();
 
     res.status(200).json(patient);
   } catch (e) {

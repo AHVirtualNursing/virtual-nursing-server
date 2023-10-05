@@ -16,6 +16,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    passwordReset: {
+      type: Boolean,
+      required: true,
+      default: false
+    }
   },
   {
     timestamps: true,

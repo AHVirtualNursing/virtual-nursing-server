@@ -4,9 +4,11 @@ const router = express.Router();
 const passport = require("../middleware/passport");
 const generator = require("generate-password");
 const Ward = require("../models/ward");
+const NurseController = require("../controllers/nurseController");
+const VirtualNurseController = require("../controllers/virtualNurseController");
 const { body, validationResult } = require("express-validator");
 const { getUserModel } = require("../helper/auth");
-const { sendWelcomeEmail } = require('../helper/email');
+const { sendWelcomeEmail } = require("../helper/email");
 
 router.post(
   "/register",
@@ -14,6 +16,8 @@ router.post(
     body("username").trim().isLength({ min: 1 }).escape(),
     body("email").trim().isEmail().normalizeEmail().escape(),
   ],
+
+
   async (req, res) => {
     const errors = validationResult(req);
 
@@ -21,11 +25,14 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     const userType = req.headers["x-usertype"];
     const userModel = getUserModel(userType);
 
     const { username, email } = req.body;
-    
+
     const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
@@ -40,37 +47,23 @@ router.post(
       strict: true,
     });
 
-    let newUser;
-    if (userType == 'mobile') {
-      const { name, nurseStatus, ward } = req.body;
-      
-      const wardInstance = await Ward.findById(ward);
-      if (!wardInstance) {
-        return res
-          .status(500)
-          .json({ message: `cannot find assigned ward with ID ${ward}` });
-      }
-      newUser = new userModel({ name, nurseStatus, ward, username, email, password });
-      
-      await Ward.findOneAndUpdate(
-        { _id: ward },
-        { $push: { nurses: newUser._id } },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
-    } else {
-      newUser = new userModel({ username, email, password });
-    }
-
+    req.body.password = password;
     try {
+      let newUser;
+      if (userType == "mobile") {
+        newUser = await NurseController.createNurse(req, res, session);
+      } else if (userType == "virtual-nurse") {
+        newUser = await VirtualNurseController.createVirtualNurse(req, res);
+      } else {
+        newUser = new userModel({ username, email, password });
+      }
+      await newUser.save({ session });
       await sendWelcomeEmail(email, username, password);
-      await newUser.save();
+      await session.commitTransaction();
+      session.endSession();
       res.status(201).json({ message: "User registered successfully" });
     } catch (error) {
-      res.status(500).json({ message: "Registration failed" });
-      console.log(error);
+      res.status(500).json({ message: error.message });
     }
   }
 );

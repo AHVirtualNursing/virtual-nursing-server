@@ -1,4 +1,5 @@
 const nurse = require("../models/nurse");
+const ward = require("../models/ward");
 const { virtualNurse, itAdmin } = require("../models/webUser");
 const axios = require("axios");
 const bcrypt = require("bcrypt");
@@ -112,7 +113,9 @@ const changePassword = async (req, res) => {
     if (!passwordMatch) {
       return res.status(401).json({ message: "Old password is incorrect" });
     }
-
+    if (!user.passwordReset){
+      user.passwordReset = true;
+    }
     user.password = newPassword;
     await user.save();
 
@@ -122,6 +125,65 @@ const changePassword = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+const updateUserById = async(req, res) => {
+  try {
+    const { id } = req.params;
+    let user = null;
+    const userType = req.headers["x-usertype"];
+    switch (userType) {
+      case "it-admin":
+        user = await itAdmin.findById(id);
+        break;
+      case "virtual-nurse":
+        user = await virtualNurse.findById(id);
+        break;
+    }
+
+    if (user == null) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    if (user == 'virtual-nurse') {
+      const { name, username, wards } = req.body;
+      if (name) {
+        user.name = name;
+      }
+      if (username) {
+        user.username = username;
+      }
+      if (wards) {
+        for (let i = 0; i < wards.length; i++) {
+          if (i > 1) {
+            return res
+              .status(500)
+              .json({
+                message: `virtual nurse can only be assigned a maximum of 2 wards`,
+              });
+          }
+          const wardId = wards[i];
+          const wardInstance = await ward.findById(wardId);
+          if (!wardInstance) {
+            return res
+              .status(500)
+              .json({ message: `cannot find assigned ward with ID ${ward}` });
+          }
+        }
+        user.wards = wards;
+      }
+    } else if (user == 'it-admin') {
+      const { username } = req.body;
+      if (username) {
+        user.username = username;
+      }
+    }
+    const updatedUser = await user.save();
+    res.status(200).json(updatedUser);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: e.message });
+  }
+}
 
 module.exports = {
   getVirtualNurses,

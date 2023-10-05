@@ -30,6 +30,7 @@ mongoose
   .connect(process.env.MONGODB_LOCAL_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    autoIndex: false
   })
   .then(() => {
     console.log("MongoDB connected");
@@ -37,6 +38,8 @@ mongoose
   .catch((error) => {
     console.error("Error connecting to MongoDB:", error);
   });
+
+
 
 /* MIDDLEWARE */
 app.use(bodyParser.json());

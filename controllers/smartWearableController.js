@@ -121,6 +121,7 @@ const updateSmartWearableById = async (req, res) => {
       smartWearable.patient = patient;
     }
     await smartWearable.save();
+
     res.status(200).json(smartWearable);
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -133,6 +134,32 @@ const updateSmartWearableById = async (req, res) => {
     } else {
       res.status(500).json({ success: e.message });
     }
+  }
+};
+
+const unassignSmartWearableFromPatient = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const smartWearable = await SmartWearable.findById(id);
+
+    if (!smartWearable) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any smart wearable with ID ${id}` });
+    }
+
+    if (smartWearable.patient != undefined) {
+      smartWearable.patient = undefined;
+      await smartWearable.save();
+
+      res.status(200).json(smartWearable);
+    } else {
+      return res
+        .status(500)
+        .json({ message: `smart wearable does not have patient assigned` });
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 };
 
@@ -163,5 +190,6 @@ module.exports = {
   getSmartWearableById,
   getSmartWearableBySerialNumber,
   updateSmartWearableById,
+  unassignSmartWearableFromPatient,
   deleteSmartWearableById,
 };

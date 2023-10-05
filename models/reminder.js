@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+const intervalEnum = ["once", "hourly", "daily"];
 const reminderSchema = new mongoose.Schema(
   {
     content: {
@@ -30,6 +31,13 @@ const reminderSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    interval: {
+      type: String,
+      enum: {
+        values: intervalEnum,
+        message: "Invalid interval: {VALUE}",
+      }
+    }
   },
   {
     timestamps: true,
