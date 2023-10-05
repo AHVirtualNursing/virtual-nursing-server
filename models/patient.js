@@ -94,10 +94,6 @@ const patientSchema = new mongoose.Schema(
         ref: "Report",
       },
     ],
-    smartWearable: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "SmartWearable",
-    },
   },
   {
     timestamps: true,
