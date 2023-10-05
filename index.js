@@ -8,6 +8,7 @@ const cors = require("cors");
 
 /* MIDDLEWARE IMPORTS */
 const passport = require("./middleware/passport");
+const configureSocket = require("./middleware/socket");
 
 /* ROUTES */
 const authRoutes = require("./routes/auth");
@@ -80,40 +81,4 @@ const server = app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
 
-const socket = require("socket.io");
-const io = socket(server, {
-  cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
-  },
-});
-
-const smartWatchConnections = new Map();
-const dashboardConnections = new Map();
-
-io.on("connection", (socket) => {
-  socket.on("connectSmartWatch", (watchId) => {
-    console.log(watchId);
-    // fetch patient id from watch
-    smartWatchConnections.set(watchId, socket);
-  });
-
-  socket.on("connectDashboard", (dashboardId) => {
-    dashboardConnections.set(dashboardId, socket);
-  });
-
-  socket.on("watchData", (vitals) => {
-    const patientId = vitals["patientId"];
-    const dashboardSocket = dashboardConnections.get(patientId);
-    if (dashboardSocket) {
-      dashboardSocket.emit("updateVitals", vitals);
-    } else {
-      console.log(`No dashboard found for patient ID ${patientId}`);
-    }
-  });
-
-  socket.on("disconnect", () => {
-    smartWatchConnections.delete(socket.id);
-    dashboardConnections.delete(socket.id);
-  });
-});
+configureSocket(server)
