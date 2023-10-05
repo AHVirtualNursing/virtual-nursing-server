@@ -4,7 +4,7 @@ const SmartBed = require("../models/smartbed");
 const Ward = require("../models/ward");
 const nurseStatusEnum = ["normal", "head"];
 
-const createNurse = async (req, res) => {
+const createNurse = async (req, res, session) => {
   try {
     const wardId = req.body.ward;
     const ward = Ward.findById(wardId);
@@ -23,8 +23,6 @@ const createNurse = async (req, res) => {
       ward: req.body.ward,
     });
 
-    await nurse.save();
-
     await Ward.findOneAndUpdate(
       { _id: wardId },
       { $push: { nurses: nurse._id } },
@@ -34,7 +32,7 @@ const createNurse = async (req, res) => {
       }
     );
 
-    res.status(200).json({ success: true, data: nurse });
+    return nurse;
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
