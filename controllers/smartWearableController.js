@@ -103,9 +103,7 @@ const updateSmartWearableById = async (req, res) => {
           .status(500)
           .json({ message: `Patient with ID: ${patient} not found` });
       }
-      incomingPatient.smartWearable = smartWearable;
       smartWearable.patient = patient;
-      await incomingPatient.save();
     }
     await smartWearable.save();
 
@@ -138,10 +136,6 @@ const unassignSmartWearableFromPatient = async (req, res) => {
     if (smartWearable.patient != undefined) {
       smartWearable.patient = undefined;
       await smartWearable.save();
-
-      const patient = await Patient.findOne({ smartWearable: { $in: [id] } });
-      patient.smartWearable = undefined;
-      await patient.save();
 
       res.status(200).json(smartWearable);
     } else {
