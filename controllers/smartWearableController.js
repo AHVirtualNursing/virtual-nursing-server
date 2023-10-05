@@ -5,6 +5,7 @@ const createSmartWearable = async (req, res) => {
   try {
     const smartWearable = new SmartWearable({
       name: req.body.name,
+      serialNumber: req.body.serialNumber,
     });
     await smartWearable.save();
 
@@ -34,9 +35,9 @@ const getSmartWearables = async (req, res) => {
               "patient"
             );
             if (!smartWearable) {
-              res
-                .status(500)
-                .json({ message: `cannot find any smart wearable with ID ${id}` });
+              res.status(500).json({
+                message: `cannot find any smart wearable with ID ${id}`,
+              });
             }
             return smartWearable;
           } else {
@@ -45,6 +46,11 @@ const getSmartWearables = async (req, res) => {
         })
       );
       res.status(200).json(smartWearables);
+    } else if (req.query.unassigned) {
+      const smartWearables = await SmartWearable.find({
+        patient: { $exists: false },
+      });
+      res.status(200).json({ success: true, data: smartWearables });
     } else {
       const smartWearables = await SmartWearable.find({}).populate("patient");
       res.status(200).json({ success: true, data: smartWearables });
@@ -76,13 +82,17 @@ const updateSmartWearableById = async (req, res) => {
     if (!smartWearable) {
       return res
         .status(500)
-        .json({ message: `cannot find any smart earable with ID ${id}` });
+        .json({ message: `cannot find any smart wearable with ID ${id}` });
     }
 
-    const { name, patient } = req.body;
+    const { name, serialNumber, patient } = req.body;
 
     if (name) {
-        smartWearable.name = name;
+      smartWearable.name = name;
+    }
+
+    if (serialNumber) {
+      smartWearable.serialNumber = serialNumber;
     }
 
     // dont call this unless testing
@@ -93,9 +103,12 @@ const updateSmartWearableById = async (req, res) => {
           .status(500)
           .json({ message: `Patient with ID: ${patient} not found` });
       }
+      incomingPatient.smartWearable = smartWearable;
       smartWearable.patient = patient;
+      await incomingPatient.save();
     }
     await smartWearable.save();
+
     res.status(200).json(smartWearable);
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -111,6 +124,36 @@ const updateSmartWearableById = async (req, res) => {
   }
 };
 
+const unassignSmartWearableFromPatient = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const smartWearable = await SmartWearable.findById(id);
+
+    if (!smartWearable) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any smart wearable with ID ${id}` });
+    }
+
+    if (smartWearable.patient != undefined) {
+      smartWearable.patient = undefined;
+      await smartWearable.save();
+
+      const patient = await Patient.findOne({ smartWearable: { $in: [id] } });
+      patient.smartWearable = undefined;
+      await patient.save();
+
+      res.status(200).json(smartWearable);
+    } else {
+      return res
+        .status(500)
+        .json({ message: `smart wearable does not have patient assigned` });
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
 const deleteSmartWearableById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -121,11 +164,9 @@ const deleteSmartWearableById = async (req, res) => {
         .json({ message: `cannot find any smart wearable with ID ${id}` });
     }
     if (smartWearable.patient) {
-      return res
-        .status(500)
-        .json({
-          message: `smartWearable with ID ${id} has a patient and cannot be deleted`,
-        });
+      return res.status(500).json({
+        message: `smartWearable with ID ${id} has a patient and cannot be deleted`,
+      });
     }
     await SmartWearable.deleteOne({ _id: id });
     res.status(200).json(smartWearable);
@@ -139,5 +180,6 @@ module.exports = {
   getSmartWearables,
   getSmartWearableById,
   updateSmartWearableById,
+  unassignSmartWearableFromPatient,
   deleteSmartWearableById,
 };
