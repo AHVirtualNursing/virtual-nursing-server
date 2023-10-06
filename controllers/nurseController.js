@@ -144,7 +144,7 @@ const updateNurseById = async (req, res) => {
         .json({ message: `cannot find any nurse with ID ${id}` });
     }
 
-    const { name, username, smartBeds, headNurse, nurseStatus } = req.body;
+    const { name, username, smartBeds, headNurse, nurseStatus, mobilePushNotificationToken } = req.body;
 
     if (name) {
       nurse.name = name;
@@ -160,6 +160,9 @@ const updateNurseById = async (req, res) => {
     }
     if (nurseStatus) {
       nurse.nurseStatus = nurseStatus;
+    }
+    if (mobilePushNotificationToken) {
+      nurse.mobilePushNotificationToken = mobilePushNotificationToken;
     }
 
     const updatedNurse = await nurse.save();
