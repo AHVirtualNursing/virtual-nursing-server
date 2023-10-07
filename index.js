@@ -8,6 +8,7 @@ const cors = require("cors");
 
 /* MIDDLEWARE IMPORTS */
 const passport = require("./middleware/passport");
+const configureSocket = require("./middleware/socket");
 
 /* ROUTES */
 const authRoutes = require("./routes/auth");
@@ -26,9 +27,10 @@ const userRoutes = require("./routes/user");
 const app = express();
 
 mongoose
-  .connect(process.env.MONGODB_URI, {
+  .connect(process.env.MONGODB_LOCAL_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    autoIndex: false
   })
   .then(() => {
     console.log("MongoDB connected");
@@ -36,6 +38,8 @@ mongoose
   .catch((error) => {
     console.error("Error connecting to MongoDB:", error);
   });
+
+
 
 /* MIDDLEWARE */
 app.use(bodyParser.json());
@@ -76,6 +80,8 @@ app.use("/vital", vitalRoutes);
 app.use("/user", userRoutes);
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
+
+configureSocket(server)

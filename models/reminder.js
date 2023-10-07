@@ -30,6 +30,10 @@ const reminderSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    interval: {
+      type: Number,
+      required: true
+    }
   },
   {
     timestamps: true,

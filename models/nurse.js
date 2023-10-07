@@ -34,6 +34,10 @@ const nurseSchema = new mongoose.Schema(
       ref: "Ward",
       default: null,
     },
+    mobilePushNotificationToken: {
+      type: String,
+      required: false,
+    }
   },
   {
     timestamps: true,

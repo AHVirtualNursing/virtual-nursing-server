@@ -4,7 +4,7 @@ const SmartBed = require("../models/smartbed");
 const Ward = require("../models/ward");
 const nurseStatusEnum = ["normal", "head"];
 
-const createNurse = async (req, res) => {
+const createNurse = async (req, res, session) => {
   try {
     const wardId = req.body.ward;
     const ward = Ward.findById(wardId);
@@ -23,18 +23,17 @@ const createNurse = async (req, res) => {
       ward: req.body.ward,
     });
 
-    await nurse.save();
-
     await Ward.findOneAndUpdate(
       { _id: wardId },
       { $push: { nurses: nurse._id } },
       {
         new: true,
         runValidators: true,
+        session
       }
     );
 
-    res.status(200).json({ success: true, data: nurse });
+    return nurse;
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
@@ -146,7 +145,7 @@ const updateNurseById = async (req, res) => {
         .json({ message: `cannot find any nurse with ID ${id}` });
     }
 
-    const { name, username, smartBeds, headNurse, nurseStatus } = req.body;
+    const { name, username, smartBeds, headNurse, nurseStatus, mobilePushNotificationToken } = req.body;
 
     if (name) {
       nurse.name = name;
@@ -162,6 +161,9 @@ const updateNurseById = async (req, res) => {
     }
     if (nurseStatus) {
       nurse.nurseStatus = nurseStatus;
+    }
+    if (mobilePushNotificationToken) {
+      nurse.mobilePushNotificationToken = mobilePushNotificationToken;
     }
 
     const updatedNurse = await nurse.save();
