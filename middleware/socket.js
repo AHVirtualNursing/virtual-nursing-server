@@ -22,9 +22,8 @@ const configureSocket = (server) => {
 
     socket.on("watchData", (vitals) => {
       const patientId = vitals["patientId"];
-      const dashboardSocket = dashboardConnections.get(
-        "651a8404d62a21c7687b89a8"
-      );
+      const dashboardSocket = dashboardConnections.get(patientId);
+
       if (dashboardSocket) {
         dashboardSocket.emit("updateVitals", vitals);
       } else {
