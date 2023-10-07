@@ -26,7 +26,7 @@ const configureSocket = (server) => {
       const dashboardSocket = dashboardConnections.get(patientId);
 
       const vitalsData = {
-        datetime: vitals["dateTime"],
+        datetime: vitals["datetime"],
         heartRate: vitals["heartRate"],
       };
 
