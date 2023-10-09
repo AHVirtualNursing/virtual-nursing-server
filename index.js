@@ -23,6 +23,8 @@ const wardRoutes = require("./routes/ward");
 const reportRoutes = require("./routes/report");
 const vitalRoutes = require("./routes/vital");
 const userRoutes = require("./routes/user");
+const { virtualNurse } = require("./models/webUser");
+const virtualNurseRoutes = require("./routes/virtualNurse");
 
 const app = express();
 
@@ -78,6 +80,7 @@ app.use("/ward", wardRoutes);
 app.use("/report", reportRoutes);
 app.use("/vital", vitalRoutes);
 app.use("/user", userRoutes);
+app.use("/virtualNurse", virtualNurseRoutes);
 
 const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, () => {
