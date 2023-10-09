@@ -6,7 +6,6 @@ const { virtualNurse} = require("../models/webUser");
 
 const createVirtualNurse = async (req, res) => {
     try {
-      
       const newVirtualNurse = new virtualNurse({
         name: req.body.name,
         username: req.body.username,
@@ -29,7 +28,7 @@ const createVirtualNurse = async (req, res) => {
     try{
         const { id } = req.params;
         const { name, wards } = req.body;
-        updateVirtualNurse = await virtualNurse.findById(id);
+        const updateVirtualNurse = await virtualNurse.findById(id);
         if (!updateVirtualNurse) {
             return res
               .status(500)
