@@ -3,17 +3,50 @@ const Patient = require("../models/patient");
 
 const addVitalForPatient = async (req, res) => {
   try {
-    const patient = await Patient.findById({ _id: req.body.patient }).populate(
-      "vital"
-    );
+    const {
+      patient,
+      datetime,
+      respRate,
+      heartRate,
+      bloodPressureSys,
+      bloodPressureDia,
+      spO2,
+      temperature,
+    } = req.body;
+
+    const vitalsData = {
+      datetime,
+      respRate,
+      heartRate,
+      bloodPressureSys,
+      bloodPressureDia,
+      spO2,
+      temperature,
+    };
+
+    const vital = await processVitalForPatient(patient, vitalsData);
+
+    res.status(200).json({ success: true, data: vital });
+  } catch (e) {
+    if (e.name === "ValidationError") {
+      const validationErrors = Object.values(e.errors).map((e) => e.message);
+      res.status(500).json({ validationErrors });
+    } else {
+      res.status(500).json({ error: e.message });
+    }
+  }
+};
+
+const processVitalForPatient = async (patientId, vitalsData) => {
+  try {
+    const patient = await Patient.findById(patientId).populate("vital");
     if (!patient) {
       return res.status(500).json({
         message: `cannot find any patient with Patient ID ${req.body.patient}`,
       });
     }
 
-    const vital = patient.vital;
-    console.log(vital);
+    let vital = patient.vital;
     if (!vital) {
       vital = new Vital({
         respRate: [],
@@ -27,61 +60,43 @@ const addVitalForPatient = async (req, res) => {
       patient.vital = vital;
       await patient.save();
     }
-    console.log(vital);
 
-    const {
-      datetime,
-      respRate,
-      heartRate,
-      bloodPressureSys,
-      bloodPressureDia,
-      spO2,
-      temperature,
-    } = req.body;
-    console.log(datetime);
     const vitalsReading = {
-      datetime: datetime,
-    }
+      datetime: vitalsData.datetime,
+    };
 
-    if (respRate) {
-      vitalsReading.reading = respRate;
-      console.log(vital.respRate);
+    if (vitalsData.respRate) {
+      vitalsReading.reading = vitalsData.respRate;
       vital.respRate.push(vitalsReading);
     }
-    if (heartRate) {
-      vitalsReading.reading = heartRate;
+    if (vitalsData.heartRate) {
+      vitalsReading.reading = vitalsData.heartRate;
       vital.heartRate.push(vitalsReading);
     }
-    if (bloodPressureSys) {
-      vitalsReading.reading = bloodPressureSys;
+    if (vitalsData.bloodPressureSys) {
+      vitalsReading.reading = vitalsData.bloodPressureSys;
       vital.bloodPressureSys.push(vitalsReading);
     }
-    if (bloodPressureDia) {
-      vitalsReading.reading = bloodPressureDia;
+    if (vitalsData.bloodPressureDia) {
+      vitalsReading.reading = vitalsData.bloodPressureDia;
       vital.bloodPressureDia.push(vitalsReading);
     }
-    if (spO2) {
-      vitalsReading.reading = spO2;
+    if (vitalsData.spO2) {
+      vitalsReading.reading = vitalsData.spO2;
       vital.spO2.push(vitalsReading);
     }
-    if (temperature) {
-      vitalsReading.temperature = temperature;
+    if (vitalsData.temperature) {
+      vitalsReading.temperature = vitalsData.temperature;
       vital.temperature.push(vitalsReading);
     }
 
     await vital.save();
-
     patient.vital = vital;
     await patient.save();
 
-    res.status(200).json({ success: true, data: vital });
-  } catch (e) {
-    if (e.name === "ValidationError") {
-      const validationErrors = Object.values(e.errors).map((e) => e.message);
-      res.status(500).json({ validationErrors });
-    } else {
-      res.status(500).json({ error: e.message });
-    }
+    return vital;
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -133,6 +148,7 @@ const getVitalById = async (req, res) => {
 
 module.exports = {
   addVitalForPatient,
+  processVitalForPatient,
   getVitals,
   getVitalById,
 };
