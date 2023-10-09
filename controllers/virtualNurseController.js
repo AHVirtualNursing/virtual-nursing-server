@@ -24,6 +24,28 @@ const createVirtualNurse = async (req, res) => {
     }
   };
 
+  const getVirtualNurseById = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const nurse = await virtualNurse.findById(id);
+
+      if (!nurse) {
+        return res
+          .status(500)
+          .json({ message: `cannot find any nurse with ID ${id}` });
+      }
+      res.status(200).json(nurse);
+      
+    } catch (e) {
+      if (e.name === "ValidationError") {
+        const validationErrors = Object.values(e.errors).map((e) => e.message);
+        return res.status(400).json({ validationErrors });
+      } else {
+        res.status(500).json({ success: false, error: e.message });
+      }
+    }
+  };
+
   const updateVirtualNurseWards = async (req, res) => {
     try{
         const { id } = req.params;
@@ -70,5 +92,6 @@ const createVirtualNurse = async (req, res) => {
 
   module.exports = {
     createVirtualNurse,
-    updateVirtualNurseWards
+    updateVirtualNurseWards,
+    getVirtualNurseById
   };

@@ -23,13 +23,12 @@ const wardRoutes = require("./routes/ward");
 const reportRoutes = require("./routes/report");
 const vitalRoutes = require("./routes/vital");
 const userRoutes = require("./routes/user");
-const { virtualNurse } = require("./models/webUser");
 const virtualNurseRoutes = require("./routes/virtualNurse");
 
 const app = express();
 
 mongoose
-  .connect(process.env.MONGODB_LOCAL_URI, {
+  .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     autoIndex: false
