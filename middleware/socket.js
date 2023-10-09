@@ -1,4 +1,5 @@
 const socket = require("socket.io");
+const vitalController = require("../controllers/vitalController");
 
 const configureSocket = (server) => {
   const io = socket(server, {
@@ -22,9 +23,15 @@ const configureSocket = (server) => {
 
     socket.on("watchData", (vitals) => {
       const patientId = vitals["patientId"];
-      const dashboardSocket = dashboardConnections.get(
-        "651a8404d62a21c7687b89a8"
-      );
+      const dashboardSocket = dashboardConnections.get(patientId);
+
+      const vitalsData = {
+        datetime: vitals["datetime"],
+        heartRate: vitals["heartRate"],
+      };
+
+      vitalController.processVitalForPatient(patientId, vitalsData);
+
       if (dashboardSocket) {
         dashboardSocket.emit("updateVitals", vitals);
       } else {
