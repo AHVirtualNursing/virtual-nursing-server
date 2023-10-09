@@ -5,7 +5,6 @@ const webUserSchema = new mongoose.Schema({}, { timestamps: true });
 
 const virtualNurseSchema = new mongoose.Schema(
   {
-    name: String,
     wards: [
       {
         type: mongoose.Schema.Types.ObjectId,
