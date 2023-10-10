@@ -23,7 +23,7 @@ const createVirtualNurse = async (req, res) => {
           .status(500)
           .json({ message: `cannot find any ward with ID ${wardId}` });
       }
-      
+
       ward.virtualNurse = newVirtualNurse._id;
       await ward.save();
     }
@@ -73,7 +73,7 @@ const updateVirtualNurseById = async (req, res) => {
 
     if (wards) {
       //unassign old wards
-      
+
       const oldWards = updateVirtualNurse.wards;
       for (let i = 0; i < oldWards.length; i++) {
         const ward = oldWards[i];
@@ -125,9 +125,29 @@ const updateVirtualNurseById = async (req, res) => {
   }
 };
 
+const getWardsByVirtualNurse = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const nurse = await virtualNurse.findById(id).populate("wards");
+    if (!nurse) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any virtual nurse with ID ${id}` });
+    }
+    res.status(200).json(nurse.wards);
+  } catch (e) {
+    if (e.name === "ValidationError") {
+      const validationErrors = Object.values(e.errors).map((e) => e.message);
+      return res.status(500).json({ validationErrors });
+    } else {
+      res.status(500).json({ message: e.message });
+    }
+  }
+};
+
 module.exports = {
   createVirtualNurse,
   updateVirtualNurseById,
   getVirtualNurseById,
-    getWardsByVirtualNurse,};
-
+  getWardsByVirtualNurse,
+};
