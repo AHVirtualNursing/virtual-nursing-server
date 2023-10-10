@@ -2,6 +2,7 @@ const Ward = require("../models/ward");
 const SmartBed = require("../models/smartbed");
 const Nurse = require("../models/nurse");
 const { getBedsPerRoom } = require("../helper/ward");
+const { virtualNurse } = require("../models/webUser");
 
 const createWard = async (req, res) => {
   try {
@@ -261,6 +262,52 @@ const assignNurseToWard = async (req, res) => {
   }
 };
 
+const assignVirtualNurseToWard = async (req, res) => {
+  try {
+  const { id } = req.params;
+    const ward = await Ward.findById(id);
+    if (!ward) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any ward with ID ${id}` });
+    }
+
+    const virtualNurseId = req.body.virtualNurse;
+    const virtualNurseInstance = await virtualNurse.findById(virtualNurseId).populate("wards");
+    if (!virtualNurseInstance) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any virtual nurse with ID ${virtualNurseId}` });
+    }
+
+    virtualNurseInstance.wards.push(id);
+    await virtualNurseInstance.save();
+
+    const prevVirtualNurse = ward.virtualNurse;
+
+    await virtualNurse.findOneAndUpdate(
+      { _id: prevVirtualNurse },
+      { $pull: { wards: id } },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    const updatedWard = await Ward.findOneAndUpdate(
+      { _id: id },
+      { virtualNurse: virtualNurseId },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    res.status(200).json(updatedWard);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+}
+
 const deleteWardById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -295,5 +342,6 @@ module.exports = {
   assignSmartBedsToWard,
   updateWardById,
   assignNurseToWard,
+  assignVirtualNurseToWard,
   deleteWardById,
 };
