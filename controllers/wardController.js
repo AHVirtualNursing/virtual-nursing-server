@@ -273,11 +273,16 @@ const assignVirtualNurseToWard = async (req, res) => {
     }
 
     const virtualNurseId = req.body.virtualNurse;
-    const virtualNurseInstance = await virtualNurse.findById(virtualNurseId).populate("wards");
+    const virtualNurseInstance = await virtualNurse.findById(virtualNurseId);
     if (!virtualNurseInstance) {
       return res
         .status(500)
         .json({ message: `cannot find any virtual nurse with ID ${virtualNurseId}` });
+    }
+    if (virtualNurseInstance.wards.length > 1) {
+      return res
+        .status(500)
+        .json({ message: `virtual nurse with ID ${virtualNurseId} cannot be assigned more than 2 wards` });
     }
 
     virtualNurseInstance.wards.push(id);
