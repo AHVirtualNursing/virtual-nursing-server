@@ -125,6 +125,40 @@ const updateVirtualNurseById = async (req, res) => {
   }
 };
 
+
+const unassignVirtualNurseFromWard = async (req, res) => {
+  try {
+    const { virtualNurseId, wardId } = req.params;
+    const virtualNurseInstance = await virtualNurse.findById(virtualNurseId);
+    if (!virtualNurseInstance ) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any virtual nurse with ID ${virtualNurseId}` });
+    }
+
+    virtualNurseInstance.wards.pull(wardId);
+    const updatedVirtualNurse = await virtualNurseInstance.save();
+    
+    const ward = await Ward.findById(wardId);
+    if (!ward) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any ward with ID ${wardId}` });
+    }
+    ward.virtualNurse = undefined;
+    await ward.save();
+
+    res.status(200).json(updatedVirtualNurse);
+  } catch (e) {
+    if (e.name === "ValidationError") {
+      const validationErrors = Object.values(e.errors).map((e) => e.message);
+      return res.status(500).json({ validationErrors });
+    } else {
+      res.status(500).json({ message: e.message });
+    }
+  }
+}
+
 const getWardsByVirtualNurse = async (req, res) => {
   try {
     const { id } = req.params;
@@ -149,5 +183,6 @@ module.exports = {
   createVirtualNurse,
   updateVirtualNurseById,
   getVirtualNurseById,
+  unassignVirtualNurseFromWard,
   getWardsByVirtualNurse,
 };
