@@ -90,8 +90,33 @@ const createVirtualNurse = async (req, res) => {
     }
   }
 
+  const getWardsByVirtualNurse = async (req, res) => {
+
+    try {
+      const { id } = req.params;
+      const nurse = await virtualNurse.findById(id).populate('wards');
+      if (!nurse) {
+          return res
+            .status(500)
+            .json({ message: `cannot find any virtual nurse with ID ${id}` });
+      }
+      res.status(200).json(nurse.wards);
+  } catch(e){
+    if (e.name === "ValidationError") {
+        const validationErrors = Object.values(e.errors).map((e) => e.message);
+        return res.status(500).json({ validationErrors });
+      } else {
+        res.status(500).json({ message: e.message });
+    }
+  }
+}
+
+  
+
+
   module.exports = {
     createVirtualNurse,
     updateVirtualNurseWards,
-    getVirtualNurseById
+    getVirtualNurseById,
+    getWardsByVirtualNurse
   };
