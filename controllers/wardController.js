@@ -35,8 +35,18 @@ const createWard = async (req, res) => {
 
 const getWards = async (req, res) => {
   try {
-    const wards = await Ward.find({});
-    res.status(200).json({ success: true, data: wards });
+    if (req.query.unassigned) {
+      if (req.query.unassigned == "true") {
+        const wards = await Ward.find({ virtualNurse: { $exists: false } });
+        res.status(200).json({ success: true, data: wards });
+      } else {
+        const wards = await Ward.find({ virtualNurse: { $exists: true } });
+        res.status(200).json({ success: true, data: wards });
+      }
+    } else {
+      const wards = await Ward.find({});
+      res.status(200).json({ success: true, data: wards });
+    }
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
