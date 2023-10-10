@@ -56,7 +56,7 @@ const getWards = async (req, res) => {
 const getWardById = async (req, res) => {
   try {
     const { id } = req.params;
-    const ward = await Ward.findById(id);
+    const ward = await Ward.findById(id).populate('virtualNurse');
     if (!ward) {
       return res
         .status(500)
