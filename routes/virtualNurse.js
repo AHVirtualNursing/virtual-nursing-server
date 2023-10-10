@@ -6,5 +6,6 @@ router.post("/", VirtualNurse.createVirtualNurse)
 router.put("/:id", VirtualNurse.updateVirtualNurseById);
 router.get("/:id", VirtualNurse.getVirtualNurseById);
 router.get("/:id/wards", VirtualNurse.getWardsByVirtualNurse);
+router.put("/:virtualNurseId/ward/:wardId", VirtualNurse.unassignVirtualNurseFromWard);
 
 module.exports = router;
