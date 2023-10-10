@@ -17,7 +17,7 @@ router.post(
     body("email").trim().isEmail().normalizeEmail().escape(),
   ],
 
-
+  
   async (req, res) => {
     const errors = validationResult(req);
 
@@ -31,10 +31,10 @@ router.post(
     const userType = req.headers["x-usertype"];
     const userModel = getUserModel(userType);
 
-    const { username, email } = req.body;
+    const { name, username, email } = req.body;
 
     const existingUser = await userModel.findOne({ email });
-
+    
     if (existingUser) {
       return res.status(400).json({ message: "Email already registered" });
     }
@@ -55,7 +55,7 @@ router.post(
       } else if (userType == "virtual-nurse") {
         newUser = await VirtualNurseController.createVirtualNurse(req, res);
       } else {
-        newUser = new userModel({ username, email, password });
+        newUser = new userModel({ name, username, email, password });
       }
       await newUser.save({ session });
       await sendWelcomeEmail(email, username, password);

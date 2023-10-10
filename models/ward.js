@@ -32,11 +32,19 @@ const wardSchema = new mongoose.Schema(
         ref: "Nurse",
       },
     ],
+    virtualNurse:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "VirtualNurse"
+    },
     beds: [
       {
         type: Number,
       },
     ],
+    virtualNurse: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "virtualNurse",
+    },
   },
   {
     timestamps: true,
