@@ -19,6 +19,52 @@ const infoLog = new mongoose.Schema({
   },
 });
 
+const layoutSchema = new mongoose.Schema({
+  i: {
+    type: String,
+    required: true
+  },
+  x: {
+    type: Number,
+    required: true
+  },
+  y: {
+    type: Number,
+    required: true
+  },
+  w: {
+    type: Number,
+    required: true
+  },
+  h: {
+    type: Number,
+    required: true
+  },
+  minW: {
+    type: Number,
+    required: true
+  },
+  minH: {
+    type: Number,
+    required: true
+  },
+});
+
+const layout = new mongoose.Schema({
+  lg: [layoutSchema]
+})
+
+const defaultLayout = {
+  lg: [
+    { i: "rr", x: 0, y: 0, w: 4, h: 4, minW: 2, minH: 2 },
+    { i: "hr", x: 4, y: 0, w: 4, h: 4, minW: 2, minH: 2 },
+    { i: "o2", x: 8, y: 0, w: 4, h: 4, minW: 2, minH: 2 },
+    { i: "bp", x: 0, y: 1, w: 4, h: 4, minW: 2, minH: 2 },
+    { i: "tp", x: 4, y: 1, w: 4, h: 4, minW: 2, minH: 2 },
+    { i: "alerts", x: 8, y: 1, w: 4, h: 4, minW: 3, minH: 3 },
+  ]
+}
+
 const patientSchema = new mongoose.Schema(
   {
     name: {
@@ -94,6 +140,10 @@ const patientSchema = new mongoose.Schema(
         ref: "Report",
       },
     ],
+    layout: {
+      type: layout,
+      default: defaultLayout
+    }
   },
   {
     timestamps: true,
