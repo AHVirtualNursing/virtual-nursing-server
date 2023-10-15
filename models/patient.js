@@ -59,9 +59,10 @@ const defaultLayout = {
     { i: "rr", x: 0, y: 0, w: 4, h: 4, minW: 2, minH: 2 },
     { i: "hr", x: 4, y: 0, w: 4, h: 4, minW: 2, minH: 2 },
     { i: "o2", x: 8, y: 0, w: 4, h: 4, minW: 2, minH: 2 },
-    { i: "bp", x: 0, y: 1, w: 4, h: 4, minW: 2, minH: 2 },
-    { i: "tp", x: 4, y: 1, w: 4, h: 4, minW: 2, minH: 2 },
-    { i: "alerts", x: 8, y: 1, w: 4, h: 4, minW: 3, minH: 3 },
+    { i: "bpDia", x: 0, y: 1, w: 4, h: 4, minW: 2, minH: 2 },
+    { i: "bpSys", x: 4, y: 1, w: 4, h: 4, minW: 2, minH: 2 },
+    { i: "tp",  x: 8, y: 1, w: 4, h: 4, minW: 2, minH: 2  },
+    { i: "alerts", x: 0, y: 2, w: 12, h: 4, minW: 3, minH: 3 },
   ]
 }
 
