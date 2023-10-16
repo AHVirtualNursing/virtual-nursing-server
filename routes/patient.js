@@ -8,6 +8,7 @@ router.get("/", Patient.getPatients);
 router.get("/:id", Patient.getPatientById);
 router.get("/:id/alerts", Patient.getAlertsByPatientId);
 router.get("/:id/reminders", Patient.getRemindersByPatientId);
+router.get("/:id/nurses", Patient.getNursesByPatientId);
 router.get("/:id/vital", Patient.getVitalByPatientId);
 router.post("/", Patient.createPatient);
 router.put("/:id", Patient.updatePatientById);
