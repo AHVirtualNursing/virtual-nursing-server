@@ -2,11 +2,6 @@ const schedule = require('node-schedule');
 const Reminder = require('../models/reminder'); 
 const pushNotification = require('./pushNotification');
 const patientController = require("../controllers/patientController");
-const Patient = require("../models/patient");
-const Nurse = require("../models/nurse");
-const SmartBed = require("../models/smartbed");
-
-
 
 const reminderJob = schedule.scheduleJob('* * * * * ', async () => {
 
@@ -17,8 +12,24 @@ const reminderJob = schedule.scheduleJob('* * * * * ', async () => {
         for(const reminder of dueReminders) {
             
             const patient = reminder.patient;
-            const nurses = await getNursesByPatientId(patient);
+            const req = { params: { id: patient } };
+            const res = {
+              statusCode: null, 
+              jsonData: null, 
+              status: function (code) {
+                this.statusCode = code;
+                return this; 
+              },
+              json: function (data) {
+                this.jsonData = data;
+                //console.log(`Status ${this.statusCode}:`, this.jsonData);
+                return this; 
+              },
+            };
             
+            await patientController.getNursesByPatientId(req, res);
+            const nurses = res.jsonData;
+
             for(const nurse of nurses){
 
                 await pushNotification.sendPushNotification(nurse.mobilePushNotificationToken, "Reminder", reminder.content);
@@ -74,28 +85,6 @@ const reminderJob = schedule.scheduleJob('* * * * * ', async () => {
     } catch (error) {
       console.error('Error updating reminder scheduled time:', error);
       throw error; 
-    }
-  }
-
-  const getNursesByPatientId = async (id) => {
-    try {
-      // const { id } = req.params;
-      const patient = await Patient.findById(id);
-      if (!patient) {
-        throw error();
-      }
-      console.log(patient)
-      const bed = await SmartBed.findOne({ patient: id });
-  
-      if (!bed) {
-        throw error();
-      }
-      console.log(bed)
-      const nurses = await Nurse.find({ smartBeds: bed._id });
-      console.log(nurses)
-      return nurses;
-    } catch (e) {
-      console.log(e.message)
     }
   }
 
