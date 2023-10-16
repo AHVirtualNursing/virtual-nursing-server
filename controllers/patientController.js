@@ -355,7 +355,7 @@ const getNursesByPatientId = async (req, res) => {
       return res.status(500).json({ message: 'Bed not found for the patient' });
     }
     
-    const nurses = await Nurse.find({ beds: bed._id });
+    const nurses = await Nurse.find({ smartBeds: bed._id });
     res.status(200).json(nurses);
   } catch (e) {
     console.error(e);
@@ -371,6 +371,7 @@ module.exports = {
   getAlertsByPatientId,
   getRemindersByPatientId,
   getVitalByPatientId,
+  getNursesByPatientId,
   updatePatientById,
   dischargePatientById,
   admitPatientById,
