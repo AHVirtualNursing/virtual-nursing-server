@@ -22,6 +22,7 @@ const configureSocket = (server) => {
     });
 
     socket.on("watchData", (vitals) => {
+      console.log(vitals);
       const patientId = vitals["patientId"];
       const dashboardSocket = dashboardConnections.get(patientId);
 

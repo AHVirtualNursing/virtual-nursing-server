@@ -24,14 +24,15 @@ const reportRoutes = require("./routes/report");
 const vitalRoutes = require("./routes/vital");
 const userRoutes = require("./routes/user");
 const virtualNurseRoutes = require("./routes/virtualNurse");
+const { simulatePatient } = require("./scripts/simulate-patient");
 
 const app = express();
 
 mongoose
-  .connect(process.env.MONGODB_URI, {
+  .connect(process.env.MONGODB_LOCAL_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    autoIndex: false
+    autoIndex: false,
   })
   .then(() => {
     console.log("MongoDB connected");
@@ -39,8 +40,6 @@ mongoose
   .catch((error) => {
     console.error("Error connecting to MongoDB:", error);
   });
-
-
 
 /* MIDDLEWARE */
 app.use(bodyParser.json());
@@ -86,4 +85,5 @@ const server = app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
 
-configureSocket(server)
+configureSocket(server);
+simulatePatient();
