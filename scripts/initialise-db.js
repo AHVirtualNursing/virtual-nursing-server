@@ -3,13 +3,13 @@ const Patient = require("../models/patient");
 
 const SERVER_URL = "http://localhost:3001";
 
-async function callApiRequest(url, method, data) {
+async function callApiRequest(url, method, data, clientType) {
   const config = {
     method: method,
     url: url,
     headers: {
       "Content-Type": "application/json",
-      "X-UserType": "mobile",
+      "X-UserType": clientType ? clientType : "",
     },
     data: "",
   };
@@ -52,18 +52,32 @@ async function initialiseDb() {
       numRooms: 2,
     });
 
-    const nurseId = await callApiRequest(`${SERVER_URL}/auth/register`, "POST", {
-      username: "nurse",
-      email: "nurse@gmail.com",
-      name: "nurse",
-      nurseStatus: "head",
-      ward: wardId,
-    });
+    const nurseId = await callApiRequest(
+      `${SERVER_URL}/auth/register`,
+      "POST",
+      {
+        username: "nurse",
+        email: "nurse@gmail.com",
+        name: "nurse",
+        nurseStatus: "head",
+        ward: wardId,
+      },
+      "mobile"
+    );
 
-    /* create and assign smart bed to patient */
+    /* create and assign smart bed to ward and patient */
     const smartBedId = await callApiRequest(`${SERVER_URL}/smartbed`, "POST", {
       name: "smart bed 1",
     });
+
+    callApiRequest(
+      `${SERVER_URL}/ward/${wardId}/smartbed/${smartBedId}`,
+      "PUT",
+      {
+        roomNum: 1,
+        bedNum: 1,
+      }
+    );
 
     callApiRequest(`${SERVER_URL}/smartbed/${smartBedId}`, "PUT", {
       patient: patientId,
@@ -97,6 +111,31 @@ async function initialiseDb() {
         patient: patientId,
       }
     );
+
+    /* create it admin and virtual nurse */
+    await callApiRequest(
+      `${SERVER_URL}/auth/register?default=true`,
+      "POST",
+      {
+        name: "itadmin",
+        username: "itadmin",
+        email: "itadmin@gmail.com",
+      },
+      "it-admin"
+    );
+
+    await callApiRequest(
+      `${SERVER_URL}/auth/register?default=true`,
+      "POST",
+      {
+        name: "virtualnurse",
+        username: "virtualnurse",
+        email: "virtualnurse@gmail.com",
+        wards: [wardId],
+      },
+      "virtual-nurse"
+    );
+
     return patientId;
   }
 }

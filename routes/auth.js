@@ -38,15 +38,19 @@ router.post(
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    const password = generator.generate({
+    let password = generator.generate({
       length: 8,
       numbers: true,
       symbols: true,
       excludeSimilarCharacters: true,
       strict: true,
     });
-
-    req.body.password = password;
+    if (req.query.default) {
+      req.body.password = "password";
+      password = "password";
+    } else {
+      req.body.password = password;
+    }
     try {
       let newUser;
       if (userType == "mobile") {
@@ -55,6 +59,9 @@ router.post(
         newUser = await VirtualNurseController.createVirtualNurse(req, res);
       } else {
         newUser = new userModel({ name, username, email, password });
+      }
+      if (req.query.default) {
+        newUser.passwordReset = true;
       }
       await newUser.save({ session });
       await sendWelcomeEmail(email, username, password);
