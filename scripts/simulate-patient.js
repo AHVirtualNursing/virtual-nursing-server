@@ -52,9 +52,12 @@ function sendVitals(patientId, type) {
 
 async function simulatePatient() {
   const vitalType = process.argv.slice(2)[0];
+  let patientId = process.argv.slice(2)[1];
 
   if (vitalType) {
-    const patientId = await initialiseDb();
+    if (!patientId) {
+      patientId = await initialiseDb();
+    }
     socket.emit("connectSmartWatch", patientId);
     sendVitals(patientId, vitalType);
   }

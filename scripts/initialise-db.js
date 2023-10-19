@@ -20,6 +20,7 @@ async function callApiRequest(url, method, data, clientType) {
     const response = await axios(config);
 
     if (response.status == 200 || 201) {
+      console.log(`${url} ${method} request successful.`);
       console.log(response.data);
 
       if (method == "POST") {
