@@ -1,7 +1,14 @@
+const mongoose = require("mongoose");
+require("dotenv").config();
 const axios = require("axios");
 const Patient = require("../models/patient");
 
 const SERVER_URL = "http://localhost:3001";
+mongoose.connect(process.env.MONGODB_LOCAL_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  autoIndex: false,
+});
 
 async function callApiRequest(url, method, data, clientType) {
   const config = {

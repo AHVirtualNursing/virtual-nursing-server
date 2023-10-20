@@ -1,6 +1,5 @@
 const { io } = require("socket.io-client");
-const Patient = require("../models/patient");
-const { initialiseDb } = require("./initialise-db");
+const { initialiseDb } = require("./initialiseDb");
 const SERVER_URL = "http://localhost:3001";
 
 const socket = io(SERVER_URL);
@@ -50,7 +49,7 @@ function sendVitals(patientId, type) {
   }, 2000);
 }
 
-async function simulatePatient() {
+async function simulatePatientVitals() {
   const arguments = process.argv.slice(2);
   const vitalType = arguments[0];
   let patientId = arguments[1];
@@ -67,5 +66,4 @@ async function simulatePatient() {
   }
 }
 
-simulatePatient();
-
+simulatePatientVitals();
