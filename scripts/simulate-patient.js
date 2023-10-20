@@ -51,8 +51,9 @@ function sendVitals(patientId, type) {
 }
 
 async function simulatePatient() {
-  const vitalType = process.argv.slice(2)[0];
-  let patientId = process.argv.slice(2)[1];
+  const arguments = process.argv.slice(2);
+  const vitalType = arguments[0];
+  let patientId = arguments[1];
 
   if (vitalType) {
     if (!patientId) {
@@ -60,9 +61,11 @@ async function simulatePatient() {
     }
     socket.emit("connectSmartWatch", patientId);
     sendVitals(patientId, vitalType);
+  } else {
+    console.error("No patient vital argument provided");
+    process.exit(1);
   }
 }
 
-module.exports = {
-  simulatePatient,
-};
+simulatePatient();
+

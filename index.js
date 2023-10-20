@@ -24,7 +24,6 @@ const reportRoutes = require("./routes/report");
 const vitalRoutes = require("./routes/vital");
 const userRoutes = require("./routes/user");
 const virtualNurseRoutes = require("./routes/virtualNurse");
-const { simulatePatient } = require("./scripts/simulate-patient");
 
 const app = express();
 
@@ -86,4 +85,4 @@ const server = app.listen(PORT, () => {
 });
 
 configureSocket(server);
-simulatePatient();
+
