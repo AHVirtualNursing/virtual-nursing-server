@@ -2,7 +2,6 @@ const { io } = require("socket.io-client");
 const { initialiseDb } = require("./initialiseDb");
 const SERVER_URL = "http://localhost:3001";
 
-
 async function simulatePatientVitals() {
   const socket = io(SERVER_URL);
   const arguments = process.argv.slice(2);
@@ -25,21 +24,29 @@ async function simulatePatientVitals() {
     return values.map((value) => ({
       patientId: patientId,
       [type]: value,
-      datetime: getCurrentFormattedDatetime(),
     }));
   }
 
-  function sendVitals() {
+  function sendVitals(vitalType) {
     // hr 60-100bpm
     // rr 16-20
-    // bp 120/80
+    // bp 90-120/60-80
     // spo2 >= 95%
     const vitals = {
-      hr: generateVitalData("heartRate", [90, 96, 102, 105]),
+      hr: generateVitalData(
+        "heartRate",
+        [66, 76, 85, 90, 102, 115, 100, 95, 70, 55]
+      ),
       rr: generateVitalData("respRate", [17, 19, 21, 21]),
-      spo2: generateVitalData("spO2", [96, 95, 94, 93]),
-      bps: generateVitalData("bloodPressureSys", [115, 117, 121, 123]),
-      bpd: generateVitalData("bloodPressureDia", [76, 79, 82, 83]),
+      spo2: generateVitalData("spO2", [96, 95, 94, 93, 92, 92, 93, 95, 96, 95]),
+      bps: generateVitalData(
+        "bloodPressureSys",
+        [90, 100, 114, 120, 126, 120, 110, 89, 75, 73]
+      ),
+      bpd: generateVitalData(
+        "bloodPressureDia",
+        [76, 79, 82, 86, 90, 80, 74, 60, 54, 57]
+      ),
     };
 
     let index = 0;
@@ -48,13 +55,16 @@ async function simulatePatientVitals() {
         vitalType === "bp" &&
         (index < vitals["bps"].length || index < vitals["bpd"].length)
       ) {
-        const bps = vitals["bps"][index];
-        const bpd = vitals["bpd"][index];
-        socket.emit("watchData", bps);
-        socket.emit("watchData", bpd);
+        const bpsVital = vitals["bps"][index];
+        const bpdVital = vitals["bpd"][index];
+        bpsVital.datetime = getCurrentFormattedDatetime();
+        bpdVital.datetime = getCurrentFormattedDatetime();
+        socket.emit("watchData", bpsVital);
+        socket.emit("watchData", bpdVital);
         index++;
       } else if (vitals[vitalType] && index < vitals[vitalType].length) {
         const vital = vitals[vitalType][index];
+        vital.datetime = getCurrentFormattedDatetime();
         socket.emit("watchData", vital);
         index++;
       } else {
@@ -68,6 +78,17 @@ async function simulatePatientVitals() {
       patientId = await initialiseDb();
     }
     socket.emit("connectSmartWatch", patientId);
+
+    if (vitalType == "all") {
+      sendVitals("hr");
+      setTimeout(() => {
+        sendVitals("spo2");
+      }, 100);
+      setTimeout(() => {
+        sendVitals("bp");
+      }, 200);
+    }
+
     sendVitals(vitalType);
   } else {
     console.error("No patient vital argument provided");
