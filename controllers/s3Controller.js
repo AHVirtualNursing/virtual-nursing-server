@@ -11,7 +11,8 @@ const uploadFile = async (req, res) => {
     }
 
     const file = req.file;
-    const destinationKey = "uploads/" + file.originalname;
+    const filename = Date.now() + "-" + file.originalname;
+    const destinationKey = "uploads/" + filename;
 
     const command = new PutObjectCommand({
       Bucket: bucket,
