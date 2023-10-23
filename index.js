@@ -24,6 +24,7 @@ const reportRoutes = require("./routes/report");
 const vitalRoutes = require("./routes/vital");
 const userRoutes = require("./routes/user");
 const virtualNurseRoutes = require("./routes/virtualNurse");
+const s3Routes = require("./routes/s3");
 
 const app = express();
 
@@ -31,7 +32,7 @@ mongoose
   .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    autoIndex: false
+    autoIndex: false,
   })
   .then(() => {
     console.log("MongoDB connected");
@@ -39,8 +40,6 @@ mongoose
   .catch((error) => {
     console.error("Error connecting to MongoDB:", error);
   });
-
-
 
 /* MIDDLEWARE */
 app.use(bodyParser.json());
@@ -80,6 +79,7 @@ app.use("/report", reportRoutes);
 app.use("/vital", vitalRoutes);
 app.use("/user", userRoutes);
 app.use("/virtualNurse", virtualNurseRoutes);
+app.use("/s3", s3Routes);
 
 const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, () => {
