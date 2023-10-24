@@ -26,7 +26,11 @@ const userRoutes = require("./routes/user");
 const virtualNurseRoutes = require("./routes/virtualNurse");
 const s3Routes = require("./routes/s3");
 
+/*PUSH NOTIFICATIONS */
+const reminderJob = require("./helper/reminderNotification");
+
 const app = express();
+
 
 mongoose
   .connect(process.env.MONGODB_URI, {

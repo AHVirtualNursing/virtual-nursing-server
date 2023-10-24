@@ -5,6 +5,7 @@ const SmartBed = require("../models/smartbed");
 const SmartWearable = require("../models/smartWearable");
 const bedStatusEnum = ["occupied", "vacant"];
 const Reminder = require("../models/reminder");
+const Nurse = require("../models/nurse");
 
 const createPatient = async (req, res) => {
   try {
@@ -342,6 +343,30 @@ const deletePatientById = async (req, res) => {
   }
 };
 
+const getNursesByPatientId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findById(id);
+    if (!patient) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any patient with ID ${id}` });
+    }
+
+    const bed = await SmartBed.findOne({ patient: id });
+
+    if (!bed) {
+      return res.status(500).json({ message: 'Bed not found for the patient' });
+    }
+    
+    const nurses = await Nurse.find({ smartBeds: bed._id });
+    res.status(200).json(nurses);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: e.message });
+  }
+}
+
 module.exports = {
   createPatient,
   getPatients,
@@ -350,8 +375,10 @@ module.exports = {
   getAlertsByPatientId,
   getRemindersByPatientId,
   getVitalByPatientId,
+  getNursesByPatientId,
   updatePatientById,
   dischargePatientById,
   admitPatientById,
   deletePatientById,
+  getNursesByPatientId
 };
