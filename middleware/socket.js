@@ -32,6 +32,8 @@ const configureSocket = (server) => {
         bloodPressureSys: vitals["bloodPressureSys"],
         bloodPressureDia: vitals["bloodPressureDia"],
         spO2: vitals["spO2"],
+        temperature: vitals["temperature"],
+        respRate: vitals["respRate"],
       };
 
       vitalController.processVitalForPatient(patientId, vitalsData);

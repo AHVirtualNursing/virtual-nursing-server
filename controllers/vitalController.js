@@ -86,8 +86,12 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       vital.spO2.push(vitalsReading);
     }
     if (vitalsData.temperature) {
-      vitalsReading.temperature = vitalsData.temperature;
+      vitalsReading.reading = vitalsData.temperature;
       vital.temperature.push(vitalsReading);
+    }
+    if (vitalsData.respRate) {
+      vitalsReading.reading = vitalsData.respRate;
+      vital.respRate.push(vitalsReading);
     }
 
     await vital.save();

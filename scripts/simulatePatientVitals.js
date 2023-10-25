@@ -28,17 +28,15 @@ async function simulatePatientVitals() {
   }
 
   function sendVitals(vitalType) {
-    // hr 60-100bpm
-    // rr 16-20
-    // bp 90-120/60-80
-    // spo2 >= 95%
+    /* THRESHOLDS */
+    // hr: 60-100bpm, rr: 16-20, bp: 90-120/60-80, spo2 >= 95%, temperature: 36.2 - 37.2, respiratoryRate: 12-18 bpm
     const vitals = {
       hr: generateVitalData(
         "heartRate",
         [66, 76, 85, 90, 102, 115, 100, 95, 70, 55]
       ),
       rr: generateVitalData("respRate", [17, 19, 21, 21]),
-      spo2: generateVitalData("spO2", [96, 95, 94, 93, 92, 92, 93, 95, 96, 95]),
+      spo2: generateVitalData("spO2", [96, 95, 97, 97, 96, 95, 93, 95, 96, 95]),
       bps: generateVitalData(
         "bloodPressureSys",
         [90, 100, 114, 120, 126, 120, 110, 89, 75, 73]
@@ -46,6 +44,14 @@ async function simulatePatientVitals() {
       bpd: generateVitalData(
         "bloodPressureDia",
         [76, 79, 82, 86, 90, 80, 74, 60, 54, 57]
+      ),
+      temp: generateVitalData(
+        "temperature",
+        [36.2, 36.5, 36.7, 37.0, 37.2, 37.5, 38.2, 37.3, 36.2, 35.9]
+      ),
+      rr: generateVitalData(
+        "respRate",
+        [12, 16, 18, 19, 20, 18, 15, 12, 10, 11]
       ),
     };
 
@@ -87,6 +93,12 @@ async function simulatePatientVitals() {
       setTimeout(() => {
         sendVitals("bp");
       }, 200);
+      setTimeout(() => {
+        sendVitals("temp");
+      }, 300);
+      setTimeout(() => {
+        sendVitals("rr");
+      }, 400);
     }
 
     sendVitals(vitalType);
