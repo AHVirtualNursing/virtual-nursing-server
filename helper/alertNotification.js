@@ -1,7 +1,8 @@
 const patientController = require("../controllers/patientController");
 
-async function sendAlert(alert) {
+const sendAlert = async(alert) => {
     try{
+        console.log(1);
         const patient = alert.patient;
         const req = { params: { id: patient } };
         const res = {
@@ -19,10 +20,10 @@ async function sendAlert(alert) {
 
         await patientController.getNursesByPatientId(req, res);
         const nurses = res.jsonData;
-
+        console.log(nurses);
         for(const nurse of nurses){
-
             await pushNotification.sendPushNotification(nurse.mobilePushNotificationToken, "Alert", alert.description);
+            console.log("sending alert mobile");
         }
 
     }catch (error) {

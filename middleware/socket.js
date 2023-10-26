@@ -63,11 +63,11 @@ const configureSocket = (server) => {
           return this; 
         },
       };
-
+      console.log(alert + "send to vn");
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
       const alertSocket = alertConnections.get(virtualNurse._id)
-
+      console.log(alertSocket);
       if(alertSocket){
         alertSocket.emit("alertIncoming", alert);
       }

@@ -5,6 +5,7 @@ const AlertConfig = require("../models/alertConfig");
 
 const addVitalForPatient = async (req, res) => {
   try {
+    console.log(req.body.patient)
     const {
       patient,
       datetime,
@@ -97,7 +98,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     const vitalsReading = {
       datetime: vitalsData.datetime,
     };
-
+    console.log(vitalsData);
     if (vitalsData.respRate) {
       vitalsReading.reading = vitalsData.respRate;
       vital.respRate.push(vitalsReading);
@@ -115,11 +116,12 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       vitalsReading.reading = vitalsData.heartRate;
       vital.heartRate.push(vitalsReading);
 
-      if(vitalsData.respRate < alertConfig.hrConfig[0] || vitalsData.respRate > alertConfig.hrConfig[1]){
-        if(vitalsData.respRate < alertConfig.hrConfig[0]){
+      if(vitalsData.heartRate < alertConfig.hrConfig[0] || vitalsData.heartRate > alertConfig.hrConfig[1]){
+        if(vitalsData.heartRate < alertConfig.hrConfig[0]){
           request.body.description = request.body.description + "Heart rate has fallen below threshold" + "\n"
         } else {
           request.body.description = request.body.description + "Heart rate has risen above threshold" + "\n"
+          
         }
       }
     }
@@ -127,8 +129,8 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       vitalsReading.reading = vitalsData.bloodPressureSys;
       vital.bloodPressureSys.push(vitalsReading);
 
-      if(vitalsData.respRate < alertConfig.bpSysConfig[0] || vitalsData.respRate > alertConfig.bpSysConfig[1]){
-        if(vitalsData.respRate < alertConfig.bpSysConfig[0]){
+      if(vitalsData.bloodPressureSys < alertConfig.bpSysConfig[0] || vitalsData.bloodPressureSys > alertConfig.bpSysConfig[1]){
+        if(vitalsData.bloodPressureSys < alertConfig.bpSysConfig[0]){
           request.body.description = request.body.description + "Systolic Blood Pressure has fallen below threshold" + "\n"
         } else {
           request.body.description = request.body.description + "Systolic Blood Pressure has risen above threshold" + "\n"
@@ -139,8 +141,8 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       vitalsReading.reading = vitalsData.bloodPressureDia;
       vital.bloodPressureDia.push(vitalsReading);
 
-      if(vitalsData.respRate < alertConfig.bpDiaConfig[0] || vitalsData.respRate > alertConfig.bpDiaConfig[1]){
-        if(vitalsData.respRate < alertConfig.bpDiaConfig[0]){
+      if(vitalsData.bloodPressureDia < alertConfig.bpDiaConfig[0] || vitalsData.bloodPressureDia > alertConfig.bpDiaConfig[1]){
+        if(vitalsData.bloodPressureDia < alertConfig.bpDiaConfig[0]){
           request.body.description = request.body.description + "Diastolic Blood Pressure has fallen below threshold" + "\n"
         } else {
           request.body.description = request.body.description + "Diastolic Blood Pressure has risen above threshold" + "\n"
@@ -151,8 +153,8 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       vitalsReading.reading = vitalsData.spO2;
       vital.spO2.push(vitalsReading);
 
-      if(vitalsData.respRate < alertConfig.spO2Config[0] || vitalsData.respRate > alertConfig.spO2Config[1]){
-        if(vitalsData.respRate < alertConfig.spO2Config[0]){
+      if(vitalsData.sp02 < alertConfig.spO2Config[0] || vitalsData.sp02 > alertConfig.spO2Config[1]){
+        if(vitalsData.spO2 < alertConfig.spO2Config[0]){
           request.body.description = request.body.description + "Oxygen Level has fallen below threshold" + "\n"
         } else {
           request.body.description = request.body.description + "Oxygen Level has risen above threshold" + "\n"
@@ -171,7 +173,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     await patient.save();
 
     if(request.body.description != ''){
-      AlertController.createAlert(result, request);
+      await AlertController.createAlert(request, result);
     }
     
 
