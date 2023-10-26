@@ -1,5 +1,6 @@
 const Alert = require("../models/alert");
 const Patient = require("../models/patient");
+const AlertNotification = require("../helper/alertNotification");
 
 const createAlert = async (req, res) => {
   try {
@@ -21,6 +22,9 @@ const createAlert = async (req, res) => {
 
     patient.alerts.push(alert._id);
     await patient.save();
+
+    io.emit("new-alert", alert);
+    AlertNotification.sendAlert(alert);
 
     res.status(200).json({ success: true, data: alert });
   } catch (e) {

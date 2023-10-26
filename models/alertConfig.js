@@ -4,12 +4,12 @@ const alertConfigSchema = new mongoose.Schema(
   {
     rrConfig: {
       type: [Number],
-      default: [12, 18],
+      default: [8, 32],
       required: true,
     },
     hrConfig: {
       type: [Number],
-      default: [60, 100],
+      default: [40, 130],
       required: true,
     },
     bpSysConfig: {

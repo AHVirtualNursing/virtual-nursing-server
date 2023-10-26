@@ -6,6 +6,7 @@ const SmartWearable = require("../models/smartWearable");
 const bedStatusEnum = ["occupied", "vacant"];
 const Reminder = require("../models/reminder");
 const Nurse = require("../models/nurse");
+const Ward = require("../models/ward");
 
 const createPatient = async (req, res) => {
   try {
@@ -367,6 +368,38 @@ const getNursesByPatientId = async (req, res) => {
   }
 }
 
+const getVirtualNurseByPatientId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const smartBed = await SmartBed.findOne({ patient: id });
+    if (!smartBed) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any Smart Bed with Patient ID ${id}` });
+    }
+
+    const ward = await Ward.findOne({ smartBeds: smartBed._id });
+    if (!ward) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any ward with Smart Bed ID ${smartBed._id}` });
+    }
+
+    const virtualNurse = await VirtualNurse.findOne({ wards: ward._id });
+    if (!virtualNurse) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any Virtual Nurse with Ward ID ${ward._id}` });
+        
+    }
+
+    res.status(200).json(virtualNurse);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: e.message });
+  }
+}
+
 module.exports = {
   createPatient,
   getPatients,
@@ -380,5 +413,6 @@ module.exports = {
   dischargePatientById,
   admitPatientById,
   deletePatientById,
-  getNursesByPatientId
+  getNursesByPatientId,
+  getVirtualNurseByPatientId
 };

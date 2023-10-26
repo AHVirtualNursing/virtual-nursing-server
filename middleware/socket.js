@@ -1,5 +1,7 @@
 const socket = require("socket.io");
 const vitalController = require("../controllers/vitalController");
+const patientController = require("../controllers/patientController");
+const { virtualNurse } = require("../models/webUser");
 
 const configureSocket = (server) => {
   const io = socket(server, {
@@ -11,7 +13,8 @@ const configureSocket = (server) => {
 
   const smartWatchConnections = new Map();
   const dashboardConnections = new Map();
-
+  const alertConnections = new Map();
+  
   io.on("connection", (socket) => {
     socket.on("connectSmartWatch", async (patientId) => {
       smartWatchConnections.set(patientId, socket);
@@ -20,6 +23,10 @@ const configureSocket = (server) => {
     socket.on("connectDashboard", (patientId) => {
       dashboardConnections.set(patientId, socket);
     });
+
+    socket.on("alertConnections", (virtualNurseId) => {
+      alertConnections.set(virtualNurseId, socket)
+    })
 
     socket.on("watchData", (vitals) => {
       const patientId = vitals["patientId"];
@@ -42,9 +49,35 @@ const configureSocket = (server) => {
       }
     });
 
+    socket.on("new-alert", async (alert) => {
+      const req = { params: { id: alert.patient } };
+      const res = {
+        statusCode: null, 
+        jsonData: null, 
+        status: function (code) {
+          this.statusCode = code;
+          return this; 
+        },
+        json: function (data) {
+          this.jsonData = data;
+          return this; 
+        },
+      };
+
+      await patientController.getVirtualNurseByPatientId(req, res);
+      const virtualNurse = res.jsonData;
+      const alertSocket = alertConnections.get(virtualNurse._id)
+
+      if(alertSocket){
+        alertSocket.emit("alertIncoming", alert);
+      }
+      
+    });
+
     socket.on("disconnect", () => {
       smartWatchConnections.delete(socket.id);
       dashboardConnections.delete(socket.id);
+      alertConnections.delete(socket.id);
     });
   });
 };

@@ -1,5 +1,7 @@
 const Vital = require("../models/vital");
 const Patient = require("../models/patient");
+const AlertController = require("../controllers/alertController");
+const AlertConfig = require("../models/alertConfig");
 
 const addVitalForPatient = async (req, res) => {
   try {
@@ -26,6 +28,8 @@ const addVitalForPatient = async (req, res) => {
 
     const vital = await processVitalForPatient(patient, vitalsData);
 
+
+
     res.status(200).json({ success: true, data: vital });
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -39,7 +43,7 @@ const addVitalForPatient = async (req, res) => {
 
 const processVitalForPatient = async (patientId, vitalsData) => {
   try {
-    const patient = await Patient.findById(patientId).populate("vital");
+    const patient = await Patient.findById(patientId).populate("vital").populate("alertConfig");
     if (!patient) {
       return res.status(500).json({
         message: `cannot find any patient with Patient ID ${req.body.patient}`,
@@ -56,10 +60,39 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         sp02: [],
         temperature: [],
       });
+
+
       await vital.save();
       patient.vital = vital;
       await patient.save();
     }
+    let alertConfig = patient.alertConfig;
+    if(!alertConfig){
+      return res.status(500).json({
+        message: `cannot find any Alert Config with Patient ID ${req.body.patient}`,
+      });
+    }
+
+    const request = {
+      body: {
+        patient: patientId,
+        description: '',
+        notes: 'Any additional notes',
+        sentBy: 'Sender name or ID'
+      }
+    };
+    const result = {
+      statusCode: null, 
+      jsonData: null, 
+      status: function (code) {
+        this.statusCode = code;
+        return this; 
+      },
+      json: function (data) {
+        this.jsonData = data;
+        return this; 
+      },
+    };
 
     const vitalsReading = {
       datetime: vitalsData.datetime,
@@ -68,31 +101,79 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     if (vitalsData.respRate) {
       vitalsReading.reading = vitalsData.respRate;
       vital.respRate.push(vitalsReading);
+
+      if(vitalsData.respRate < alertConfig.rrConfig[0] || vitalsData.respRate > alertConfig.rrConfig[1]){
+        if(vitalsData.respRate < alertConfig.rrConfig[0]){
+          request.body.description = request.body.description + "Respiratory rate has fallen below threshold" + "\n"
+        } else {
+          request.body.description = request.body.description + "Respiratory rate has risen above threshold" + "\n"
+        }
+      }
+      
     }
     if (vitalsData.heartRate) {
       vitalsReading.reading = vitalsData.heartRate;
       vital.heartRate.push(vitalsReading);
+
+      if(vitalsData.respRate < alertConfig.hrConfig[0] || vitalsData.respRate > alertConfig.hrConfig[1]){
+        if(vitalsData.respRate < alertConfig.hrConfig[0]){
+          request.body.description = request.body.description + "Heart rate has fallen below threshold" + "\n"
+        } else {
+          request.body.description = request.body.description + "Heart rate has risen above threshold" + "\n"
+        }
+      }
     }
     if (vitalsData.bloodPressureSys) {
       vitalsReading.reading = vitalsData.bloodPressureSys;
       vital.bloodPressureSys.push(vitalsReading);
+
+      if(vitalsData.respRate < alertConfig.bpSysConfig[0] || vitalsData.respRate > alertConfig.bpSysConfig[1]){
+        if(vitalsData.respRate < alertConfig.bpSysConfig[0]){
+          request.body.description = request.body.description + "Systolic Blood Pressure has fallen below threshold" + "\n"
+        } else {
+          request.body.description = request.body.description + "Systolic Blood Pressure has risen above threshold" + "\n"
+        }
+      }
     }
     if (vitalsData.bloodPressureDia) {
       vitalsReading.reading = vitalsData.bloodPressureDia;
       vital.bloodPressureDia.push(vitalsReading);
+
+      if(vitalsData.respRate < alertConfig.bpDiaConfig[0] || vitalsData.respRate > alertConfig.bpDiaConfig[1]){
+        if(vitalsData.respRate < alertConfig.bpDiaConfig[0]){
+          request.body.description = request.body.description + "Diastolic Blood Pressure has fallen below threshold" + "\n"
+        } else {
+          request.body.description = request.body.description + "Diastolic Blood Pressure has risen above threshold" + "\n"
+        }
+      }
     }
     if (vitalsData.spO2) {
       vitalsReading.reading = vitalsData.spO2;
       vital.spO2.push(vitalsReading);
+
+      if(vitalsData.respRate < alertConfig.spO2Config[0] || vitalsData.respRate > alertConfig.spO2Config[1]){
+        if(vitalsData.respRate < alertConfig.spO2Config[0]){
+          request.body.description = request.body.description + "Oxygen Level has fallen below threshold" + "\n"
+        } else {
+          request.body.description = request.body.description + "Oxygen Level has risen above threshold" + "\n"
+        }
+      }
     }
     if (vitalsData.temperature) {
       vitalsReading.temperature = vitalsData.temperature;
       vital.temperature.push(vitalsReading);
     }
 
+    
+
     await vital.save();
     patient.vital = vital;
     await patient.save();
+
+    if(request.body.description != ''){
+      AlertController.createAlert(result, request);
+    }
+    
 
     return vital;
   } catch (error) {
