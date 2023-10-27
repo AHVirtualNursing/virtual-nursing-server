@@ -7,6 +7,7 @@ const bedStatusEnum = ["occupied", "vacant"];
 const Reminder = require("../models/reminder");
 const Nurse = require("../models/nurse");
 const Ward = require("../models/ward");
+const {virtualNurse} = require("../models/webUser");
 
 const createPatient = async (req, res) => {
   try {
@@ -117,7 +118,6 @@ const getAlertsByPatientId = async (req, res) => {
     }
 
     const alerts = await Alert.find({ patient: id });
-    //console.log(alerts);
     res.status(200).json(alerts);
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -155,7 +155,6 @@ const getVitalByPatientId = async (req, res) => {
     }
 
     const vital = await patient.vital;
-    //console.log(vital);
     res.status(200).json(vital);
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -385,15 +384,16 @@ const getVirtualNurseByPatientId = async (req, res) => {
         .json({ message: `cannot find any ward with Smart Bed ID ${smartBed._id}` });
     }
 
-    const virtualNurse = await VirtualNurse.findOne({ wards: ward._id });
-    if (!virtualNurse) {
+    const vn = await virtualNurse.findOne({ wards: ward._id });
+    if (!vn) {
       return res
         .status(500)
         .json({ message: `cannot find any Virtual Nurse with Ward ID ${ward._id}` });
         
     }
 
-    res.status(200).json(virtualNurse);
+
+    res.status(200).json(vn);
   } catch (e) {
     console.error(e);
     res.status(500).json({ success: e.message });
