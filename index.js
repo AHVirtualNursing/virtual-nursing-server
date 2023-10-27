@@ -24,6 +24,7 @@ const reportRoutes = require("./routes/report");
 const vitalRoutes = require("./routes/vital");
 const userRoutes = require("./routes/user");
 const virtualNurseRoutes = require("./routes/virtualNurse");
+const s3Routes = require("./routes/s3");
 
 /*PUSH NOTIFICATIONS */
 const reminderJob = require("./helper/reminderNotification");
@@ -82,6 +83,7 @@ app.use("/report", reportRoutes);
 app.use("/vital", vitalRoutes);
 app.use("/user", userRoutes);
 app.use("/virtualNurse", virtualNurseRoutes);
+app.use("/s3", s3Routes);
 
 const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, () => {
