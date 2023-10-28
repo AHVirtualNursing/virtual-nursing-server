@@ -7,7 +7,18 @@ const createChat = async (req, res) => {
     const existingChat = await Chat.findOne({
       virtualNurse: virtualNurseId,
       bedsideNurse: bedsideNurseId,
-    }).populate([{ path: "virtualNurse" }, { path: "bedsideNurse" }]);
+    }).populate([
+      { path: "virtualNurse" },
+      { path: "bedsideNurse" },
+      {
+        path: "messages",
+        populate: [
+          {
+            path: "patient",
+          },
+        ],
+      },
+    ]);
 
     if (existingChat) {
       res.status(403).json({
@@ -28,6 +39,14 @@ const createChat = async (req, res) => {
     const chat = await Chat.findById(newChat._id).populate([
       { path: "virtualNurse" },
       { path: "bedsideNurse" },
+      {
+        path: "messages",
+        populate: [
+          {
+            path: "patient",
+          },
+        ],
+      },
     ]);
 
     res.status(200).json({ success: true, data: chat });
@@ -43,12 +62,9 @@ const createChat = async (req, res) => {
 
 const createChatMessage = async (req, res) => {
   try {
-    const { chatId, content, imageUrl, createdBy, alert } = req.body;
+    const { chatId, content, imageUrl, createdBy, alert, patient } = req.body;
 
-    const existingChat = await Chat.findById(chatId).populate([
-      { path: "virtualNurse" },
-      { path: "bedsideNurse" },
-    ]);
+    let existingChat = await Chat.findById(chatId);
 
     if (!existingChat) {
       res.status(500).json({
@@ -62,11 +78,24 @@ const createChatMessage = async (req, res) => {
       imageUrl: imageUrl,
       createdBy: createdBy,
       alert: alert,
+      patient: patient,
     };
 
     existingChat.messages.push(newChatMessage);
-
     await existingChat.save();
+
+    existingChat = await Chat.findById(chatId).populate([
+      { path: "virtualNurse" },
+      { path: "bedsideNurse" },
+      {
+        path: "messages",
+        populate: [
+          {
+            path: "patient",
+          },
+        ],
+      },
+    ]);
 
     res.status(200).json({ success: true, data: existingChat });
   } catch (e) {
@@ -97,6 +126,14 @@ const updateChatMessage = async (req, res) => {
     const updatedChat = await Chat.findById(chatId).populate([
       { path: "virtualNurse" },
       { path: "bedsideNurse" },
+      {
+        path: "messages",
+        populate: [
+          {
+            path: "patient",
+          },
+        ],
+      },
     ]);
 
     res.status(200).json(updatedChat);
@@ -120,6 +157,14 @@ const getChats = async (req, res) => {
             const chat = await Chat.findById(id).populate([
               { path: "virtualNurse" },
               { path: "bedsideNurse" },
+              {
+                path: "messages",
+                populate: [
+                  {
+                    path: "patient",
+                  },
+                ],
+              },
             ]);
 
             chat.messages.sort(
@@ -155,6 +200,14 @@ const getChatsForVirtualNurse = async (req, res) => {
     const chats = await Chat.find({ virtualNurse: id }).populate([
       { path: "virtualNurse" },
       { path: "bedsideNurse" },
+      {
+        path: "messages",
+        populate: [
+          {
+            path: "patient",
+          },
+        ],
+      },
     ]);
 
     chats.forEach((chat) => {
@@ -175,6 +228,14 @@ const getChatsForBedsideNurse = async (req, res) => {
     const chats = await Chat.find({ bedsideNurse: id }).populate([
       { path: "virtualNurse" },
       { path: "bedsideNurse" },
+      {
+        path: "messages",
+        populate: [
+          {
+            path: "patient",
+          },
+        ],
+      },
     ]);
 
     chats.forEach((chat) => {
@@ -225,6 +286,14 @@ const deleteChatMessageById = async (req, res) => {
     const updatedChat = await Chat.findById(chatId).populate([
       { path: "virtualNurse" },
       { path: "bedsideNurse" },
+      {
+        path: "messages",
+        populate: [
+          {
+            path: "patient",
+          },
+        ],
+      },
     ]);
 
     res.status(200).json(updatedChat);
