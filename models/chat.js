@@ -20,6 +20,11 @@ const ChatMessage = new mongoose.Schema(
       ref: "Alert",
       required: false,
     },
+    patient: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Patient",
+        required: false,
+    }
   },
   {
     timestamps: true,
