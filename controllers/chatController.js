@@ -16,6 +16,14 @@ const createChat = async (req, res) => {
           {
             path: "patient",
           },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient"
+              }
+            ]
+          },
         ],
       },
     ]);
@@ -44,6 +52,14 @@ const createChat = async (req, res) => {
         populate: [
           {
             path: "patient",
+          },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient"
+              }
+            ]
           },
         ],
       },
@@ -93,6 +109,14 @@ const createChatMessage = async (req, res) => {
           {
             path: "patient",
           },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient"
+              }
+            ]
+          },
         ],
       },
     ]);
@@ -132,6 +156,14 @@ const updateChatMessage = async (req, res) => {
           {
             path: "patient",
           },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient"
+              }
+            ]
+          },
         ],
       },
     ]);
@@ -162,6 +194,14 @@ const getChats = async (req, res) => {
                 populate: [
                   {
                     path: "patient",
+                  },
+                  {
+                    path: "alert",
+                    populate: [
+                      {
+                        path: "patient"
+                      }
+                    ]
                   },
                 ],
               },
@@ -206,6 +246,14 @@ const getChatsForVirtualNurse = async (req, res) => {
           {
             path: "patient",
           },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient"
+              }
+            ]
+          },
         ],
       },
     ]);
@@ -233,6 +281,14 @@ const getChatsForBedsideNurse = async (req, res) => {
         populate: [
           {
             path: "patient",
+          },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient"
+              }
+            ]
           },
         ],
       },
@@ -291,6 +347,14 @@ const deleteChatMessageById = async (req, res) => {
         populate: [
           {
             path: "patient",
+          },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient"
+              }
+            ]
           },
         ],
       },
