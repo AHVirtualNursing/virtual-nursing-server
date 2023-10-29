@@ -144,6 +144,10 @@ const patientSchema = new mongoose.Schema(
     layout: {
       type: layout,
       default: defaultLayout
+    },
+    order: {
+      type: [String],
+      default: ["hr", "bpSys", "bpDia"]
     }
   },
   {

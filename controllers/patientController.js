@@ -182,6 +182,7 @@ const updatePatientById = async (req, res) => {
       reports,
       alertConfig,
       layout,
+      order,
     } = req.body;
 
     if (infoLogs) {
@@ -210,6 +211,9 @@ const updatePatientById = async (req, res) => {
     }
     if (layout) {
       patient.layout = layout;
+    }
+    if (order) {
+      patient.order = order;
     }
 
     if (alertConfig) {
