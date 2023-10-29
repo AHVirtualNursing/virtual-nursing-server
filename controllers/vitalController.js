@@ -41,9 +41,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
   try {
     const patient = await Patient.findById(patientId).populate("vital");
     if (!patient) {
-      return res.status(500).json({
-        message: `cannot find any patient with Patient ID ${req.body.patient}`,
-      });
+      throw new Error(`Cannot find any patient with Patient ID ${patientId}`);
     }
 
     let vital = patient.vital;

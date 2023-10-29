@@ -1,5 +1,6 @@
 const { io } = require("socket.io-client");
 const { initialiseDb } = require("./initialiseDb");
+const { sendMockPatientVitals } = require("./sendMockPatientVitals");
 const SERVER_URL = "http://localhost:3001";
 
 async function simulatePatientVitals() {
@@ -35,7 +36,6 @@ async function simulatePatientVitals() {
         "heartRate",
         [66, 76, 85, 90, 102, 115, 100, 95, 70, 55]
       ),
-      rr: generateVitalData("respRate", [17, 19, 21, 21]),
       spo2: generateVitalData("spO2", [96, 95, 97, 97, 96, 95, 93, 95, 96, 95]),
       bps: generateVitalData(
         "bloodPressureSys",
@@ -80,28 +80,30 @@ async function simulatePatientVitals() {
   }
 
   if (vitalType) {
-    if (!patientId) {
-      patientId = await initialiseDb();
+    if (vitalType === "s3") {
+      sendMockPatientVitals(patientId);
+    } else {
+      if (!patientId) {
+        patientId = await initialiseDb();
+      }
+      socket.emit("connectSmartWatch", patientId);
+      if (vitalType == "all") {
+        sendVitals("hr");
+        setTimeout(() => {
+          sendVitals("spo2");
+        }, 100);
+        setTimeout(() => {
+          sendVitals("bp");
+        }, 200);
+        setTimeout(() => {
+          sendVitals("temp");
+        }, 300);
+        setTimeout(() => {
+          sendVitals("rr");
+        }, 400);
+      }
+      sendVitals(vitalType);
     }
-    socket.emit("connectSmartWatch", patientId);
-
-    if (vitalType == "all") {
-      sendVitals("hr");
-      setTimeout(() => {
-        sendVitals("spo2");
-      }, 100);
-      setTimeout(() => {
-        sendVitals("bp");
-      }, 200);
-      setTimeout(() => {
-        sendVitals("temp");
-      }, 300);
-      setTimeout(() => {
-        sendVitals("rr");
-      }, 400);
-    }
-
-    sendVitals(vitalType);
   } else {
     console.error("No patient vital argument provided");
     process.exit(1);
