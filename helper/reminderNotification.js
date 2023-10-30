@@ -28,7 +28,6 @@ const reminderJob = schedule.scheduleJob('* * * * * ', async () => {
             const nurses = res.jsonData;
 
             for(const nurse of nurses){
-
                 await pushNotification.sendPushNotification(nurse.mobilePushNotificationToken, "Reminder", reminder.content);
             }
             if (reminder.interval != 0){
