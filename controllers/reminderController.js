@@ -40,7 +40,8 @@ const createReminder = async (req, res) => {
       createdBy: req.body.createdBy,
       patient: req.body.patient,
       time: req.body.time,
-      interval:req.body.interval
+      interval: req.body.interval,
+      picture: req.body.imageUri,
     });
     await reminder.save();
 
