@@ -61,7 +61,7 @@ async function initialiseDb() {
     });
 
     const nurseId = await callApiRequest(
-      `${SERVER_URL}/auth/register`,
+      `${SERVER_URL}/auth/register?default=true`,
       "POST",
       {
         username: "nurse",
