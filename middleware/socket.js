@@ -22,6 +22,7 @@ const configureSocket = (server) => {
     });
 
     socket.on("watchData", (vitals) => {
+      console.log(vitals);
       const patientId = vitals["patientId"];
       const dashboardSocket = dashboardConnections.get(patientId);
 
@@ -31,6 +32,8 @@ const configureSocket = (server) => {
         bloodPressureSys: vitals["bloodPressureSys"],
         bloodPressureDia: vitals["bloodPressureDia"],
         spO2: vitals["spO2"],
+        temperature: vitals["temperature"],
+        respRate: vitals["respRate"],
       };
 
       vitalController.processVitalForPatient(patientId, vitalsData);

@@ -41,9 +41,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
   try {
     const patient = await Patient.findById(patientId).populate("vital");
     if (!patient) {
-      return res.status(500).json({
-        message: `cannot find any patient with Patient ID ${req.body.patient}`,
-      });
+      throw new Error(`Cannot find any patient with Patient ID ${patientId}`);
     }
 
     let vital = patient.vital;
@@ -86,8 +84,12 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       vital.spO2.push(vitalsReading);
     }
     if (vitalsData.temperature) {
-      vitalsReading.temperature = vitalsData.temperature;
+      vitalsReading.reading = vitalsData.temperature;
       vital.temperature.push(vitalsReading);
+    }
+    if (vitalsData.respRate) {
+      vitalsReading.reading = vitalsData.respRate;
+      vital.respRate.push(vitalsReading);
     }
 
     await vital.save();

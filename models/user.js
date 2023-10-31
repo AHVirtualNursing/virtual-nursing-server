@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     email: {
       type: String,
@@ -24,8 +24,12 @@ const userSchema = new mongoose.Schema(
     passwordReset: {
       type: Boolean,
       required: true,
-      default: false
-    }
+      default: false,
+    },
+    picture: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,

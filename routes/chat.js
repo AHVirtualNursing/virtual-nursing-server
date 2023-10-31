@@ -10,5 +10,6 @@ router.delete("/:id", Chat.deleteChatById);
 router.post("/message", Chat.createChatMessage);
 router.delete("/message/:chatId/:msgId", Chat.deleteChatMessageById);
 router.put("/message", Chat.updateChatMessage);
+router.put("/", Chat.updateChat);
 
 module.exports = router;

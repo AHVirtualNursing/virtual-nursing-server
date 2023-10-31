@@ -11,9 +11,9 @@ const ChatMessage = new mongoose.Schema(
       required: false,
     },
     createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     alert: {
       type: mongoose.Schema.Types.ObjectId,
@@ -21,10 +21,10 @@ const ChatMessage = new mongoose.Schema(
       required: false,
     },
     patient: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Patient",
-        required: false,
-    }
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Patient",
+      required: false,
+    },
   },
   {
     timestamps: true,
@@ -45,6 +45,11 @@ const chatSchema = new mongoose.Schema(
     },
     messages: {
       type: [ChatMessage],
+    },
+    isArchived: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   {
