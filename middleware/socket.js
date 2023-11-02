@@ -14,7 +14,7 @@ const configureSocket = (server) => {
   const smartWatchConnections = new Map();
   const dashboardConnections = new Map();
   const alertConnections = new Map();
-  
+
   io.on("connection", (socket) => {
     socket.on("connectSmartWatch", async (patientId) => {
       smartWatchConnections.set(patientId, socket);
@@ -25,10 +25,10 @@ const configureSocket = (server) => {
     });
 
     socket.on("alertConnections", (virtualNurseId) => {
-      console.log("connection established")
+      console.log("connection established");
       alertConnections.set(virtualNurseId, socket);
       console.log(alertConnections);
-    })
+    });
 
     socket.on("watchData", (vitals) => {
       const patientId = vitals["patientId"];
@@ -52,34 +52,63 @@ const configureSocket = (server) => {
     });
 
     socket.on("new-alert", async (alert) => {
-      
       const req = { params: { id: alert.patient } };
       const res = {
-        statusCode: null, 
-        jsonData: null, 
+        statusCode: null,
+        jsonData: null,
         status: function (code) {
           this.statusCode = code;
-          return this; 
+          return this;
         },
         json: function (data) {
           this.jsonData = data;
-          return this; 
+          return this;
         },
       };
-      
+
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
       console.log(virtualNurse);
       // console.log(virtualNurse._id.toString)
-      console.log(String(virtualNurse._id))
-      const alertSocket = alertConnections.get(String(virtualNurse._id))
-      
-      console.log(alertSocket)
-      if(alertSocket){
-        console.log("went inside if")
+      console.log(String(virtualNurse._id));
+      const alertSocket = alertConnections.get(String(virtualNurse._id));
+
+      await patientController.getAlertsByPatientId(req, res);
+      const alertsList = res.jsonData;
+
+      console.log(alertSocket);
+      if (alertSocket) {
+        console.log("went inside if");
         alertSocket.emit("alertIncoming", alert);
+        alertSocket.emit("patientAlertAdded", alertsList);
       }
-      
+    });
+
+    socket.on("delete-alert", async (alert) => {
+      const req = { params: { id: alert.patient } };
+      const res = {
+        statusCode: null,
+        jsonData: null,
+        status: function (code) {
+          this.statusCode = code;
+          return this;
+        },
+        json: function (data) {
+          this.jsonData = data;
+          return this;
+        },
+      };
+
+      await patientController.getVirtualNurseByPatientId(req, res);
+      const virtualNurse = res.jsonData;
+      const alertSocket = alertConnections.get(String(virtualNurse._id));
+
+      await patientController.getAlertsByPatientId(req, res);
+      const alertsList = res.jsonData;
+
+      if (alertSocket) {
+        alertSocket.emit("patientAlertDeleted", alertsList);
+      }
     });
 
     socket.on("disconnect", () => {
