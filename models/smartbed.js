@@ -74,6 +74,9 @@ const smartBedSchema = new mongoose.Schema(
       default: false,
       required: true,
     },
+    bedAlarmProtocolBreachReason: {
+      type: String
+    },
     patient: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Patient",
