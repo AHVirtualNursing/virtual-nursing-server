@@ -23,6 +23,10 @@ const createPatient = async (req, res) => {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(500).json({ validationErrors });
+    } else if (e.code === 11000 && e.keyPattern.name) {
+      return res
+        .status(500)
+        .json({ message: "NRIC of patient must be unique." });
     } else {
       res.status(500).json({ success: e.message });
     }
@@ -178,6 +182,8 @@ const updatePatientById = async (req, res) => {
       o2Intake,
       consciousness,
       picture,
+      acuityLevel,
+      fallRisk,
       alerts,
       reminders,
       reports,
@@ -199,6 +205,12 @@ const updatePatientById = async (req, res) => {
     }
     if (picture) {
       patient.picture = picture;
+    }
+    if (acuityLevel) {
+      patient.acuityLevel = acuityLevel;
+    }
+    if (fallRisk) {
+      patient.fallRisk = fallRisk;
     }
     if (alerts) {
       patient.alerts = alerts;
