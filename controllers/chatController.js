@@ -16,6 +16,14 @@ const createChat = async (req, res) => {
           {
             path: "patient",
           },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient",
+              },
+            ],
+          },
         ],
       },
     ]);
@@ -44,6 +52,14 @@ const createChat = async (req, res) => {
         populate: [
           {
             path: "patient",
+          },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient",
+              },
+            ],
           },
         ],
       },
@@ -93,11 +109,68 @@ const createChatMessage = async (req, res) => {
           {
             path: "patient",
           },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient",
+              },
+            ],
+          },
         ],
       },
     ]);
 
     res.status(200).json({ success: true, data: existingChat });
+  } catch (e) {
+    if (e.name === "ValidationError") {
+      const validationErrors = Object.values(e.errors).map((e) => e.message);
+      res.status(500).json({ validationErrors });
+    } else {
+      res.status(500).json({ error: e.message });
+    }
+  }
+};
+
+const updateChat = async (req, res) => {
+  try {
+    const { chatId, isArchived } = req.body;
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any chat with ID ${id}` });
+    }
+
+    if (isArchived !== undefined) {
+      chat.isArchived = isArchived;
+    }
+
+    await chat.save();
+
+    const updatedChat = await Chat.findById(chatId).populate([
+      { path: "virtualNurse" },
+      { path: "bedsideNurse" },
+      {
+        path: "messages",
+        populate: [
+          {
+            path: "patient",
+          },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient",
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    res.status(200).json(updatedChat);
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
@@ -132,6 +205,14 @@ const updateChatMessage = async (req, res) => {
           {
             path: "patient",
           },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient",
+              },
+            ],
+          },
         ],
       },
     ]);
@@ -162,6 +243,14 @@ const getChats = async (req, res) => {
                 populate: [
                   {
                     path: "patient",
+                  },
+                  {
+                    path: "alert",
+                    populate: [
+                      {
+                        path: "patient",
+                      },
+                    ],
                   },
                 ],
               },
@@ -206,6 +295,14 @@ const getChatsForVirtualNurse = async (req, res) => {
           {
             path: "patient",
           },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient",
+              },
+            ],
+          },
         ],
       },
     ]);
@@ -234,6 +331,14 @@ const getChatsForBedsideNurse = async (req, res) => {
           {
             path: "patient",
           },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient",
+              },
+            ],
+          },
         ],
       },
     ]);
@@ -261,8 +366,10 @@ const deleteChatById = async (req, res) => {
         .json({ message: `cannot find any chat with ID ${id}` });
     }
 
-    await Chat.deleteOne({ _id: id });
-    res.status(200).json(chat);
+    chat.isArchived = true;
+
+    const archivedChat = await chat.save();
+    res.status(200).json(archivedChat);
   } catch (e) {
     console.error(e);
     res.status(500).json({ success: false });
@@ -292,6 +399,14 @@ const deleteChatMessageById = async (req, res) => {
           {
             path: "patient",
           },
+          {
+            path: "alert",
+            populate: [
+              {
+                path: "patient",
+              },
+            ],
+          },
         ],
       },
     ]);
@@ -310,6 +425,7 @@ module.exports = {
   deleteChatById,
   deleteChatMessageById,
   updateChatMessage,
+  updateChat,
   getChatsForVirtualNurse,
   getChatsForBedsideNurse,
 };

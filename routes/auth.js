@@ -17,7 +17,6 @@ router.post(
     body("email").trim().isEmail().normalizeEmail().escape(),
   ],
 
-  
   async (req, res) => {
     const errors = validationResult(req);
 
@@ -34,20 +33,24 @@ router.post(
     const { name, username, email } = req.body;
 
     const existingUser = await userModel.findOne({ email });
-    
+
     if (existingUser) {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    const password = generator.generate({
+    let password = generator.generate({
       length: 8,
       numbers: true,
       symbols: true,
       excludeSimilarCharacters: true,
       strict: true,
     });
-
-    req.body.password = password;
+    if (req.query.default) {
+      req.body.password = "password";
+      password = "password";
+    } else {
+      req.body.password = password;
+    }
     try {
       let newUser;
       if (userType == "mobile") {
@@ -57,11 +60,14 @@ router.post(
       } else {
         newUser = new userModel({ name, username, email, password });
       }
+      if (req.query.default) {
+        newUser.passwordReset = true;
+      }
       await newUser.save({ session });
       await sendWelcomeEmail(email, username, password);
       await session.commitTransaction();
       session.endSession();
-      res.status(201).json({ message: "User registered successfully" });
+      res.status(201).json({ data: { _id: newUser._id } });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
