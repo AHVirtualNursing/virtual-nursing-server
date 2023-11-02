@@ -1,9 +1,19 @@
 const mongoose = require("mongoose");
 
+const reportTypeEnum = ["event", "discharge"];
+
 const reportSchema = new mongoose.Schema(
   {
-    name: {
+    reportName: {
       type: String,
+      require: true,
+    },
+    reportType: {
+      type: String,
+      enum: {
+        values: reportTypeEnum,
+        message: "Invalid report type: {VALUE}",
+      },
       require: true
     },
     content: {
