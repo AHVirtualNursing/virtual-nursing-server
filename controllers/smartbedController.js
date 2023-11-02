@@ -106,7 +106,19 @@ const updateSmartBedById = async (req, res) => {
         .json({ message: `cannot find any smartbed with ID ${id}` });
     }
 
-    const { name, bedStatus, isRightUpperRail, isRightLowerRail, isLeftUpperRail, isLeftLowerRail, isBrakeSet, isLowestPosition, isBedAlarmTriggered, patient } = req.body;
+    const {
+      name,
+      bedStatus,
+      isRightUpperRail,
+      isRightLowerRail,
+      isLeftUpperRail,
+      isLeftLowerRail,
+      isBrakeSet,
+      isLowestPosition,
+      isBedAlarmTriggered,
+      bedAlarmProtocolBreachReason,
+      patient,
+    } = req.body;
     if (name) {
       smartbed.name = name;
     }
@@ -133,6 +145,9 @@ const updateSmartBedById = async (req, res) => {
     }
     if (isBedAlarmTriggered !== undefined) {
       smartbed.isBedAlarmTriggered = isBedAlarmTriggered;
+    }
+    if (bedAlarmProtocolBreachReason) {
+      patient.bedAlarmProtocolBreachReason = bedAlarmProtocolBreachReason;
     }
 
     // dont call this unless testing
@@ -166,13 +181,13 @@ const unassignSmartBedFromWard = async (req, res) => {
   try {
     const { id } = req.params;
     const smartBed = await SmartBed.findById(id);
-    if (!smartBed ) {
+    if (!smartBed) {
       return res
         .status(500)
         .json({ message: `cannot find any smartBed with ID ${id}` });
     }
-    if(smartBed.patient != undefined){
-        return res
+    if (smartBed.patient != undefined) {
+      return res
         .status(500)
         .json({ message: `there is a patient on the smartbed` });
     }
@@ -183,7 +198,7 @@ const unassignSmartBedFromWard = async (req, res) => {
     const bedNum = smartBed.bedNum;
     ward.beds[bedNum - 1] = 0;
     await ward.save();
-    
+
     smartBed.roomNum = undefined;
     smartBed.bedNum = undefined;
     smartBed.ward = undefined;
@@ -264,11 +279,9 @@ const deleteSmartBedById = async (req, res) => {
         .json({ message: `cannot find any smartbed with ID ${id}` });
     }
     if (smartBed.patient) {
-      return res
-        .status(500)
-        .json({
-          message: `smartbed with ID ${id} has a patient and cannot be deleted`,
-        });
+      return res.status(500).json({
+        message: `smartbed with ID ${id} has a patient and cannot be deleted`,
+      });
     }
 
     const ward = await Ward.findOne({ smartBeds: { $in: [id] } }).populate(
