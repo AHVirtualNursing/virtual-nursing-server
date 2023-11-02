@@ -77,6 +77,7 @@ const patientSchema = new mongoose.Schema(
     nric: {
       type: String,
       required: true,
+      unique: true,
     },
     picture: {
       type: String,
