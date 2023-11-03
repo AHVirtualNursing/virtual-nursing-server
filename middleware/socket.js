@@ -73,14 +73,10 @@ const configureSocket = (server) => {
       console.log(String(virtualNurse._id));
       const alertSocket = alertConnections.get(String(virtualNurse._id));
 
-      await patientController.getAlertsByPatientId(req, res);
-      const alertsList = res.jsonData;
-
       console.log(alertSocket);
       if (alertSocket) {
         console.log("went inside if");
         alertSocket.emit("alertIncoming", alert);
-        alertSocket.emit("patientAlertAdded", alertsList);
       }
     });
 
@@ -103,11 +99,8 @@ const configureSocket = (server) => {
       const virtualNurse = res.jsonData;
       const alertSocket = alertConnections.get(String(virtualNurse._id));
 
-      await patientController.getAlertsByPatientId(req, res);
-      const alertsList = res.jsonData;
-
       if (alertSocket) {
-        alertSocket.emit("patientAlertDeleted", alertsList);
+        alertSocket.emit("patientAlertDeleted", alert);
       }
     });
 
