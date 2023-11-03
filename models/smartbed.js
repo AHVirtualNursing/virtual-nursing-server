@@ -69,7 +69,7 @@ const smartBedSchema = new mongoose.Schema(
       default: false,
       required: true,
     },
-    isBedAlarmTriggered: {
+    isBedAlarmOn: {
       type: Boolean,
       default: false,
       required: true,

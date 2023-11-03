@@ -114,7 +114,7 @@ const updateSmartBedById = async (req, res) => {
       isLeftLowerRail,
       isBrakeSet,
       isLowestPosition,
-      isBedAlarmTriggered,
+      isBedAlarmOn,
       bedAlarmProtocolBreachReason,
       patient,
     } = req.body;
@@ -142,8 +142,8 @@ const updateSmartBedById = async (req, res) => {
     if (isLowestPosition !== undefined) {
       smartbed.isLowestPosition = isLowestPosition;
     }
-    if (isBedAlarmTriggered !== undefined) {
-      smartbed.isBedAlarmTriggered = isBedAlarmTriggered;
+    if (isBedAlarmOn !== undefined) {
+      smartbed.isBedAlarmOn = isBedAlarmOn;
     }
     if (bedAlarmProtocolBreachReason) {
       patient.bedAlarmProtocolBreachReason = bedAlarmProtocolBreachReason;
