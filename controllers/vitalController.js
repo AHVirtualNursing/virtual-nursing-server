@@ -161,8 +161,9 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         }
       }
     }
+    
     if (vitalsData.temperature) {
-      vitalsReading.temperature = vitalsData.temperature;
+      vitalsReading.reading = vitalsData.temperature;
       vital.temperature.push(vitalsReading);
     }
 

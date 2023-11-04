@@ -32,32 +32,10 @@ const createPatient = async (req, res) => {
 
 const getPatients = async (req, res) => {
   try {
-    if (req.query.ids) {
-      const ids = req.query.ids.split(",");
-      const patients = await Promise.all(
-        ids.map(async (id) => {
-          if (id.match(/^[0-9a-fA-F]{24}$/)) {
-            const patient = await Patient.findById(id);
-            console.log(patient);
-            if (!patient) {
-              res
-                .status(500)
-                .json({ message: `cannot find any patient with ID ${id}` });
-            }
-            return patient;
-          } else {
-            res.status(500).json({ message: `${id} is in wrong format` });
-          }
-        })
-      );
-      res.status(200).json(patients);
-    } else {
-      const patients = await Patient.find({});
-      res.status(200).json({ success: true, data: patients });
-    }
+    const patients = await Patient.find({});
+    res.status(200).json(patients);
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ success: e.message });
+    res.status(500).json({ error: e.message });
   }
 };
 

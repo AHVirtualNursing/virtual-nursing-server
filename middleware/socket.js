@@ -48,7 +48,7 @@ const configureSocket = (server) => {
         console.log(`No dashboard found for patient ID ${patientId}`);
       }
     });
-
+    
     socket.on("new-alert", async (alert) => {
       
       const req = { params: { id: alert.patient } };
@@ -67,8 +67,8 @@ const configureSocket = (server) => {
       
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
-      console.log(virtualNurse);
-      const alertSocket = alertConnections.get(virtualNurse._id)
+      
+      const alertSocket = alertConnections.get(String(virtualNurse._id));
       
       if(alertSocket){
         alertSocket.emit("alertIncoming", alert);
