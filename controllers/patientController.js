@@ -6,6 +6,7 @@ const SmartWearable = require("../models/smartWearable");
 const bedStatusEnum = ["occupied", "vacant"];
 const Reminder = require("../models/reminder");
 const Nurse = require("../models/nurse");
+const vitalController = require("../controllers/vitalController");
 
 const createPatient = async (req, res) => {
   try {
@@ -69,7 +70,7 @@ const getPatientById = async (req, res) => {
         .json({ message: `cannot find any patient with ID ${id}` }); //status 400?
     }
     const smartWearable = await SmartWearable.findOne({ patient: id });
-    const response = patient.toObject()
+    const response = patient.toObject();
     if (smartWearable) {
       response.smartWearable = smartWearable;
     }
@@ -145,7 +146,7 @@ const getRemindersByPatientId = async (req, res) => {
 const getVitalByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
-    const patient = await Patient.findById(id).populate('vital');
+    const patient = await Patient.findById(id).populate("vital");
     console.log(patient);
     if (!patient) {
       return res
@@ -261,9 +262,9 @@ const dischargePatientById = async (req, res) => {
     const smartWearable = await SmartWearable.findOne({ patient: id });
 
     if (!smartWearable) {
-      return res
-        .status(500)
-        .json({ message: `cannot find any smart wearable with Patient ID ${id}` });
+      return res.status(500).json({
+        message: `cannot find any smart wearable with Patient ID ${id}`,
+      });
     }
 
     if (smartWearable.patient != undefined) {
@@ -309,9 +310,9 @@ const admitPatientById = async (req, res) => {
 
     const smartWearable = await SmartWearable.findById(smartWearableId);
     if (!smartWearable) {
-      return res
-        .status(500)
-        .json({ message: `cannot find any smartWearable with SmartWearable ID ${id}` });
+      return res.status(500).json({
+        message: `cannot find any smartWearable with SmartWearable ID ${id}`,
+      });
     }
     smartWearable.patient = id;
     await smartWearable.save();
@@ -356,16 +357,16 @@ const getNursesByPatientId = async (req, res) => {
     const bed = await SmartBed.findOne({ patient: id });
 
     if (!bed) {
-      return res.status(500).json({ message: 'Bed not found for the patient' });
+      return res.status(500).json({ message: "Bed not found for the patient" });
     }
-    
+
     const nurses = await Nurse.find({ smartBeds: bed._id });
     res.status(200).json(nurses);
   } catch (e) {
     console.error(e);
     res.status(500).json({ success: e.message });
   }
-}
+};
 
 module.exports = {
   createPatient,
@@ -380,5 +381,5 @@ module.exports = {
   dischargePatientById,
   admitPatientById,
   deletePatientById,
-  getNursesByPatientId
+  getNursesByPatientId,
 };

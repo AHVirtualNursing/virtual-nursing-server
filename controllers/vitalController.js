@@ -25,7 +25,6 @@ const addVitalForPatient = async (req, res) => {
     };
 
     const vital = await processVitalForPatient(patient, vitalsData);
-
     res.status(200).json({ success: true, data: vital });
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -86,10 +85,6 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     if (vitalsData.temperature) {
       vitalsReading.reading = vitalsData.temperature;
       vital.temperature.push(vitalsReading);
-    }
-    if (vitalsData.respRate) {
-      vitalsReading.reading = vitalsData.respRate;
-      vital.respRate.push(vitalsReading);
     }
 
     await vital.save();

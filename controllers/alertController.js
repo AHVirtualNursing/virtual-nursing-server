@@ -5,17 +5,15 @@ const createAlert = async (req, res) => {
   try {
     const patient = await Patient.findById({ _id: req.body.patient });
     if (!patient) {
-      return res
-        .status(500)
-        .json({
-          message: `cannot find any patient with Patient ID ${req.body.patient}`,
-        });
+      return res.status(500).json({
+        message: `cannot find any patient with Patient ID ${req.body.patient}`,
+      });
     }
     const alert = new Alert({
       description: req.body.description,
       notes: req.body.notes,
       patient: req.body.patient,
-      sentBy: req.body.sentBy
+      sentBy: req.body.sentBy,
     });
     await alert.save();
 
@@ -45,7 +43,7 @@ const getAllAlerts = async (req, res) => {
 const getAlertById = async (req, res) => {
   try {
     const { id } = req.params;
-    const alert = await Alert.findById(id);
+    const alert = await Alert.findById(id).populate([{ path: "patient" }]);
     if (!alert) {
       res.status(500).json({ message: `cannot find any alert with ID ${id}` });
     }
@@ -65,7 +63,7 @@ const updateAlertById = async (req, res) => {
         .json({ message: `cannot find any alert with ID ${id}` });
     }
 
-    const { status, description, notes, handledBy } = req.body;
+    const { status, description, notes, handledBy, followUps } = req.body;
     if (status) {
       alert.status = status;
     }
@@ -77,6 +75,9 @@ const updateAlertById = async (req, res) => {
     }
     if (handledBy) {
       alert.handledBy = handledBy;
+    }
+    if (followUps) {
+      alert.followUps = followUps;
     }
 
     const updatedAlert = await alert.save();
@@ -100,8 +101,15 @@ const createFollowUpForAlert = async (req, res) => {
         .status(500)
         .json({ message: `cannot find any alert with ID ${id}` });
     }
-    
-    const { respRate, heartRate, bloodPressureSys, bloodPressureDia, spO2, temperature } = req.body;
+
+    const {
+      respRate,
+      heartRate,
+      bloodPressureSys,
+      bloodPressureDia,
+      spO2,
+      temperature,
+    } = req.body;
 
     const followUp = {};
 
@@ -123,7 +131,7 @@ const createFollowUpForAlert = async (req, res) => {
     if (temperature) {
       followUp.temperature = temperature;
     }
-    
+
     alert.followUps.push(followUp);
     await alert.save();
 
@@ -136,7 +144,7 @@ const createFollowUpForAlert = async (req, res) => {
       res.status(500).json({ success: false });
     }
   }
-}
+};
 
 const deleteAlertById = async (req, res) => {
   try {
@@ -158,11 +166,9 @@ const deleteAlertById = async (req, res) => {
       }
     );
     if (!updatedPatient) {
-      return res
-        .status(500)
-        .json({
-          message: `cannot find any patient tagged to this alert with ID ${id}`,
-        });
+      return res.status(500).json({
+        message: `cannot find any patient tagged to this alert with ID ${id}`,
+      });
     }
 
     await Alert.deleteOne({ _id: id });
