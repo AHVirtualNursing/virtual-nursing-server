@@ -1,6 +1,7 @@
 const nurse = require("../models/nurse");
 const ward = require("../models/ward");
-const { virtualNurse, itAdmin } = require("../models/webUser");
+const virtualNurse = require("../models/virtualNurse");
+const itAdmin = require("../models/itAdmin");
 const axios = require("axios");
 const bcrypt = require("bcrypt");
 

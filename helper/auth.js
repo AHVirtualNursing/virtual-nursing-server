@@ -1,5 +1,6 @@
 const nurse = require("../models/nurse");
-const { virtualNurse, itAdmin } = require("../models/webUser");
+const virtualNurse = require("../models/virtualNurse");
+const itAdmin = require("../models/itAdmin");
 
 function getUserModel(userType) {
   let userModel = "";
