@@ -1,7 +1,6 @@
 const socket = require("socket.io");
 const vitalController = require("../controllers/vitalController");
 const patientController = require("../controllers/patientController");
-const { virtualNurse } = require("../models/webUser");
 
 const configureSocket = (server) => {
   const io = socket(server, {
@@ -14,7 +13,7 @@ const configureSocket = (server) => {
   const smartWatchConnections = new Map();
   const dashboardConnections = new Map();
   const alertConnections = new Map();
-    const virtualNurseChatConnections = new Map();
+  const virtualNurseChatConnections = new Map();
   const bedsideNurseChatConnections = new Map();
 
   io.on("connection", (socket) => {
@@ -27,11 +26,11 @@ const configureSocket = (server) => {
     });
 
     socket.on("alertConnections", (virtualNurseId) => {
-      alertConnections.set(virtualNurseId, socket)
-    })
+      console.log("connection established");
+      alertConnections.set(virtualNurseId, socket);
+    });
 
     socket.on("watchData", (vitals) => {
-      console.log(vitals);
       const patientId = vitals["patientId"];
       const dashboardSocket = dashboardConnections.get(patientId);
 
@@ -53,30 +52,54 @@ const configureSocket = (server) => {
         console.log(`No dashboard found for patient ID ${patientId}`);
       }
     });
-
+    
     socket.on("new-alert", async (alert) => {
       const req = { params: { id: alert.patient } };
       const res = {
-        statusCode: null, 
-        jsonData: null, 
+        statusCode: null,
+        jsonData: null,
         status: function (code) {
           this.statusCode = code;
-          return this; 
+          return this;
         },
         json: function (data) {
           this.jsonData = data;
-          return this; 
+          return this;
         },
       };
-      console.log(alert + "send to vn");
+
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
-      const alertSocket = alertConnections.get(virtualNurse._id)
-      console.log(alertSocket);
-      if(alertSocket){
+
+      const alertSocket = alertConnections.get(String(virtualNurse._id));
+
+      if (alertSocket) {
         alertSocket.emit("alertIncoming", alert);
       }
-      
+    });
+
+    socket.on("delete-alert", async (alert) => {
+      const req = { params: { id: alert.patient } };
+      const res = {
+        statusCode: null,
+        jsonData: null,
+        status: function (code) {
+          this.statusCode = code;
+          return this;
+        },
+        json: function (data) {
+          this.jsonData = data;
+          return this;
+        },
+      };
+
+      await patientController.getVirtualNurseByPatientId(req, res);
+      const virtualNurse = res.jsonData;
+      const alertSocket = alertConnections.get(String(virtualNurse._id));
+
+      if (alertSocket) {
+        alertSocket.emit("patientAlertDeleted", alert);
+      }
     });
 
     socket.on("connectVirtualNurseForChatMessaging", (nurseId) => {

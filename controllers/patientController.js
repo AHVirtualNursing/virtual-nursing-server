@@ -7,6 +7,8 @@ const bedStatusEnum = ["occupied", "vacant"];
 const Reminder = require("../models/reminder");
 const Nurse = require("../models/nurse");
 const Ward = require("../models/ward");
+const virtualNurse = require("../models/virtualNurse");
+
 
 const createPatient = async (req, res) => {
   try {
@@ -35,32 +37,10 @@ const createPatient = async (req, res) => {
 
 const getPatients = async (req, res) => {
   try {
-    if (req.query.ids) {
-      const ids = req.query.ids.split(",");
-      const patients = await Promise.all(
-        ids.map(async (id) => {
-          if (id.match(/^[0-9a-fA-F]{24}$/)) {
-            const patient = await Patient.findById(id);
-            console.log(patient);
-            if (!patient) {
-              res
-                .status(500)
-                .json({ message: `cannot find any patient with ID ${id}` });
-            }
-            return patient;
-          } else {
-            res.status(500).json({ message: `${id} is in wrong format` });
-          }
-        })
-      );
-      res.status(200).json(patients);
-    } else {
-      const patients = await Patient.find({});
-      res.status(200).json({ success: true, data: patients });
-    }
+    const patients = await Patient.find({});
+    res.status(200).json(patients);
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ success: e.message });
+    res.status(500).json({ error: e.message });
   }
 };
 
@@ -121,7 +101,6 @@ const getAlertsByPatientId = async (req, res) => {
     }
 
     const alerts = await Alert.find({ patient: id });
-    //console.log(alerts);
     res.status(200).json(alerts);
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -159,7 +138,6 @@ const getVitalByPatientId = async (req, res) => {
     }
 
     const vital = await patient.vital;
-    //console.log(vital);
     res.status(200).json(vital);
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -188,7 +166,7 @@ const updatePatientById = async (req, res) => {
       reminders,
       reports,
       alertConfig,
-      layout,
+      order,
     } = req.body;
 
     if (infoLogs) {
@@ -221,8 +199,8 @@ const updatePatientById = async (req, res) => {
     if (reports) {
       patient.reports = reports;
     }
-    if (layout) {
-      patient.layout = layout;
+    if (order) {
+      patient.order = order;
     }
 
     if (alertConfig) {
@@ -397,15 +375,16 @@ const getVirtualNurseByPatientId = async (req, res) => {
         .json({ message: `cannot find any ward with Smart Bed ID ${smartBed._id}` });
     }
 
-    const virtualNurse = await VirtualNurse.findOne({ wards: ward._id });
-    if (!virtualNurse) {
+    const vn = await virtualNurse.findOne({ wards: ward._id });
+    if (!vn) {
       return res
         .status(500)
         .json({ message: `cannot find any Virtual Nurse with Ward ID ${ward._id}` });
         
     }
 
-    res.status(200).json(virtualNurse);
+
+    res.status(200).json(vn);
   } catch (e) {
     console.error(e);
     res.status(500).json({ success: e.message });

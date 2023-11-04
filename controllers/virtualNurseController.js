@@ -1,8 +1,6 @@
 const { ObjectId } = require("mongodb");
-const Nurse = require("../models/nurse");
-const SmartBed = require("../models/smartbed");
 const Ward = require("../models/ward");
-const { virtualNurse } = require("../models/webUser");
+const virtualNurse = require("../models/virtualNurse");
 
 const createVirtualNurse = async (req, res) => {
   try {
