@@ -80,7 +80,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         description: '',
         notes: 'Any additional notes',
         sentBy: 'Sender name or ID',
-        vitalsReading:[]
+        alertVitals:[]
       }
     };
     const result = {
@@ -96,6 +96,8 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       },
     };
 
+    const alertVital = {}
+
     const vitalsReading = {
       datetime: vitalsData.datetime,
     };
@@ -110,7 +112,9 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         } else {
           request.body.description = request.body.description + "Respiratory rate has risen above threshold" + "\n"
         }
-        request.body.vitalsReading.push(vitalsReading);
+        alertVital.vital = "Respiratory Rate";
+        alertVital.reading = vitalsData.respRate;
+        request.body.alertVitals.push(alertVital);
       }
       
     }
@@ -124,7 +128,9 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         } else {
           request.body.description = request.body.description + "Heart rate has risen above threshold" + "\n"
         }
-        request.body.vitalsReading.push(vitalsReading)
+        alertVital.vital = "Heart Rate";
+        alertVital.reading = vitalsData.heartRate;
+        request.body.alertVitals.push(alertVital);
       }
     }
     if (vitalsData.bloodPressureSys) {
@@ -137,7 +143,9 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         } else {
           request.body.description = request.body.description + "Systolic Blood Pressure has risen above threshold" + "\n"
         }
-        request.body.vitalsReading.push(vitalsReading)
+        alertVital.vital = "Systolic Blood Pressure";
+        alertVital.reading = vitalsData.bloodPressureSys;
+        request.body.alertVitals.push(alertVital);
       }
     }
     if (vitalsData.bloodPressureDia) {
@@ -150,7 +158,9 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         } else {
           request.body.description = request.body.description + "Diastolic Blood Pressure has risen above threshold" + "\n"
         }
-        request.body.vitalsReading.push(vitalsReading)
+        alertVital.vital = "Diastolic Blood Pressure";
+        alertVital.reading = vitalsData.bloodPressureDia;
+        request.body.alertVitals.push(alertVital);
       }
     }
     if (vitalsData.spO2) {
@@ -163,7 +173,9 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         } else {
           request.body.description = request.body.description + "Oxygen Level has risen above threshold" + "\n"
         }
-        request.body.vitalsReading.push(vitalsReading)
+        alertVital.vital = "SPO2";
+        alertVital.reading = vitalsData.spO2;
+        request.body.alertVitals.push(alertVital);
       }
     }
     if (vitalsData.temperature) {
@@ -176,7 +188,9 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         } else {
           request.body.description = request.body.description + "Temperature has risen above threshold" + "\n"
         }
-        request.body.vitalsReading.push(vitalsReading)
+        alertVital.vital = "Temperature";
+        alertVital.reading = vitalsData.temperature;
+        request.body.alertVitals.push(alertVital);
       }
     }
 

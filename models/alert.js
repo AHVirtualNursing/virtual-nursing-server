@@ -1,7 +1,18 @@
 const mongoose = require("mongoose");
-const { VitalsReading } = require("./vital");
 
-const alertStatusEnum = ["open", "handling", "complete"];
+
+const alertStatusEnum = ["open", "handling", "complete"]
+
+const AlertVitals = new mongoose.Schema({
+  reading: {
+    type: Number,
+    required: true,
+  },
+  vital:{
+    type: String,
+    required: true
+  }
+});
 
 const followUpLog = new mongoose.Schema({
   respRate: {
@@ -69,8 +80,8 @@ const alertSchema = new mongoose.Schema(
     followUps: {
       type: [followUpLog],
     },
-    vitalsReading: {
-      type:[VitalsReading]
+    alertVitals: {
+      type:[AlertVitals]
     }
   },
   {
