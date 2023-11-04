@@ -7,7 +7,7 @@ const bedStatusEnum = ["occupied", "vacant"];
 const Reminder = require("../models/reminder");
 const Nurse = require("../models/nurse");
 const Ward = require("../models/ward");
-const {virtualNurse} = require("../models/webUser");
+const virtualNurse = require("../models/virtualNurse");
 
 
 const createPatient = async (req, res) => {
