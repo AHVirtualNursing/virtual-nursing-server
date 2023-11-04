@@ -4,7 +4,7 @@ const axios = require("axios");
 const Patient = require("../models/patient");
 
 const SERVER_URL = "http://localhost:3001";
-mongoose.connect(process.env.MONGODB_LOCAL_URI, {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   autoIndex: false,
@@ -119,6 +119,11 @@ async function initialiseDb() {
         patient: patientId,
       }
     );
+
+    /* create alert config for patient */
+    await callApiRequest(`${SERVER_URL}/alertConfig`, "POST", {
+      patient: patientId,
+    });
 
     /* create it admin and virtual nurse */
     await callApiRequest(
