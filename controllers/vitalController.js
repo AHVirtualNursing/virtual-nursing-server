@@ -3,10 +3,9 @@ const Patient = require("../models/patient");
 const AlertController = require("../controllers/alertController");
 const AlertConfig = require("../models/alertConfig");
 
-
 const addVitalForPatient = async (req, res) => {
   try {
-   
+    console.log(req.body.patient)
     const {
       patient,
       datetime,
@@ -31,6 +30,7 @@ const addVitalForPatient = async (req, res) => {
     const vital = await processVitalForPatient(patient, vitalsData);
 
 
+
     res.status(200).json({ success: true, data: vital });
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -44,10 +44,7 @@ const addVitalForPatient = async (req, res) => {
 
 const processVitalForPatient = async (patientId, vitalsData) => {
   try {
-    const patient = await Patient.findById(patientId)
-      .populate("vital")
-      .populate("alertConfig");
-
+    const patient = await Patient.findById(patientId).populate("vital").populate("alertConfig");
     if (!patient) {
       return res.status(500).json({
         message: `cannot find any patient with Patient ID ${req.body.patient}`,
@@ -65,167 +62,148 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         temperature: [],
       });
 
+
       await vital.save();
       patient.vital = vital;
       await patient.save();
     }
-
     let alertConfig = patient.alertConfig;
-
-    if (!alertConfig) {
-      throw new Error(
-        `cannot find any Alert Config with Patient ID ${patientId}`
-      );
+    if(!alertConfig){
+      return res.status(500).json({
+        message: `cannot find any Alert Config with Patient ID ${req.body.patient}`,
+      });
     }
 
     const request = {
       body: {
         patient: patientId,
-        description: "",
-        notes: "Any additional notes",
-        sentBy: "Sender name or ID",
-      },
+        description: '',
+        notes: 'Any additional notes',
+        sentBy: 'Sender name or ID',
+        alertVitals:[]
+      }
     };
-
     const result = {
-      statusCode: null,
-      jsonData: null,
+      statusCode: null, 
+      jsonData: null, 
       status: function (code) {
         this.statusCode = code;
-        return this;
+        return this; 
       },
       json: function (data) {
         this.jsonData = data;
-        return this;
+        return this; 
       },
     };
+
+    const alertVital = {}
 
     const vitalsReading = {
       datetime: vitalsData.datetime,
     };
-
+    console.log(vitalsData);
     if (vitalsData.respRate) {
       vitalsReading.reading = vitalsData.respRate;
       vital.respRate.push(vitalsReading);
 
-      if (
-        vitalsData.respRate < alertConfig.rrConfig[0] ||
-        vitalsData.respRate > alertConfig.rrConfig[1]
-      ) {
-        if (vitalsData.respRate < alertConfig.rrConfig[0]) {
-          request.body.description =
-            request.body.description +
-            "Respiratory rate has fallen below threshold" +
-            "\n";
+      if(vitalsData.respRate < alertConfig.rrConfig[0] || vitalsData.respRate > alertConfig.rrConfig[1]){
+        if(vitalsData.respRate < alertConfig.rrConfig[0]){
+          request.body.description = request.body.description + "Respiratory rate has fallen below threshold" + "\n"
         } else {
-          request.body.description =
-            request.body.description +
-            "Respiratory rate has risen above threshold" +
-            "\n";
+          request.body.description = request.body.description + "Respiratory rate has risen above threshold" + "\n"
         }
+        alertVital.vital = "Respiratory Rate";
+        alertVital.reading = vitalsData.respRate;
+        request.body.alertVitals.push(alertVital);
       }
+      
     }
-
     if (vitalsData.heartRate) {
       vitalsReading.reading = vitalsData.heartRate;
       vital.heartRate.push(vitalsReading);
 
-      if (
-        vitalsData.heartRate < alertConfig.hrConfig[0] ||
-        vitalsData.heartRate > alertConfig.hrConfig[1]
-      ) {
-        if (vitalsData.heartRate < alertConfig.hrConfig[0]) {
-          request.body.description =
-            request.body.description +
-            "Heart rate has fallen below threshold" +
-            "\n";
+      if(vitalsData.heartRate < alertConfig.hrConfig[0] || vitalsData.heartRate > alertConfig.hrConfig[1]){
+        if(vitalsData.heartRate < alertConfig.hrConfig[0]){
+          request.body.description = request.body.description + "Heart rate has fallen below threshold" + "\n"
         } else {
-          request.body.description =
-            request.body.description +
-            "Heart rate has risen above threshold" +
-            "\n";
+          request.body.description = request.body.description + "Heart rate has risen above threshold" + "\n"
         }
+        alertVital.vital = "Heart Rate";
+        alertVital.reading = vitalsData.heartRate;
+        request.body.alertVitals.push(alertVital);
       }
     }
-
     if (vitalsData.bloodPressureSys) {
       vitalsReading.reading = vitalsData.bloodPressureSys;
       vital.bloodPressureSys.push(vitalsReading);
 
-      if (
-        vitalsData.bloodPressureSys < alertConfig.bpSysConfig[0] ||
-        vitalsData.bloodPressureSys > alertConfig.bpSysConfig[1]
-      ) {
-        if (vitalsData.bloodPressureSys < alertConfig.bpSysConfig[0]) {
-          request.body.description =
-            request.body.description +
-            "Systolic Blood Pressure has fallen below threshold" +
-            "\n";
+      if(vitalsData.bloodPressureSys < alertConfig.bpSysConfig[0] || vitalsData.bloodPressureSys > alertConfig.bpSysConfig[1]){
+        if(vitalsData.bloodPressureSys < alertConfig.bpSysConfig[0]){
+          request.body.description = request.body.description + "Systolic Blood Pressure has fallen below threshold" + "\n"
         } else {
-          request.body.description =
-            request.body.description +
-            "Systolic Blood Pressure has risen above threshold" +
-            "\n";
+          request.body.description = request.body.description + "Systolic Blood Pressure has risen above threshold" + "\n"
         }
+        alertVital.vital = "Systolic Blood Pressure";
+        alertVital.reading = vitalsData.bloodPressureSys;
+        request.body.alertVitals.push(alertVital);
       }
     }
-
     if (vitalsData.bloodPressureDia) {
       vitalsReading.reading = vitalsData.bloodPressureDia;
       vital.bloodPressureDia.push(vitalsReading);
 
-      if (
-        vitalsData.bloodPressureDia < alertConfig.bpDiaConfig[0] ||
-        vitalsData.bloodPressureDia > alertConfig.bpDiaConfig[1]
-      ) {
-        if (vitalsData.bloodPressureDia < alertConfig.bpDiaConfig[0]) {
-          request.body.description =
-            request.body.description +
-            "Diastolic Blood Pressure has fallen below threshold" +
-            "\n";
+      if(vitalsData.bloodPressureDia < alertConfig.bpDiaConfig[0] || vitalsData.bloodPressureDia > alertConfig.bpDiaConfig[1]){
+        if(vitalsData.bloodPressureDia < alertConfig.bpDiaConfig[0]){
+          request.body.description = request.body.description + "Diastolic Blood Pressure has fallen below threshold" + "\n"
         } else {
-          request.body.description =
-            request.body.description +
-            "Diastolic Blood Pressure has risen above threshold" +
-            "\n";
+          request.body.description = request.body.description + "Diastolic Blood Pressure has risen above threshold" + "\n"
         }
+        alertVital.vital = "Diastolic Blood Pressure";
+        alertVital.reading = vitalsData.bloodPressureDia;
+        request.body.alertVitals.push(alertVital);
       }
     }
-
     if (vitalsData.spO2) {
       vitalsReading.reading = vitalsData.spO2;
       vital.spO2.push(vitalsReading);
 
-      if (
-        vitalsData.sp02 < alertConfig.spO2Config[0] ||
-        vitalsData.sp02 > alertConfig.spO2Config[1]
-      ) {
-        if (vitalsData.spO2 < alertConfig.spO2Config[0]) {
-          request.body.description =
-            request.body.description +
-            "Oxygen Level has fallen below threshold" +
-            "\n";
+      if(vitalsData.sp02 < alertConfig.spO2Config[0] || vitalsData.sp02 > alertConfig.spO2Config[1]){
+        if(vitalsData.spO2 < alertConfig.spO2Config[0]){
+          request.body.description = request.body.description + "Oxygen Level has fallen below threshold" + "\n"
         } else {
-          request.body.description =
-            request.body.description +
-            "Oxygen Level has risen above threshold" +
-            "\n";
+          request.body.description = request.body.description + "Oxygen Level has risen above threshold" + "\n"
         }
+        alertVital.vital = "SPO2";
+        alertVital.reading = vitalsData.spO2;
+        request.body.alertVitals.push(alertVital);
+      }
+    }
+    if (vitalsData.temperature) {
+      vitalsReading.temperature = vitalsData.temperature;
+      vital.temperature.push(vitalsReading);
+
+      if(vitalsData.temperature < alertConfig.temperatureConfig[0] || vitalsData.temperature > alertConfig.temperatureConfig[1]){
+        if(vitalsData.temperature < alertConfig.temperatureConfig[0]){
+          request.body.description = request.body.description + "Temperature has fallen below threshold" + "\n"
+        } else {
+          request.body.description = request.body.description + "Temperature has risen above threshold" + "\n"
+        }
+        alertVital.vital = "Temperature";
+        alertVital.reading = vitalsData.temperature;
+        request.body.alertVitals.push(alertVital);
       }
     }
 
-    if (vitalsData.temperature) {
-      vitalsReading.reading = vitalsData.temperature;
-      vital.temperature.push(vitalsReading);
-    }
-
+    
+    
     await vital.save();
     patient.vital = vital;
     await patient.save();
 
-    if (request.body.description != "") {
+    if(request.body.description != ''){
       await AlertController.createAlert(request, result);
     }
+    
 
     return vital;
   } catch (error) {
