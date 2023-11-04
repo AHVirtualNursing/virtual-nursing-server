@@ -1,7 +1,11 @@
+const { io } = require("socket.io-client");
 const Alert = require("../models/alert");
 const Patient = require("../models/patient");
+const alertNotification = require("../helper/alertNotification");
+const SERVER_URL = "http://localhost:3001";
 
 const createAlert = async (req, res) => {
+  const socket = io(SERVER_URL);
   try {
     const patient = await Patient.findById({ _id: req.body.patient });
     if (!patient) {
@@ -16,9 +20,13 @@ const createAlert = async (req, res) => {
       sentBy: req.body.sentBy,
     });
     await alert.save();
-
     patient.alerts.push(alert._id);
+
     await patient.save();
+
+    socket.emit("new-alert", alert);
+
+    await alertNotification.sendAlert(alert);
 
     res.status(200).json({ success: true, data: alert });
   } catch (e) {
@@ -147,6 +155,7 @@ const createFollowUpForAlert = async (req, res) => {
 };
 
 const deleteAlertById = async (req, res) => {
+  const socket = io(SERVER_URL);
   try {
     const { id } = req.params;
     const alert = await Alert.findById(id);
@@ -172,6 +181,8 @@ const deleteAlertById = async (req, res) => {
     }
 
     await Alert.deleteOne({ _id: id });
+    // emit delete-alert event when deleting alert to trigger update of patient's alert list
+    socket.emit("delete-alert", alert);
     res.status(200).json(alert);
   } catch (e) {
     res.status(500).json({ error: e.message });

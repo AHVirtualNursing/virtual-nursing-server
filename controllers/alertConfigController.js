@@ -55,7 +55,7 @@ const getAlertConfigById = async (req, res) => {
 const updateAlertConfigById = async (req, res) => {
   try {
     const { id } = req.params;
-    const alertConfig = await AlertConfig.findbyId(id);
+    const alertConfig = await AlertConfig.findById(id);
     if (!alertConfig) {
       return res
         .status(500)
@@ -79,9 +79,10 @@ const updateAlertConfigById = async (req, res) => {
       alertConfig.spO2Config = spO2Config;
     }
 
-    const updatedAlertConfig = await AlertConfig.save();
+    const updatedAlertConfig = await alertConfig.save();
     res.status(200).json(updatedAlertConfig);
   } catch (e) {
+    console.log(e)
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(500).json({ validationErrors });

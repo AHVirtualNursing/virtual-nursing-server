@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 const Device = require("./device");
 
 const bedStatusEnum = ["occupied", "vacant"];
+const bedPositionEnum = ["upright", "incline", "flat"]
+
+
 
 const smartBedSchema = new mongoose.Schema(
   {
@@ -27,10 +30,46 @@ const smartBedSchema = new mongoose.Schema(
       default: "vacant",
       required: false,
     },
+    bedPosition: {
+      type: String,
+      enum: {
+        values: bedPositionEnum,
+        message: "Invalid bed position: {VALUE}",
+      },
+      default: "flat",
+      required: true,
+    },
     railStatus: {
+      left: {
+        upper: {
+          type: Boolean,
+          default: true, // Default value for left upper
+        },
+        lower: {
+          type: Boolean,
+          default: true, // Default value for left lower
+        },
+      },
+      right: {
+        upper: {
+          type: Boolean,
+          default: true, // Default value for right upper
+        },
+        lower: {
+          type: Boolean,
+          default: true, // Default value for right lower
+        },
+      },
+    },
+    isBrakeSet: {
+      type: Boolean,
+      default: true,
+      required: true,
+    },
+    bedAlarmTriggered: {
       type: Boolean,
       default: false,
-      required: false,
+      required: true,
     },
     patient: {
       type: mongoose.Schema.Types.ObjectId,
