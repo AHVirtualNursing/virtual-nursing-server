@@ -8,7 +8,6 @@ const firebaseAdmin = admin.initializeApp({
 })
 
 const sendPushNotification = async (devicePushToken, title, body) => {
-    console.log("sending");
     await firebaseAdmin.messaging().send({
         token: devicePushToken,
         notification: {

@@ -30,6 +30,9 @@ const chatRoutes = require("./routes/chat");
 /*PUSH NOTIFICATIONS */
 const reminderJob = require("./helper/reminderNotification");
 
+/*NEWS2 SCORE */
+const news2Scheduler = require("./helper/news2");
+
 const app = express();
 
 
