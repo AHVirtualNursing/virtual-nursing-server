@@ -31,6 +31,10 @@ const followUpLog = new mongoose.Schema({
     type: String,
     required: true,
   },
+  addedBy: {
+    type: String,
+    required: true,
+  },
 });
 
 const alertSchema = new mongoose.Schema(

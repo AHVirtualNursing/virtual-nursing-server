@@ -9,6 +9,7 @@ const Nurse = require("../models/nurse");
 const Ward = require("../models/ward");
 const {virtualNurse} = require("../models/webUser");
 
+
 const createPatient = async (req, res) => {
   try {
     const patient = new Patient({

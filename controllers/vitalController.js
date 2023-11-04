@@ -3,9 +3,10 @@ const Patient = require("../models/patient");
 const AlertController = require("../controllers/alertController");
 const AlertConfig = require("../models/alertConfig");
 
+
 const addVitalForPatient = async (req, res) => {
   try {
-    console.log(req.body.patient)
+   
     const {
       patient,
       datetime,
@@ -30,7 +31,6 @@ const addVitalForPatient = async (req, res) => {
     const vital = await processVitalForPatient(patient, vitalsData);
 
 
-
     res.status(200).json({ success: true, data: vital });
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -45,6 +45,7 @@ const addVitalForPatient = async (req, res) => {
 const processVitalForPatient = async (patientId, vitalsData) => {
   try {
     const patient = await Patient.findById(patientId).populate("vital").populate("alertConfig");
+    
     if (!patient) {
       return res.status(500).json({
         message: `cannot find any patient with Patient ID ${req.body.patient}`,
@@ -61,7 +62,6 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         sp02: [],
         temperature: [],
       });
-
 
       await vital.save();
       patient.vital = vital;
@@ -98,7 +98,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     const vitalsReading = {
       datetime: vitalsData.datetime,
     };
-    console.log(vitalsData);
+    
     if (vitalsData.respRate) {
       vitalsReading.reading = vitalsData.respRate;
       vital.respRate.push(vitalsReading);
@@ -161,7 +161,6 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         }
       }
     }
-    
     if (vitalsData.temperature) {
       vitalsReading.reading = vitalsData.temperature;
       vital.temperature.push(vitalsReading);
