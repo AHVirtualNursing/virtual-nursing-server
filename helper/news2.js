@@ -1,11 +1,10 @@
 const schedule = require('node-schedule');
 const patientController = require("../controllers/patientController");
 const vitalController = require("../controllers/vitalController");
-
 const patientO2IntakeEnum = ["air", "oxygen"];
 const patientConsciousnessEnum = ["alert", "cvpu"];
 
-const scheduleNews2 = schedule.scheduleJob("* * * * * ", async () => {
+const scheduleNews2 = schedule.scheduleJob("* /5 * * * ", async () => {
   const req = {};
   const res = {
     statusCode: null,
@@ -22,7 +21,8 @@ const scheduleNews2 = schedule.scheduleJob("* * * * * ", async () => {
 
   await patientController.getPatients(req, res);
   const patients = res.jsonData;
-
+  console.log(patients)
+ 
   for (const patient of patients) {
     await calculateNews2(patient);
   }
@@ -55,6 +55,8 @@ const calculateNews2 = async (patient) => {
   if (!vital) {
     return;
   }
+
+  console.log(patient.name, vital._id);
 
   if (vital.respRate.length > 0) {
     respRate = vital.respRate[vital.respRate.length - 1]["reading"];
