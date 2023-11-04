@@ -100,7 +100,5 @@ const smartBedSchema = new mongoose.Schema(
   }
 );
 
-smartBedSchema.add(Device.schema);
-
 module.exports =
   mongoose.models.SmartBed || mongoose.model("SmartBed", smartBedSchema);
