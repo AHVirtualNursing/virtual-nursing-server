@@ -14,7 +14,7 @@ const configureSocket = (server) => {
   const smartWatchConnections = new Map();
   const dashboardConnections = new Map();
   const alertConnections = new Map();
-  
+
   io.on("connection", (socket) => {
     socket.on("connectSmartWatch", async (patientId) => {
       smartWatchConnections.set(patientId, socket);
@@ -25,8 +25,10 @@ const configureSocket = (server) => {
     });
 
     socket.on("alertConnections", (virtualNurseId) => {
-      alertConnections.set(virtualNurseId, socket)
-    })
+      console.log("connection established");
+      alertConnections.set(virtualNurseId, socket);
+      console.log(alertConnections);
+    });
 
     socket.on("watchData", (vitals) => {
       const patientId = vitals["patientId"];
@@ -50,21 +52,20 @@ const configureSocket = (server) => {
     });
     
     socket.on("new-alert", async (alert) => {
-      
       const req = { params: { id: alert.patient } };
       const res = {
-        statusCode: null, 
-        jsonData: null, 
+        statusCode: null,
+        jsonData: null,
         status: function (code) {
           this.statusCode = code;
-          return this; 
+          return this;
         },
         json: function (data) {
           this.jsonData = data;
-          return this; 
+          return this;
         },
       };
-      
+
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
       
@@ -73,7 +74,30 @@ const configureSocket = (server) => {
       if(alertSocket){
         alertSocket.emit("alertIncoming", alert);
       }
-      
+    });
+
+    socket.on("delete-alert", async (alert) => {
+      const req = { params: { id: alert.patient } };
+      const res = {
+        statusCode: null,
+        jsonData: null,
+        status: function (code) {
+          this.statusCode = code;
+          return this;
+        },
+        json: function (data) {
+          this.jsonData = data;
+          return this;
+        },
+      };
+
+      await patientController.getVirtualNurseByPatientId(req, res);
+      const virtualNurse = res.jsonData;
+      const alertSocket = alertConnections.get(String(virtualNurse._id));
+
+      if (alertSocket) {
+        alertSocket.emit("patientAlertDeleted", alert);
+      }
     });
 
     socket.on("disconnect", () => {
