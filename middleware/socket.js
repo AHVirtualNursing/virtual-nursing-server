@@ -28,11 +28,9 @@ const configureSocket = (server) => {
     socket.on("alertConnections", (virtualNurseId) => {
       console.log("connection established");
       alertConnections.set(virtualNurseId, socket);
-      
     });
 
     socket.on("watchData", (vitals) => {
-  
       const patientId = vitals["patientId"];
       const dashboardSocket = dashboardConnections.get(patientId);
 
@@ -72,10 +70,10 @@ const configureSocket = (server) => {
 
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
-      
+
       const alertSocket = alertConnections.get(String(virtualNurse._id));
-      
-      if(alertSocket){
+
+      if (alertSocket) {
         alertSocket.emit("alertIncoming", alert);
       }
     });
@@ -134,7 +132,6 @@ const configureSocket = (server) => {
       smartWatchConnections.delete(socket.id);
       dashboardConnections.delete(socket.id);
       alertConnections.delete(socket.id);
-      
     });
   });
 };

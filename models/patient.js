@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 
 const patientO2IntakeEnum = ["air", "oxygen"];
 const patientConsciousnessEnum = ["alert", "cvpu"];
+const patientAcuityLevelEnum = ["L1", "L2", "L3"];
+const patientFallRiskEnum = ["High", "Medium", "Low"];
 
 const infoLog = new mongoose.Schema({
   info: {
@@ -28,6 +30,7 @@ const patientSchema = new mongoose.Schema(
     nric: {
       type: String,
       required: true,
+      unique: true,
     },
     picture: {
       type: String,
@@ -60,9 +63,22 @@ const patientSchema = new mongoose.Schema(
       },
       default: patientConsciousnessEnum[0],
     },
-    temperature: {
-      type: Number,
-      required: false,
+    acuityLevel: {
+      type: String,
+      enum: {
+        values: patientAcuityLevelEnum,
+        message: "Invalid patient acuity level: {VALUE}",
+      }, 
+    },
+    fallRisk: {
+      type: String,
+      enum: {
+        values: patientFallRiskEnum,
+        message: "Invalid patient patient fall risk: {VALUE}",
+      }, 
+    },
+    fallRiskProtocolBreachReason: {
+      type: String
     },
     isDischarged: {
       type: Boolean,
