@@ -71,9 +71,6 @@ const alertSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Patient",
     },
-    sentBy: {
-      type: String,
-    },
     handledBy: {
       type: String,
     },
