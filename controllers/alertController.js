@@ -18,6 +18,7 @@ const createAlert = async (req, res) => {
       notes: req.body.notes,
       patient: req.body.patient,
       sentBy: req.body.sentBy,
+      vitalsReading: req.body.vitalsReading
     });
     await alert.save();
     patient.alerts.push(alert._id);

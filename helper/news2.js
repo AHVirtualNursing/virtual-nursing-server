@@ -1,7 +1,6 @@
 const schedule = require('node-schedule');
 const patientController = require("../controllers/patientController");
 const vitalController = require("../controllers/vitalController");
-
 const patientO2IntakeEnum = ["air", "oxygen"];
 const patientConsciousnessEnum = ["alert", "cvpu"];
 

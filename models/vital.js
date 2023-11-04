@@ -40,4 +40,5 @@ const vitalSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.models.Vital || mongoose.model("Vital", vitalSchema);
+const Vital = mongoose.models.Vital || mongoose.model("Vital", vitalSchema);
+module.exports = {Vital, VitalsReading}

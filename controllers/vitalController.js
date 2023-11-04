@@ -79,7 +79,8 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         patient: patientId,
         description: '',
         notes: 'Any additional notes',
-        sentBy: 'Sender name or ID'
+        sentBy: 'Sender name or ID',
+        vitalsReading:[]
       }
     };
     const result = {
@@ -109,6 +110,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         } else {
           request.body.description = request.body.description + "Respiratory rate has risen above threshold" + "\n"
         }
+        request.body.vitalsReading.push(vitalsReading);
       }
       
     }
@@ -121,8 +123,8 @@ const processVitalForPatient = async (patientId, vitalsData) => {
           request.body.description = request.body.description + "Heart rate has fallen below threshold" + "\n"
         } else {
           request.body.description = request.body.description + "Heart rate has risen above threshold" + "\n"
-          
         }
+        request.body.vitalsReading.push(vitalsReading)
       }
     }
     if (vitalsData.bloodPressureSys) {
@@ -135,6 +137,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         } else {
           request.body.description = request.body.description + "Systolic Blood Pressure has risen above threshold" + "\n"
         }
+        request.body.vitalsReading.push(vitalsReading)
       }
     }
     if (vitalsData.bloodPressureDia) {
@@ -147,6 +150,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         } else {
           request.body.description = request.body.description + "Diastolic Blood Pressure has risen above threshold" + "\n"
         }
+        request.body.vitalsReading.push(vitalsReading)
       }
     }
     if (vitalsData.spO2) {
@@ -159,15 +163,25 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         } else {
           request.body.description = request.body.description + "Oxygen Level has risen above threshold" + "\n"
         }
+        request.body.vitalsReading.push(vitalsReading)
       }
     }
     if (vitalsData.temperature) {
       vitalsReading.reading = vitalsData.temperature;
       vital.temperature.push(vitalsReading);
+
+      if(vitalsData.temperature < alertConfig.temperatureConfig[0] || vitalsData.temperature > alertConfig.temperatureConfig[1]){
+        if(vitalsData.temperature < alertConfig.temperatureConfig[0]){
+          request.body.description = request.body.description + "Temperature has fallen below threshold" + "\n"
+        } else {
+          request.body.description = request.body.description + "Temperature has risen above threshold" + "\n"
+        }
+        request.body.vitalsReading.push(vitalsReading)
+      }
     }
 
     
-
+    
     await vital.save();
     patient.vital = vital;
     await patient.save();

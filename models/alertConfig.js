@@ -4,7 +4,7 @@ const alertConfigSchema = new mongoose.Schema(
   {
     rrConfig: {
       type: [Number],
-      default: [8, 32],
+      default: [8, 25],
       required: true,
     },
     hrConfig: {
@@ -14,7 +14,7 @@ const alertConfigSchema = new mongoose.Schema(
     },
     bpSysConfig: {
       type: [Number],
-      default: [0, 120],
+      default: [90, 220],
       required: true,
     },
     bpDiaConfig: {
@@ -24,9 +24,14 @@ const alertConfigSchema = new mongoose.Schema(
     },
     spO2Config: {
       type: [Number],
-      default: [95, 100],
+      default: [91, 100],
       required: true,
     },
+    temperatureConfig: {
+      type: [Number],
+      default: [35, 39],
+      required: true,
+    }
   },
   {
     timestamps: true,

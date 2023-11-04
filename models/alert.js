@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { VitalsReading } = require("./vital");
 
 const alertStatusEnum = ["open", "handling", "complete"];
 
@@ -68,6 +69,9 @@ const alertSchema = new mongoose.Schema(
     followUps: {
       type: [followUpLog],
     },
+    vitalsReading: {
+      type:[VitalsReading]
+    }
   },
   {
     timestamps: true,
