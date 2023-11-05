@@ -68,7 +68,7 @@ const configureSocket = (server) => {
 
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
-      // console.log(virtualNurse);
+      console.log(virtualNurse);
       // console.log(virtualNurse._id.toString)
       // console.log(String(virtualNurse._id));
       const alertSocket = alertConnections.get(String(virtualNurse._id));
