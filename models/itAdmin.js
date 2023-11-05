@@ -10,4 +10,4 @@ const itAdminSchema = new mongoose.Schema(
 
 itAdminSchema.add(User.schema);
 
-module.exports = mongoose.model("itAdmin", itAdminSchema);
+module.exports = mongoose.model("itAdmin", itAdminSchema, "it_admins");

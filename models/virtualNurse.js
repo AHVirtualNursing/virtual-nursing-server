@@ -18,4 +18,8 @@ const virtualNurseSchema = new mongoose.Schema(
 
 virtualNurseSchema.add(User.schema);
 
-module.exports = mongoose.model("VirtualNurse", virtualNurseSchema);
+module.exports = mongoose.model(
+  "VirtualNurse",
+  virtualNurseSchema,
+  "virtual_nurses"
+);
