@@ -146,7 +146,7 @@ const updateSmartBedById = async (req, res) => {
       smartbed.isBedAlarmOn = isBedAlarmOn;
     }
     if (bedAlarmProtocolBreachReason) {
-      patient.bedAlarmProtocolBreachReason = bedAlarmProtocolBreachReason;
+      smartbed.bedAlarmProtocolBreachReason = bedAlarmProtocolBreachReason;
     }
 
     // dont call this unless testing
