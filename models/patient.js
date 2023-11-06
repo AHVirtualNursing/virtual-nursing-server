@@ -81,6 +81,12 @@ const patientSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    admissionDateTime: {
+      type: Date
+    },
+    dischargeDateTime: {
+      type: Date
+    },
     alerts: [
       {
         type: mongoose.Schema.Types.ObjectId,
