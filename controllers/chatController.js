@@ -342,7 +342,6 @@ const getChatsForBedsideNurse = async (req, res) => {
         ],
       },
     ]);
-
     chats.forEach((chat) => {
       chat.messages.sort(
         (a, b) =>
