@@ -38,7 +38,7 @@ const getPatients = async (req, res) => {
         ids.map(async (id) => {
           if (id.match(/^[0-9a-fA-F]{24}$/)) {
             const patient = await Patient.findById(id);
-            console.log(patient);
+            // console.log(patient);
             if (!patient) {
               res
                 .status(500)
@@ -88,7 +88,7 @@ const getPatientsByIds = async (req, res) => {
       idsToRetrieve.map(async (id) => {
         if (id.match(/^[0-9a-fA-F]{24}$/)) {
           const patient = await Patient.findById(id);
-          console.log(patient);
+          // console.log(patient);
           if (!patient) {
             res
               .status(500)
@@ -110,7 +110,7 @@ const getAlertsByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
     const patient = await Patient.findById(id);
-    console.log(patient);
+    // console.log(patient);
     if (!patient) {
       return res
         .status(500)
@@ -128,7 +128,7 @@ const getRemindersByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
     const patient = await Patient.findById(id);
-    console.log(patient);
+    // console.log(patient);
     if (!patient) {
       return res
         .status(500)
@@ -136,7 +136,7 @@ const getRemindersByPatientId = async (req, res) => {
     }
 
     const reminders = await Reminder.find({ patient: id });
-    console.log(reminders);
+    // console.log(reminders);
     res.status(200).json(reminders);
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -147,7 +147,7 @@ const getVitalByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
     const patient = await Patient.findById(id).populate('vital');
-    console.log(patient);
+    // console.log(patient);
     if (!patient) {
       return res
         .status(500)

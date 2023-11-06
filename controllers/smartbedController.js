@@ -8,7 +8,7 @@ const createSmartBed = async (req, res) => {
     const smartbed = new SmartBed({
       name: req.body.name,
     });
-    console.log(smartbed);
+    // console.log(smartbed);
     await smartbed.save();
 
     res.status(200).json({ success: true, data: smartbed });

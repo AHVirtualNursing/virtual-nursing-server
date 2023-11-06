@@ -27,7 +27,8 @@ const configureSocket = (server) => {
     socket.on("alertConnections", (virtualNurseId) => {
       console.log("connection established");
       alertConnections.set(virtualNurseId, socket);
-      console.log(alertConnections);
+      console.log(alertConnections.size)
+      // console.log(alertConnections);
     });
 
     socket.on("watchData", (vitals) => {
@@ -68,7 +69,7 @@ const configureSocket = (server) => {
 
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
-      console.log(virtualNurse);
+      // console.log(virtualNurse);
       // console.log(virtualNurse._id.toString)
       // console.log(String(virtualNurse._id));
       const alertSocket = alertConnections.get(String(virtualNurse._id));
@@ -76,10 +77,11 @@ const configureSocket = (server) => {
       await patientController.getAlertsByPatientId(req, res);
       const alertsList = res.jsonData;
 
-      console.log(alertSocket);
+      // console.log(alertSocket);
       if (alertSocket) {
         console.log("went inside if");
         alertSocket.emit("alertIncoming", alert);
+        console.log("alertIncomingEmitted")
         alertSocket.emit("patientAlertAdded", alertsList);
       }
     });
