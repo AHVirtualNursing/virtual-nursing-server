@@ -49,6 +49,21 @@ const followUpLog = new mongoose.Schema({
   },
 });
 
+const NoteLog = new mongoose.Schema({
+  info: {
+    type: String,
+    required: true,
+  },
+  datetime: {
+    type: String,
+    required: true,
+  },
+  addedBy: {
+    type: String,
+    required: true,
+  },
+});
+
 const alertSchema = new mongoose.Schema(
   {
     status: {
@@ -65,7 +80,7 @@ const alertSchema = new mongoose.Schema(
       required: true,
     },
     notes: {
-      type: String,
+      type: [NoteLog],
     },
     patient: {
       type: mongoose.Schema.Types.ObjectId,
