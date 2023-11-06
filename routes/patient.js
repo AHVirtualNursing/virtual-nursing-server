@@ -1,11 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const patient = require("../models/patient");
 const Patient = require("../controllers/patientController");
-const Smartbed = require("../models/smartbed");
 
 router.get("/", Patient.getPatients);
 router.get("/:id", Patient.getPatientById);
+router.get("/:nric/nric", Patient.getPatientByNric);
 router.get("/:id/alerts", Patient.getAlertsByPatientId);
 router.get("/:id/reminders", Patient.getRemindersByPatientId);
 router.get("/:id/nurses", Patient.getNursesByPatientId);
