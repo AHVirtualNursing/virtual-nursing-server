@@ -12,15 +12,33 @@ const virtualNurse = require("../models/virtualNurse");
 
 const createPatient = async (req, res) => {
   try {
-    const patient = new Patient({
-      name: req.body.name,
-      nric: req.body.nric,
-      condition: req.body.condition,
-      infoLogs: req.body.infoLogs,
-      copd: req.body.copd,
-    });
-    await Patient.create(patient);
-    res.status(200).json({ success: true, data: patient });
+    const patientNric = req.body.nric;
+    const readmittedPatient = await Patient.findOne({nric: String(patientNric)})
+
+    if (!readmittedPatient) {
+      console.log("patient is new and no record of them was found in the DB")
+      const patient = new Patient({
+        name: req.body.name,
+        nric: req.body.nric,
+        condition: req.body.condition,
+        infoLogs: req.body.infoLogs,
+        copd: req.body.copd,
+        admissionDateTime: new Date()
+      });
+      newPatientRecord = await Patient.create(patient);
+      res.status(200).json({ success: true, data: patient });
+    }
+    else {
+      console.log("patient is being readmitted and a record of them was found in the DB")
+      readmittedPatient.condition = req.body.condition;
+      readmittedPatient.infoLogs = req.body.infoLogs;
+      readmittedPatient.copd = req.body.copd;
+      readmittedPatient.admissionDateTime = new Date();
+      readmittedPatient.isDischarged = false;
+      readmittedPatient.dischargeDateTime = undefined;
+      await readmittedPatient.save();
+      res.status(200).json({ success: true, data: readmittedPatient });
+    }
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
@@ -30,7 +48,7 @@ const createPatient = async (req, res) => {
         .status(500)
         .json({ message: "NRIC of patient must be unique." });
     } else {
-      res.status(500).json({ success: e.message });
+      res.status(500).json({ success: false, data: e.message });
     }
   }
 };
@@ -86,6 +104,21 @@ const getPatientsByIds = async (req, res) => {
     res.status(200).json(patients);
   } catch (e) {
     res.status(500).json({ message: e.message });
+  }
+};
+
+const getPatientByNric = async (req, res) => {
+  try {
+    const { nric } = req.params;
+    const patient = await Patient.findOne({nric: String(nric)})
+    if (!patient) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any patient with NRIC ${nric}` }); 
+    }
+    res.status(200).json(patient);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 };
 
@@ -236,6 +269,7 @@ const dischargePatientById = async (req, res) => {
     }
 
     patient.isDischarged = true;
+    patient.dischargeDateTime = new Date();
     await patient.save();
 
     const smartBed = await SmartBed.findOne({ patient: id });
@@ -268,7 +302,7 @@ const dischargePatientById = async (req, res) => {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(500).json({ validationErrors });
     } else {
-      res.status(500).json({ success: e.message });
+      res.status(500).json({ success: false, data: e.message });
     }
   }
 };
@@ -396,6 +430,7 @@ module.exports = {
   getPatients,
   getPatientById,
   getPatientsByIds,
+  getPatientByNric,
   getAlertsByPatientId,
   getRemindersByPatientId,
   getVitalByPatientId,
