@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const Device = require("./device");
 
 const bedStatusEnum = ["occupied", "vacant"];
 const bedPositionEnum = ["upright", "incline", "flat"]
