@@ -35,7 +35,7 @@ const chatSchema = new mongoose.Schema(
   {
     virtualNurse: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "virtualNurse",
+      ref: "VirtualNurse",
       required: true,
     },
     bedsideNurse: {

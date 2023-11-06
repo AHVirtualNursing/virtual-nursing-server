@@ -103,10 +103,12 @@ const configureSocket = (server) => {
     });
 
     socket.on("connectVirtualNurseForChatMessaging", (nurseId) => {
+      console.log("Virtual Nurse is connected to Socket")
       virtualNurseChatConnections.set(nurseId, socket);
     });
 
     socket.on("connectBedsideNurseForChatMessaging", (nurseId) => {
+      console.log("Bedside Nurse is connected to Socket")
       bedsideNurseChatConnections.set(nurseId, socket);
     });
 
