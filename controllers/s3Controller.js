@@ -9,10 +9,12 @@ const uploadFile = async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
+    const folder = req.body.folder ?? "uploads";
+
     const bucket = "ah-virtual-nursing";
     const file = req.file;
     const filename = Date.now() + "-" + file.originalname;
-    const destinationKey = "uploads/" + filename;
+    const destinationKey = folder + "/" + filename;
 
     const command = new PutObjectCommand({
       Bucket: bucket,
