@@ -3,13 +3,6 @@ require("dotenv").config();
 const axios = require("axios");
 const Patient = require("../models/patient");
 
-const SERVER_URL = "http://localhost:3001";
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  autoIndex: false,
-});
-
 async function callApiRequest(url, method, data, clientType) {
   const config = {
     method: method,
@@ -42,6 +35,13 @@ async function callApiRequest(url, method, data, clientType) {
 }
 
 async function initialiseDb() {
+  const SERVER_URL = "http://localhost:3001";
+  mongoose.connect(process.env.MONGODB_CLOUD_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    autoIndex: false,
+  });
+
   const patient = await Patient.findOne({ name: "Hazel Lim" });
   if (patient) {
     return patient._id;
