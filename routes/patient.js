@@ -4,7 +4,7 @@ const Patient = require("../controllers/patientController");
 
 router.get("/", Patient.getPatients);
 router.get("/:id", Patient.getPatientById);
-router.get("/:nric/nric", Patient.getPatientByNric);
+router.get("/nric/:nric", Patient.getPatientByNric);
 router.get("/:id/alerts", Patient.getAlertsByPatientId);
 router.get("/:id/reminders", Patient.getRemindersByPatientId);
 router.get("/:id/nurses", Patient.getNursesByPatientId);
