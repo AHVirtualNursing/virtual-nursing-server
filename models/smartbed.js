@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const Device = require("./device");
 
 const bedStatusEnum = ["occupied", "vacant"];
 const bedPositionEnum = ["upright", "incline", "flat"]
@@ -99,8 +98,6 @@ const smartBedSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-smartBedSchema.add(Device.schema);
 
 module.exports =
   mongoose.models.SmartBed || mongoose.model("SmartBed", smartBedSchema);

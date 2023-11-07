@@ -77,12 +77,15 @@ const patientSchema = new mongoose.Schema(
         message: "Invalid patient patient fall risk: {VALUE}",
       }, 
     },
-    fallRiskProtocolBreachReason: {
-      type: String
-    },
     isDischarged: {
       type: Boolean,
       default: false,
+    },
+    admissionDateTime: {
+      type: Date
+    },
+    dischargeDateTime: {
+      type: Date
     },
     alerts: [
       {
