@@ -36,9 +36,10 @@ const createReport = async (req, res) => {
     }
 
     const report = new Report({
-      reportName: req.body.reportName,
-      reportType: req.body.reportType,
+      name: req.body.name,
+      type: req.body.type,
       content: req.body.content,
+      url: req.body.url,
     });
     await report.save();
 
@@ -70,9 +71,9 @@ const updateReportByReportId = async (req, res) => {
         .status(500)
         .json({ message: `cannot find any report with ID ${id}` });
     }
-    const { reportName } = req.body;
-    if (reportName) {
-      report.reportName = reportName;
+    const { name } = req.body;
+    if (name) {
+      report.name = name;
     }
     const updatedReport = await report.save();
     res.status(200).json(updatedReport);

@@ -250,7 +250,6 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         request.body.alertVitals.push(alertVital);
       }
     }
-
     await vital.save();
     patient.vital = vital;
     await patient.save();
