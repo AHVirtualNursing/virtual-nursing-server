@@ -36,7 +36,7 @@ async function callApiRequest(url, method, data, clientType) {
 
 async function initialiseDb() {
   const SERVER_URL = "http://localhost:3001";
-  mongoose.connect(process.env.MONGODB_CLOUD_URI, {
+  mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     autoIndex: false,
@@ -44,7 +44,7 @@ async function initialiseDb() {
 
   const patient = await Patient.findOne({ name: "Hazel Lim" });
   if (patient) {
-    return patient._id;
+    return patient._id.toString();
   } else {
     /* create patient */
     const patientId = await callApiRequest(`${SERVER_URL}/patient`, "POST", {

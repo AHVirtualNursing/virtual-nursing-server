@@ -1,6 +1,8 @@
 const { io } = require("socket.io-client");
 const { initialiseDb } = require("./initialiseDb");
 const { sendMockPatientVitals } = require("./sendMockPatientVitals");
+const Patient = require("../models/patient");
+
 const SERVER_URL = "http://localhost:3001";
 
 async function simulatePatientVitals() {
@@ -79,6 +81,19 @@ async function simulatePatientVitals() {
     }, 2000);
   }
 
+  async function simulateFallRisk() {
+    const fallRiskValues = ["Low", "Medium", "High"];
+
+    const patient = await Patient.findById(patientId);
+
+    fallRiskValues.map((fallRiskValue) => {
+      setTimeout(async () => {
+        patient.fallRisk = fallRiskValue;
+        await patient.save();
+      }, 60000);
+    });
+  }
+
   if (vitalType) {
     if (vitalType === "s3") {
       sendMockPatientVitals(patientId);
@@ -101,8 +116,11 @@ async function simulatePatientVitals() {
         setTimeout(() => {
           sendVitals("rr");
         }, 400);
+      } else if (vitalType == "fr") {
+        simulateFallRisk();
+      } else {
+        sendVitals(vitalType);
       }
-      sendVitals(vitalType);
     }
   } else {
     console.error("No patient vital argument provided");
