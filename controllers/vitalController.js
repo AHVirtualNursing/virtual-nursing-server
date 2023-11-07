@@ -78,8 +78,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       body: {
         patient: patientId,
         description: '',
-        notes: 'Any additional notes',
-        sentBy: 'Sender name or ID',
+        notes: [],
         alertVitals:[]
       }
     };
@@ -199,8 +198,9 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     await vital.save();
     patient.vital = vital;
     await patient.save();
-
+    console.log(request)
     if(request.body.description != ''){
+      console.log("in_");
       await AlertController.createAlert(request, result);
     }
     

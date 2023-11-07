@@ -17,10 +17,10 @@ const createAlert = async (req, res) => {
       description: req.body.description,
       notes: req.body.notes,
       patient: req.body.patient,
-      sentBy: req.body.sentBy,
       alertVitals: req.body.alertVitals
     });
     await alert.save();
+    console.log(alert)
     patient.alerts.push(alert._id);
 
     await patient.save();
@@ -32,9 +32,11 @@ const createAlert = async (req, res) => {
     res.status(200).json({ success: true, data: alert });
   } catch (e) {
     if (e.name === "ValidationError") {
+      console.log(e)
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       res.status(500).json({ validationErrors });
     } else {
+      console.log(e)
       res.status(500).json({ success: false });
     }
   }
