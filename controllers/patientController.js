@@ -16,7 +16,6 @@ const createPatient = async (req, res) => {
     const readmittedPatient = await Patient.findOne({nric: String(patientNric)})
 
     if (!readmittedPatient) {
-      console.log("patient is new and no record of them was found in the DB")
       const patient = new Patient({
         name: req.body.name,
         nric: req.body.nric,
@@ -29,11 +28,10 @@ const createPatient = async (req, res) => {
       res.status(200).json({ success: true, data: patient });
     }
     else {
-      console.log("patient is being readmitted and a record of them was found in the DB")
       readmittedPatient.condition = req.body.condition;
       readmittedPatient.infoLogs = req.body.infoLogs;
       readmittedPatient.copd = req.body.copd;
-      readmittedPatient.admissionDateTime = new Date();
+      readmittedPatient.admissionDateTime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
       readmittedPatient.isDischarged = false;
       readmittedPatient.dischargeDateTime = undefined;
       await readmittedPatient.save();
@@ -269,9 +267,9 @@ const dischargePatientById = async (req, res) => {
     }
 
     patient.isDischarged = true;
-    patient.dischargeDateTime = new Date();
+    patient.dischargeDateTime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
     await patient.save();
-
+/*
     const smartBed = await SmartBed.findOne({ patient: id });
 
     if (!smartBed) {
@@ -295,7 +293,7 @@ const dischargePatientById = async (req, res) => {
       smartWearable.patient = undefined;
       await smartWearable.save();
     }
-
+*/
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
