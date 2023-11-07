@@ -45,6 +45,7 @@ const addVitalForPatient = async (req, res) => {
 const processVitalForPatient = async (patientId, vitalsData) => {
   try {
     const patient = await Patient.findById(patientId).populate("vital").populate("alertConfig");
+
     if (!patient) {
       return res.status(500).json({
         message: `cannot find any patient with Patient ID ${req.body.patient}`,
@@ -52,6 +53,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     }
 
     let vital = patient.vital;
+
     if (!vital) {
       vital = new Vital({
         respRate: [],
@@ -62,12 +64,13 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         temperature: [],
       });
 
-
       await vital.save();
       patient.vital = vital;
       await patient.save();
     }
+
     let alertConfig = patient.alertConfig;
+
     if(!alertConfig){
       return res.status(500).json({
         message: `cannot find any Alert Config with Patient ID ${req.body.patient}`,
@@ -82,6 +85,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         alertVitals:[]
       }
     };
+
     const result = {
       statusCode: null, 
       jsonData: null, 
@@ -100,7 +104,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     const vitalsReading = {
       datetime: vitalsData.datetime,
     };
-    console.log(vitalsData);
+
     if (vitalsData.respRate) {
       vitalsReading.reading = vitalsData.respRate;
       vital.respRate.push(vitalsReading);
@@ -117,6 +121,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       }
       
     }
+
     if (vitalsData.heartRate) {
       vitalsReading.reading = vitalsData.heartRate;
       vital.heartRate.push(vitalsReading);
@@ -132,6 +137,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         request.body.alertVitals.push(alertVital);
       }
     }
+
     if (vitalsData.bloodPressureSys) {
       vitalsReading.reading = vitalsData.bloodPressureSys;
       vital.bloodPressureSys.push(vitalsReading);
@@ -147,6 +153,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         request.body.alertVitals.push(alertVital);
       }
     }
+
     if (vitalsData.bloodPressureDia) {
       vitalsReading.reading = vitalsData.bloodPressureDia;
       vital.bloodPressureDia.push(vitalsReading);
@@ -162,6 +169,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         request.body.alertVitals.push(alertVital);
       }
     }
+
     if (vitalsData.spO2) {
       vitalsReading.reading = vitalsData.spO2;
       vital.spO2.push(vitalsReading);
@@ -177,8 +185,9 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         request.body.alertVitals.push(alertVital);
       }
     }
+
     if (vitalsData.temperature) {
-      vitalsReading.temperature = vitalsData.temperature;
+      vitalsReading.reading = vitalsData.temperature;
       vital.temperature.push(vitalsReading);
 
       if(vitalsData.temperature < alertConfig.temperatureConfig[0] || vitalsData.temperature > alertConfig.temperatureConfig[1]){
@@ -192,18 +201,15 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         request.body.alertVitals.push(alertVital);
       }
     }
-
-    
     
     await vital.save();
     patient.vital = vital;
     await patient.save();
-    console.log(request)
+
     if(request.body.description != ''){
       console.log("in_");
       await AlertController.createAlert(request, result);
     }
-    
 
     return vital;
   } catch (error) {
