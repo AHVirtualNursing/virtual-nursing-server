@@ -269,7 +269,7 @@ const dischargePatientById = async (req, res) => {
     patient.isDischarged = true;
     patient.dischargeDateTime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
     await patient.save();
-/*
+
     const smartBed = await SmartBed.findOne({ patient: id });
 
     if (!smartBed) {
@@ -293,7 +293,7 @@ const dischargePatientById = async (req, res) => {
       smartWearable.patient = undefined;
       await smartWearable.save();
     }
-*/
+
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
