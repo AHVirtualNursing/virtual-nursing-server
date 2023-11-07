@@ -4,7 +4,6 @@ const AlertController = require("../controllers/alertController");
 
 const addVitalForPatient = async (req, res) => {
   try {
-    console.log(req.body.patient);
     const {
       patient,
       datetime,
@@ -275,7 +274,6 @@ const getVitals = async (req, res) => {
         ids.map(async (id) => {
           if (id.match(/^[0-9a-fA-F]{24}$/)) {
             const vital = await Vital.findById(id);
-            console.log(vital);
             if (!vital) {
               res
                 .status(500)
