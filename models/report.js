@@ -4,11 +4,11 @@ const reportTypeEnum = ["event", "discharge"];
 
 const reportSchema = new mongoose.Schema(
   {
-    reportName: {
+    name: {
       type: String,
       require: true,
     },
-    reportType: {
+    type: {
       type: String,
       enum: {
         values: reportTypeEnum,
