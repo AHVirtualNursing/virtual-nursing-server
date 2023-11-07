@@ -39,6 +39,7 @@ const createReport = async (req, res) => {
       reportName: req.body.reportName,
       reportType: req.body.reportType,
       content: req.body.content,
+      url: req.body.url,
     });
     await report.save();
 

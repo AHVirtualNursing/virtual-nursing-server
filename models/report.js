@@ -14,10 +14,14 @@ const reportSchema = new mongoose.Schema(
         values: reportTypeEnum,
         message: "Invalid report type: {VALUE}",
       },
-      require: true
+      require: true,
     },
     content: {
       type: String,
+    },
+    url: {
+      type: String,
+      require: true,
     },
   },
   {
