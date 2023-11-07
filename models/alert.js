@@ -1,17 +1,27 @@
 const mongoose = require("mongoose");
 
-
-const alertStatusEnum = ["open", "handling", "complete"]
+const alertStatusEnum = ["open", "handling", "complete"];
+const AlertVitalEnum = [
+  "Respiratory Rate",
+  "Heart Rate",
+  "Systolic Blood Pressure",
+  "Diastolic Blood Pressure",
+  "SPO2",
+  "Temperature",
+];
 
 const AlertVitals = new mongoose.Schema({
   reading: {
     type: Number,
     required: true,
   },
-  vital:{
+  vital: {
     type: String,
-    required: true
-  }
+    enum: {
+      values: AlertVitalEnum,
+      message: "Invalid alert enum: {VALUE}",
+    },
+  },
 });
 
 const followUpLog = new mongoose.Schema({
@@ -93,8 +103,8 @@ const alertSchema = new mongoose.Schema(
       type: [followUpLog],
     },
     alertVitals: {
-      type:[AlertVitals]
-    }
+      type: [AlertVitals],
+    },
   },
   {
     timestamps: true,
