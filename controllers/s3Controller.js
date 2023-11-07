@@ -13,7 +13,7 @@ const uploadFile = async (req, res) => {
 
     const bucket = "ah-virtual-nursing";
     const file = req.file;
-    const filename = Date.now() + "-" + file.originalname;
+    const filename = Date.now() + "-" + file.originalname.replace(/\s+/g, "+");
     const destinationKey = folder + "/" + filename;
 
     const command = new PutObjectCommand({
@@ -37,14 +37,18 @@ const uploadFile = async (req, res) => {
 
 const retrieveFileWithPresignedUrl = async (req, res) => {
   try {
-    const { key } = req.body;
+    const { url } = req.body;
+    const urlParts = url.split(".s3.ap-southeast-2.amazonaws.com/");
+    const bucket = urlParts[0].slice(8);
+    const key = urlParts[1];
+
     const command = new GetObjectCommand({
-      Bucket: "ah-virtual-nursing",
+      Bucket: bucket,
       Key: key,
     });
 
-    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-    res.status(200).json({ url });
+    const presignedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    res.status(200).json({ presignedUrl });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Error retrieving file", error });
