@@ -15,6 +15,7 @@ const configureSocket = (server) => {
   const alertConnections = new Map();
   const virtualNurseChatConnections = new Map();
   const bedsideNurseChatConnections = new Map();
+  const patientConnections = new Map();
 
   io.on("connection", (socket) => {
     socket.on("connectSmartWatch", async (patientId) => {
@@ -23,6 +24,10 @@ const configureSocket = (server) => {
 
     socket.on("connectDashboard", (patientId) => {
       dashboardConnections.set(patientId, socket);
+    });
+
+    socket.on("connectPatient", (patientId) => {
+      patientConnections.set(patientId, socket);
     });
 
     socket.on("alertConnections", (virtualNurseId) => {
@@ -52,7 +57,7 @@ const configureSocket = (server) => {
         console.log(`No dashboard found for patient ID ${patientId}`);
       }
     });
-    
+
     socket.on("new-alert", async (alert) => {
       const req = { params: { id: alert.patient } };
       const res = {
@@ -103,12 +108,12 @@ const configureSocket = (server) => {
     });
 
     socket.on("connectVirtualNurseForChatMessaging", (nurseId) => {
-      console.log("Virtual Nurse is connected to Socket")
+      console.log("Virtual Nurse is connected to Socket");
       virtualNurseChatConnections.set(nurseId, socket);
     });
 
     socket.on("connectBedsideNurseForChatMessaging", (nurseId) => {
-      console.log("Bedside Nurse is connected to Socket")
+      console.log("Bedside Nurse is connected to Socket");
       bedsideNurseChatConnections.set(nurseId, socket);
     });
 
@@ -127,6 +132,13 @@ const configureSocket = (server) => {
       );
       if (virtualNurseSocket) {
         virtualNurseSocket.emit("updateVirtualNurseChat", chat);
+      }
+    });
+
+    socket.on("fallRiskUpdate", (patient) => {
+      const patientSocket = patientConnections.get(patient._id);
+      if (patientSocket) {
+        patientSocket.emit("newFallRisk", patient.fallRisk);
       }
     });
 
