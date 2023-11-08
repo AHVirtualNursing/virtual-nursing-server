@@ -27,6 +27,41 @@ const getReportByReportId = async (req, res) => {
   }
 };
 
+const getReportsWithPatientParticulars = async (req, res) => {
+  try {
+    const reports = await Patient.aggregate([
+      {
+        $unwind: "$reports",
+      },
+      {
+        $lookup: {
+          from: "reports",
+          localField: "reports",
+          foreignField: "_id",
+          as: "reportDetails",
+        },
+      },
+      {
+        $unwind: "$reportDetails",
+      },
+      {
+        $project: {
+          patientName: "$name",
+          patientNric: "$nric",
+          name: "$reportDetails.name",
+          type: "$reportDetails.type",
+          url: "$reportDetails.url",
+          createdAt: "$reportDetails.createdAt",
+        },
+      },
+    ]);
+
+    res.status(200).json(reports);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const createReport = async (req, res) => {
   try {
     const patient = await Patient.findById({ _id: req.body.patient });
@@ -132,6 +167,7 @@ module.exports = {
   getReports,
   createReport,
   getReportByReportId,
+  getReportsWithPatientParticulars,
   updateReportByReportId,
   deleteReportByReportId,
 };
