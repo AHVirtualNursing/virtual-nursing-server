@@ -49,15 +49,7 @@ const virtualNurseSchema = new mongoose.Schema(
         type: Boolean,
         default: true
       },
-      exit: {
-        type: Boolean,
-        default: true
-      },
-      lowestPosition: {
-        type: Boolean,
-        default: true
-      },
-      brake: {
+      warnings: {
         type: Boolean,
         default: true
       },
