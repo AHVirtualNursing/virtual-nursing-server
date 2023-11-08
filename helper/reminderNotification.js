@@ -62,27 +62,7 @@ const reminderJob = schedule.scheduleJob('* * * * * ', async () => {
     }
   }
 
-  // const intervalToMilliseconds = {
-  //   1: 60 * 60 * 1000, 
-  //   2: 2 * 60 * 60 * 1000, 
-  //   3: 3 * 60 * 60 * 1000, 
-  //   4: 4 * 60 * 60 * 1000, 
-  //   12: 12 * 60 * 60 * 1000,
-  //   24: 24 * 60 * 60 * 1000, 
-  
-  // };
-  
-  // async function updateReminderNextScheduledTime(reminder) {
-  //   try {
-  //     const currentScheduledTime = reminder.time;
-  //     const interval = reminder.interval;
-  //     const nextScheduledTime = new Date(currentScheduledTime.getTime() + intervalToMilliseconds[interval]);
-  //     reminder.scheduledTime = nextScheduledTime;
-  //     await reminder.save();
-  //   } catch (error) {
-  //     console.error('Error updating reminder scheduled time:', error);
-  //     throw error; 
-  //   }
-  // }
+
+ 
 
   module.exports = {reminderJob}

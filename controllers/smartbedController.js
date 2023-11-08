@@ -8,7 +8,6 @@ const createSmartBed = async (req, res) => {
     const smartbed = new SmartBed({
       name: req.body.name,
     });
-    // console.log(smartbed);
     await smartbed.save();
 
     res.status(200).json({ success: true, data: smartbed });
@@ -106,13 +105,48 @@ const updateSmartBedById = async (req, res) => {
         .json({ message: `cannot find any smartbed with ID ${id}` });
     }
 
-    const { name, bedStatus, patient } = req.body;
-
+    const {
+      name,
+      bedStatus,
+      isRightUpperRail,
+      isRightLowerRail,
+      isLeftUpperRail,
+      isLeftLowerRail,
+      isBrakeSet,
+      isLowestPosition,
+      isBedAlarmOn,
+      bedAlarmProtocolBreachReason,
+      patient,
+    } = req.body;
     if (name) {
       smartbed.name = name;
     }
     if (bedStatus) {
       smartbed.bedStatus = bedStatus;
+    }
+    if (isRightUpperRail !== undefined) {
+      smartbed.isRightUpperRail = isRightUpperRail;
+    }
+    if (isRightLowerRail !== undefined) {
+      smartbed.isRightLowerRail = isRightLowerRail;
+    }
+    if (isLeftUpperRail !== undefined) {
+      smartbed.isLeftUpperRail = isLeftUpperRail;
+    }
+    if (isLeftLowerRail !== undefined) {
+      smartbed.isLeftLowerRail = isLeftLowerRail;
+    }
+    if (isBrakeSet !== undefined) {
+      smartbed.isBrakeSet = isBrakeSet;
+    }
+    if (isLowestPosition !== undefined) {
+      smartbed.isLowestPosition = isLowestPosition;
+    }
+    if (isBedAlarmOn !== undefined) {
+      smartbed.isBedAlarmOn = isBedAlarmOn;
+    }
+    if (bedAlarmProtocolBreachReason) {
+      smartbed.bedAlarmProtocolBreachReason = bedAlarmProtocolBreachReason;
     }
 
     // dont call this unless testing
@@ -126,8 +160,8 @@ const updateSmartBedById = async (req, res) => {
           .json({ message: `Patient with ID: ${patient} not found` });
       }
     }
-    await smartbed.save();
-    res.status(200).json(smartbed);
+    const updatedSmartBed = await smartbed.save();
+    res.status(200).json(updatedSmartBed);
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
@@ -146,13 +180,13 @@ const unassignSmartBedFromWard = async (req, res) => {
   try {
     const { id } = req.params;
     const smartBed = await SmartBed.findById(id);
-    if (!smartBed ) {
+    if (!smartBed) {
       return res
         .status(500)
         .json({ message: `cannot find any smartBed with ID ${id}` });
     }
-    if(smartBed.patient != undefined){
-        return res
+    if (smartBed.patient != undefined) {
+      return res
         .status(500)
         .json({ message: `there is a patient on the smartbed` });
     }
@@ -163,7 +197,7 @@ const unassignSmartBedFromWard = async (req, res) => {
     const bedNum = smartBed.bedNum;
     ward.beds[bedNum - 1] = 0;
     await ward.save();
-    
+
     smartBed.roomNum = undefined;
     smartBed.bedNum = undefined;
     smartBed.ward = undefined;
@@ -244,11 +278,9 @@ const deleteSmartBedById = async (req, res) => {
         .json({ message: `cannot find any smartbed with ID ${id}` });
     }
     if (smartBed.patient) {
-      return res
-        .status(500)
-        .json({
-          message: `smartbed with ID ${id} has a patient and cannot be deleted`,
-        });
+      return res.status(500).json({
+        message: `smartbed with ID ${id} has a patient and cannot be deleted`,
+      });
     }
 
     const ward = await Ward.findOne({ smartBeds: { $in: [id] } }).populate(

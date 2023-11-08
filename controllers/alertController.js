@@ -17,9 +17,10 @@ const createAlert = async (req, res) => {
       description: req.body.description,
       notes: req.body.notes,
       patient: req.body.patient,
-      sentBy: req.body.sentBy,
+      alertVitals: req.body.alertVitals
     });
     await alert.save();
+    console.log(alert)
     patient.alerts.push(alert._id);
 
     await patient.save();
@@ -31,9 +32,11 @@ const createAlert = async (req, res) => {
     res.status(200).json({ success: true, data: alert });
   } catch (e) {
     if (e.name === "ValidationError") {
+      console.log(e)
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       res.status(500).json({ validationErrors });
     } else {
+      console.log(e)
       res.status(500).json({ success: false });
     }
   }
@@ -51,7 +54,7 @@ const getAllAlerts = async (req, res) => {
 const getAlertById = async (req, res) => {
   try {
     const { id } = req.params;
-    const alert = await Alert.findById(id);
+    const alert = await Alert.findById(id).populate([{ path: "patient" }]);
     if (!alert) {
       res.status(500).json({ message: `cannot find any alert with ID ${id}` });
     }
@@ -71,7 +74,7 @@ const updateAlertById = async (req, res) => {
         .json({ message: `cannot find any alert with ID ${id}` });
     }
 
-    const { status, description, notes, handledBy } = req.body;
+    const { status, description, notes, handledBy, followUps } = req.body;
     if (status) {
       alert.status = status;
     }
@@ -83,6 +86,9 @@ const updateAlertById = async (req, res) => {
     }
     if (handledBy) {
       alert.handledBy = handledBy;
+    }
+    if (followUps) {
+      alert.followUps = followUps;
     }
 
     const updatedAlert = await alert.save();

@@ -1,7 +1,6 @@
 const socket = require("socket.io");
 const vitalController = require("../controllers/vitalController");
 const patientController = require("../controllers/patientController");
-const { virtualNurse } = require("../models/webUser");
 
 const configureSocket = (server) => {
   const io = socket(server, {
@@ -16,6 +15,8 @@ const configureSocket = (server) => {
   const dashboardConnections = new Map();
   // maps each virtual nurse to a socket
   const dvsClientConnections = new Map();
+  const virtualNurseChatConnections = new Map();
+  const bedsideNurseChatConnections = new Map();
 
   io.on("connection", (socket) => {
     socket.on("connectSmartWatch", async (patientId) => {
@@ -61,6 +62,8 @@ const configureSocket = (server) => {
         bloodPressureSys: vitals["bloodPressureSys"],
         bloodPressureDia: vitals["bloodPressureDia"],
         spO2: vitals["spO2"],
+        temperature: vitals["temperature"],
+        respRate: vitals["respRate"],
       };
 
       vitalController.processVitalForPatient(patientId, vitalsData);
@@ -73,7 +76,7 @@ const configureSocket = (server) => {
         console.log(`No dashboard found for patient ID ${patientId}`);
       }
     });
-
+    
     socket.on("new-alert", async (alert) => {
       const req = { params: { id: alert.patient } };
       const res = {
@@ -137,6 +140,34 @@ const configureSocket = (server) => {
 
       if (alertSocket) {
         alertSocket.emit("patientAlertDeleted", {alertList: alertList, patient: patient});
+      }
+    });
+
+    socket.on("connectVirtualNurseForChatMessaging", (nurseId) => {
+      console.log("Virtual Nurse is connected to Socket")
+      virtualNurseChatConnections.set(nurseId, socket);
+    });
+
+    socket.on("connectBedsideNurseForChatMessaging", (nurseId) => {
+      console.log("Bedside Nurse is connected to Socket")
+      bedsideNurseChatConnections.set(nurseId, socket);
+    });
+
+    socket.on("virtualToBedsideNurseChatUpdate", (chat) => {
+      const bedsideNurseSocket = bedsideNurseChatConnections.get(
+        chat.bedsideNurse._id
+      );
+      if (bedsideNurseSocket) {
+        bedsideNurseSocket.emit("updateBedsideNurseChat", chat);
+      }
+    });
+
+    socket.on("bedsideToVirtualNurseChatUpdate", (chat) => {
+      const virtualNurseSocket = virtualNurseChatConnections.get(
+        chat.virtualNurse._id
+      );
+      if (virtualNurseSocket) {
+        virtualNurseSocket.emit("updateVirtualNurseChat", chat);
       }
     });
 

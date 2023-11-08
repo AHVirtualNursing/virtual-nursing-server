@@ -1,6 +1,18 @@
 const mongoose = require("mongoose");
 
-const alertStatusEnum = ["open", "handling", "complete"];
+
+const alertStatusEnum = ["open", "handling", "complete"]
+
+const AlertVitals = new mongoose.Schema({
+  reading: {
+    type: Number,
+    required: true,
+  },
+  vital:{
+    type: String,
+    required: true
+  }
+});
 
 const followUpLog = new mongoose.Schema({
   respRate: {
@@ -31,6 +43,25 @@ const followUpLog = new mongoose.Schema({
     type: String,
     required: true,
   },
+  addedBy: {
+    type: String,
+    required: true,
+  },
+});
+
+const NoteLog = new mongoose.Schema({
+  info: {
+    type: String,
+    required: true,
+  },
+  datetime: {
+    type: String,
+    required: true,
+  },
+  addedBy: {
+    type: String,
+    required: true,
+  },
 });
 
 const alertSchema = new mongoose.Schema(
@@ -49,14 +80,11 @@ const alertSchema = new mongoose.Schema(
       required: true,
     },
     notes: {
-      type: String,
+      type: [NoteLog],
     },
     patient: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Patient",
-    },
-    sentBy: {
-      type: String,
     },
     handledBy: {
       type: String,
@@ -64,6 +92,9 @@ const alertSchema = new mongoose.Schema(
     followUps: {
       type: [followUpLog],
     },
+    alertVitals: {
+      type:[AlertVitals]
+    }
   },
   {
     timestamps: true,
