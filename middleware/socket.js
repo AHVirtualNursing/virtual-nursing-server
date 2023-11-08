@@ -12,8 +12,10 @@ const configureSocket = (server) => {
   });
 
   const smartWatchConnections = new Map();
+  // maps patient to open nurse sockets 
   const dashboardConnections = new Map();
-  const alertConnections = new Map();
+  // maps each virtual nurse to a socket
+  const dvsClientConnections = new Map();
 
   io.on("connection", (socket) => {
     socket.on("connectSmartWatch", async (patientId) => {
@@ -21,14 +23,32 @@ const configureSocket = (server) => {
     });
 
     socket.on("connectDashboard", (patientId) => {
-      dashboardConnections.set(patientId, socket);
+      if (!dashboardConnections.has(patientId)) {
+        dashboardConnections.set(patientId, [socket]);
+      } else {
+        const connectedSockets = dashboardConnections.get(patientId);
+        if (!connectedSockets.includes(socket)) {
+          connectedSockets.push(socket);
+        }
+      }
     });
 
-    socket.on("alertConnections", (virtualNurseId) => {
+    socket.on("disconnectDashboard", (patientId) => {
+      if (dashboardConnections.has(patientId)) {
+        const connectedSockets = dashboardConnections.get(patientId);
+        const index = connectedSockets.indexOf(socket);
+        if (index !== -1) {
+          connectedSockets.splice(index, 1);
+          if (connectedSockets.length === 0) {
+            dashboardConnections.delete(patientId);
+          }
+        }
+      }
+    });
+
+    socket.on("dvsClientConnections", (virtualNurseId) => {
       console.log("connection established");
-      alertConnections.set(virtualNurseId, socket);
-      console.log(alertConnections.size)
-      // console.log(alertConnections);
+      dvsClientConnections.set(virtualNurseId, socket);
     });
 
     socket.on("watchData", (vitals) => {
@@ -46,7 +66,9 @@ const configureSocket = (server) => {
       vitalController.processVitalForPatient(patientId, vitalsData);
 
       if (dashboardSocket) {
-        dashboardSocket.emit("updateVitals", vitals);
+        for (const socket of dashboardSocket) {
+          socket.emit("updateVitals", vitals);
+        }
       } else {
         console.log(`No dashboard found for patient ID ${patientId}`);
       }
@@ -73,7 +95,7 @@ const configureSocket = (server) => {
       await patientController.getPatientById(req, res);
       const patient = res.jsonData;
 
-      const alertSocket = alertConnections.get(String(virtualNurse._id));
+      const alertSocket = dvsClientConnections.get(String(virtualNurse._id));
 
       await patientController.getAlertsByPatientId(req, res);
       const alertList = res.jsonData;
@@ -108,7 +130,7 @@ const configureSocket = (server) => {
       await patientController.getPatientById(req, res);
       const patient = res.jsonData;
 
-      const alertSocket = alertConnections.get(String(virtualNurse._id));
+      const alertSocket = dvsClientConnections.get(String(virtualNurse._id));
 
       await patientController.getAlertsByPatientId(req, res);
       const alertList = res.jsonData;
@@ -121,7 +143,7 @@ const configureSocket = (server) => {
     socket.on("disconnect", () => {
       smartWatchConnections.delete(socket.id);
       dashboardConnections.delete(socket.id);
-      alertConnections.delete(socket.id);
+      dvsClientConnections.delete(socket.id);
     });
   });
 };
