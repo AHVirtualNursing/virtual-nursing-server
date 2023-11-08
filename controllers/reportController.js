@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
 const Report = require("../models/report");
 const Patient = require("../models/patient");
+const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const { s3 } = require("../middleware/awsClient");
 
 const getReports = async (req, res) => {
   try {
@@ -44,13 +45,13 @@ const createReport = async (req, res) => {
     await report.save();
 
     await Patient.findOneAndUpdate(
-        { _id: patient._id },
-        { $push: { reports: report._id } },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
+      { _id: patient._id },
+      { $push: { reports: report._id } },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     res.status(200).json({ success: true, data: report });
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -110,7 +111,17 @@ const deleteReportByReportId = async (req, res) => {
         message: `cannot find any patient tagged to report with ID ${id}`,
       });
     }
+
+    const key = report.url.split(".amazonaws.com/")[1];
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: "ah-virtual-nursing",
+        Key: key,
+      })
+    );
+
     await Report.deleteOne({ _id: id });
+
     res.status(200).json(report);
   } catch (e) {
     res.status(500).json({ message: e.message });
