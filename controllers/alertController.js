@@ -57,6 +57,7 @@ const getAlertById = async (req, res) => {
     const alert = await Alert.findById(id).populate([{ path: "patient" }]);
     if (!alert) {
       res.status(500).json({ message: `cannot find any alert with ID ${id}` });
+      return;
     }
     res.status(200).json(alert);
   } catch (e) {

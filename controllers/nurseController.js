@@ -29,7 +29,7 @@ const createNurse = async (req, res, session) => {
       {
         new: true,
         runValidators: true,
-        session
+        session,
       }
     );
 
@@ -43,7 +43,6 @@ const createNurse = async (req, res, session) => {
     }
   }
 };
-
 
 const getNurses = async (req, res) => {
   try {
@@ -91,6 +90,9 @@ const getNurseById = async (req, res) => {
               {
                 path: "alerts",
                 populate: [{ path: "patient" }],
+              },
+              {
+                path: "alertConfig",
               },
             ],
           },
@@ -145,7 +147,15 @@ const updateNurseById = async (req, res) => {
         .json({ message: `cannot find any nurse with ID ${id}` });
     }
 
-    const { name, username, smartBeds, headNurse, nurseStatus, mobilePushNotificationToken, picture } = req.body;
+    const {
+      name,
+      username,
+      smartBeds,
+      headNurse,
+      nurseStatus,
+      mobilePushNotificationToken,
+      picture,
+    } = req.body;
 
     if (name) {
       nurse.name = name;
