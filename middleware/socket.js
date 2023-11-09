@@ -48,7 +48,7 @@ const configureSocket = (server) => {
     });
 
     socket.on("dvsClientConnections", (virtualNurseId) => {
-      console.log("connection established");
+      console.log(`Connection established with ${virtualNurseId}`);
       dvsClientConnections.set(virtualNurseId, socket);
     });
 
@@ -168,6 +168,15 @@ const configureSocket = (server) => {
       );
       if (virtualNurseSocket) {
         virtualNurseSocket.emit("updateVirtualNurseChat", chat);
+      }
+    });
+
+    socket.on("fallRiskUpdate", (data) => {
+      const [patient, virtualNurseId] = data;
+      const fallRiskSocket = dvsClientConnections.get(virtualNurseId);
+      console.log(fallRiskSocket);
+      if (fallRiskSocket) {
+        fallRiskSocket.emit("newFallRisk", patient.fallRisk);
       }
     });
 

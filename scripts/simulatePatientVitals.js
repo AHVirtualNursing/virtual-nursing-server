@@ -3,6 +3,7 @@ const { initialiseDb } = require("./initialiseDb");
 const { sendMockPatientVitals } = require("./sendMockPatientVitals");
 const mongoose = require("mongoose");
 const Patient = require("../models/patient");
+const patientController = require("../controllers/patientController");
 
 const SERVER_URL = "http://localhost:3001";
 
@@ -98,9 +99,28 @@ async function simulatePatientVitals() {
 
       const fallRiskValue = fallRiskValues[index];
       const patient = await Patient.findById(patientId);
+
+      const req = { params: { id: patientId } };
+      const res = {
+        statusCode: null,
+        jsonData: null,
+        status: function (code) {
+          this.statusCode = code;
+          return this;
+        },
+        json: function (data) {
+          this.jsonData = data;
+          return this;
+        },
+      };
+
+      await patientController.getVirtualNurseByPatientId(req, res);
+      const virtualNurseId = res.jsonData._id;
       patient.fallRisk = fallRiskValue;
       await patient.save();
-      if (patient) socket.emit("fallRiskUpdate", patient);
+
+      if (patient && virtualNurseId)
+        socket.emit("fallRiskUpdate", [patient, virtualNurseId]);
 
       console.log(`Updated patient fall risk to ${fallRiskValue}`);
       index++;
