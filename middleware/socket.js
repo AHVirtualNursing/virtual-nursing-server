@@ -172,7 +172,7 @@ const configureSocket = (server) => {
       }
     });
 
-    socket.on("smartbedUpdate", async (smartbed) => {
+    socket.on("update-smartbed", async (smartbed) => {
 
       const req = { params: { id: smartbed.patient } };
       const res = {
