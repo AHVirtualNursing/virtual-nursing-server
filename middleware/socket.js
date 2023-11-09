@@ -13,7 +13,7 @@ const configureSocket = (server) => {
 
   const smartWatchConnections = new Map();
   // maps patient to open nurse sockets
-  const dashboardConnections = new Map();
+  // const dashboardConnections = new Map();
   // maps each virtual nurse to a socket
   const dvsClientConnections = new Map();
   const virtualNurseChatConnections = new Map();
@@ -77,6 +77,31 @@ const configureSocket = (server) => {
         console.log(`No dashboard found for patient ID ${patientId}`);
       }
     });
+
+    socket.on("update-vitals", async (vital, patient) => {
+      const req = { params: { id: patient } };
+      const res = {
+        statusCode: null,
+        jsonData: null,
+        status: function (code) {
+          this.statusCode = code;
+          return this;
+        },
+        json: function (data) {
+          this.jsonData = data;
+          return this;
+        },
+      };
+
+      await patientController.getVirtualNurseByPatientId(req, res);
+      const virtualNurse = res.jsonData;
+      const patientSocket = dvsClientConnections.get(String(virtualNurse._id));
+      console.log(vital);
+      console.log(patient);
+      if(patientSocket){
+        patientSocket.emit("updatedVitals", vital);
+      }
+    })
 
     socket.on("new-alert", async (alert) => {
       const req = { params: { id: alert.patient } };

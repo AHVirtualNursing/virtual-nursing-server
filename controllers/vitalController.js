@@ -2,6 +2,8 @@ const Vital = require("../models/vital");
 const Patient = require("../models/patient");
 const AlertController = require("../controllers/alertController");
 const { alertTypeEnum } = require("../models/alert");
+const { io } = require("socket.io-client");
+const SERVER_URL = "http://localhost:3001";
 
 const addVitalForPatient = async (req, res) => {
   try {
@@ -48,6 +50,8 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     if (!patient) {
       throw new Error(`Cannot find any patient with Patient ID ${patientId}`);
     }
+
+    const socket = io(SERVER_URL);
 
     let vital = patient.vital;
 
@@ -252,9 +256,12 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         request.body.alertVitals.push(alertVital);
       }
     }
-    await vital.save();
+    const updatedVital = await vital.save();
     patient.vital = vital;
     await patient.save();
+
+    socket.emit("update-vitals", updatedVital, patient._id);
+
 
     if (request.body.description != "") {
       await AlertController.createAlert(request, result);
