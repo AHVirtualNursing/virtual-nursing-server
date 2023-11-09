@@ -4,6 +4,8 @@ const Patient = require("../models/patient");
 const Ward = require("../models/ward");
 const {alertTypeEnum} = require("../models/alert");
 const AlertController = require("../controllers/alertController");
+const { io } = require("socket.io-client");
+const SERVER_URL = "http://localhost:3001";
 
 const createSmartBed = async (req, res) => {
   try {
@@ -106,7 +108,7 @@ const updateSmartBedById = async (req, res) => {
         .status(500)
         .json({ message: `cannot find any smartbed with ID ${id}` });
     }
-
+    const socket = io(SERVER_URL);
     const {
       name,
       bedStatus,
@@ -122,7 +124,6 @@ const updateSmartBedById = async (req, res) => {
       patient
     } = req.body;
 
-    console.log(req.body)
     if (name) {
       smartbed.name = name;
     }
@@ -173,6 +174,7 @@ const updateSmartBedById = async (req, res) => {
       }
     }
     const updatedSmartBed = await smartbed.save();
+    socket.emit("update-smartbed", updatedSmartBed);
     res.status(200).json(updatedSmartBed);
   } catch (e) {
     if (e.name === "ValidationError") {

@@ -1,6 +1,7 @@
 const socket = require("socket.io");
 const vitalController = require("../controllers/vitalController");
 const patientController = require("../controllers/patientController");
+const smartbed = require("../models/smartbed");
 
 const configureSocket = (server) => {
   const io = socket(server, {
@@ -170,6 +171,32 @@ const configureSocket = (server) => {
         virtualNurseSocket.emit("updateVirtualNurseChat", chat);
       }
     });
+
+    socket.on("smartbedUpdate", async (smartbed) => {
+
+      const req = { params: { id: smartbed.patient } };
+      const res = {
+        statusCode: null,
+        jsonData: null,
+        status: function (code) {
+          this.statusCode = code;
+          return this;
+        },
+        json: function (data) {
+          this.jsonData = data;
+          return this;
+        },
+      };
+      
+      await patientController.getVirtualNurseByPatientId(req, res);
+      const virtualNurse = res.jsonData;
+      const patientSocket = dvsClientConnections.get(String(virtualNurse._id));
+
+      if(patientSocket){
+        patientSocket.emit("updatedSmartbed", smartbed);
+      }
+
+    })
 
     socket.on("fallRiskUpdate", (data) => {
       const [patient, virtualNurseId] = data;
