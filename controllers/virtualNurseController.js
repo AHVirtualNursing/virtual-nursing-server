@@ -59,9 +59,10 @@ const getVirtualNurseById = async (req, res) => {
 };
 
 const updateVirtualNurseById = async (req, res) => {
+  console.log("ENTER")
   try {
     const { id } = req.params;
-    const { name, username, wards } = req.body;
+    const { name, username, wards, cardLayout } = req.body;
     const updateVirtualNurse = await virtualNurse.findById(id);
     if (!updateVirtualNurse) {
       return res
@@ -110,6 +111,10 @@ const updateVirtualNurseById = async (req, res) => {
     }
     if (username) {
       updateVirtualNurse.username = username;
+    }
+    if (cardLayout) {
+      console.log("ENTER")
+      updateVirtualNurse.cardLayout = cardLayout;
     }
     const updatedVirtualNurse = await updateVirtualNurse.save();
     res.status(200).json(updatedVirtualNurse);

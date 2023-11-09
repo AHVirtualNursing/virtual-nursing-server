@@ -10,6 +10,56 @@ const virtualNurseSchema = new mongoose.Schema(
         default: null,
       },
     ],
+    cardLayout: {
+      allVitals: {
+        type: Boolean,
+        default: true
+      },
+      hr: {
+        type: Boolean,
+        default: true
+      },
+      rr: {
+        type: Boolean,
+        default: true
+      },
+      spo2: {
+        type: Boolean,
+        default: true
+      },
+      bp: {
+        type: Boolean,
+        default: true
+      },
+      temp: {
+        type: Boolean,
+        default: true
+      },
+      news2: {
+        type: Boolean,
+        default: true
+      },
+      allBedStatuses: {
+        type: Boolean,
+        default: true
+      },
+      rail: {
+        type: Boolean,
+        default: true
+      },
+      warnings: {
+        type: Boolean,
+        default: true
+      },
+      weight: {
+        type: Boolean,
+        default: true
+      },
+      fallRisk: {
+        type: Boolean,
+        default: true
+      }
+    },
   },
   {
     timestamps: true,
