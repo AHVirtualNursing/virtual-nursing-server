@@ -13,7 +13,7 @@ const configureSocket = (server) => {
 
   const smartWatchConnections = new Map();
   // maps patient to open nurse sockets
-  // const dashboardConnections = new Map();
+  const dashboardConnections = new Map();
   // maps each virtual nurse to a socket
   const dvsClientConnections = new Map();
   const virtualNurseChatConnections = new Map();
@@ -98,7 +98,7 @@ const configureSocket = (server) => {
       const patientSocket = dvsClientConnections.get(String(virtualNurse._id));
 
       if(patientSocket){
-        patientSocket.emit("updatedVitals", vital);
+        patientSocket.emit("updatedVitals", {vital: vital, patient: patient});
       }
     })
 
