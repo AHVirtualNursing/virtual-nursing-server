@@ -147,7 +147,6 @@ const getRemindersByPatientId = async (req, res) => {
         .status(500)
         .json({ message: `cannot find any patient with ID ${id}` });
     }
-
     const reminders = await Reminder.find({ patient: id }).populate("patient");
     res.status(200).json(reminders);
   } catch (e) {
@@ -158,7 +157,8 @@ const getRemindersByPatientId = async (req, res) => {
 const getVitalByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
-    const patient = await Patient.findById(id).populate("vital");
+    const patient = await Patient.findById(id).populate('vital');
+
     if (!patient) {
       return res
         .status(500)

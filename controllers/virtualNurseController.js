@@ -14,7 +14,6 @@ const createVirtualNurse = async (req, res) => {
 
     const wardIds = req.body.wards;
     for (const wardId of wardIds) {
-      console.log("in vn assignment for ward part");
       const ward = await Ward.findById(wardId);
       if (!ward) {
         return res
@@ -61,7 +60,7 @@ const getVirtualNurseById = async (req, res) => {
 const updateVirtualNurseById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, username, wards } = req.body;
+    const { name, username, wards, cardLayout } = req.body;
     const updateVirtualNurse = await virtualNurse.findById(id);
     if (!updateVirtualNurse) {
       return res
@@ -110,6 +109,9 @@ const updateVirtualNurseById = async (req, res) => {
     }
     if (username) {
       updateVirtualNurse.username = username;
+    }
+    if (cardLayout) {
+      updateVirtualNurse.cardLayout = cardLayout;
     }
     const updatedVirtualNurse = await updateVirtualNurse.save();
     res.status(200).json(updatedVirtualNurse);
