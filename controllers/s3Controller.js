@@ -30,7 +30,7 @@ const uploadFile = async (req, res) => {
       url: url,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error: "Error uploading file", error });
   }
 };
@@ -50,7 +50,7 @@ const retrieveFileWithPresignedUrl = async (req, res) => {
     const presignedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
     res.status(200).json({ presignedUrl });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error: "Error retrieving file", error });
   }
 };
@@ -78,7 +78,7 @@ const uploadAndParseMockData = async (req, res) => {
 
     sendMockPatientVitals(patientId);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res
       .status(500)
       .json({ error: "Error uploading or pasrsing mock data from S3" });

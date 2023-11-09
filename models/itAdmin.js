@@ -4,7 +4,7 @@ const User = require("./user");
 const itAdminSchema = new mongoose.Schema(
   {},
   {
-    timestamps: true,
+    
   }
 );
 

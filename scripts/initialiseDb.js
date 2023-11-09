@@ -21,7 +21,6 @@ async function callApiRequest(url, method, data, clientType) {
 
     if (response.status == 200 || 201) {
       console.log(`${url} ${method} request successful.`);
-      console.log(response.data);
 
       if (method == "POST") {
         return response.data.data._id;

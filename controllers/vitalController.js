@@ -1,6 +1,7 @@
 const Vital = require("../models/vital");
 const Patient = require("../models/patient");
 const AlertController = require("../controllers/alertController");
+const { alertTypeEnum } = require("../models/alert");
 
 const addVitalForPatient = async (req, res) => {
   try {
@@ -79,6 +80,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         description: "",
         notes: [],
         alertVitals: [],
+        alertType: alertTypeEnum[0]
       },
     };
 
@@ -255,7 +257,6 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     await patient.save();
 
     if (request.body.description != "") {
-      console.log("in_");
       await AlertController.createAlert(request, result);
     }
 
