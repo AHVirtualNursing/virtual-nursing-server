@@ -9,11 +9,12 @@ const { Nurse } = require("../models/nurse");
 const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
 
-
 const createPatient = async (req, res) => {
   try {
     const patientNric = req.body.nric;
-    const readmittedPatient = await Patient.findOne({nric: String(patientNric)})
+    const readmittedPatient = await Patient.findOne({
+      nric: String(patientNric),
+    });
 
     if (!readmittedPatient) {
       const patient = new Patient({
@@ -22,16 +23,17 @@ const createPatient = async (req, res) => {
         condition: req.body.condition,
         infoLogs: req.body.infoLogs,
         copd: req.body.copd,
-        admissionDateTime: new Date()
+        admissionDateTime: new Date(),
       });
       newPatientRecord = await Patient.create(patient);
       res.status(200).json({ success: true, data: patient });
-    }
-    else {
+    } else {
       readmittedPatient.condition = req.body.condition;
       readmittedPatient.infoLogs = req.body.infoLogs;
       readmittedPatient.copd = req.body.copd;
-      readmittedPatient.admissionDateTime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
+      readmittedPatient.admissionDateTime = new Date(
+        new Date().getTime() + 8 * 60 * 60 * 1000
+      );
       readmittedPatient.isDischarged = false;
       readmittedPatient.dischargeDateTime = undefined;
       await readmittedPatient.save();
@@ -70,7 +72,7 @@ const getPatientById = async (req, res) => {
         .json({ message: `cannot find any patient with ID ${id}` }); //status 400?
     }
     const smartWearable = await SmartWearable.findOne({ patient: id });
-    const response = patient.toObject()
+    const response = patient.toObject();
     if (smartWearable) {
       response.smartWearable = smartWearable;
     }
@@ -87,7 +89,6 @@ const getPatientsByIds = async (req, res) => {
       idsToRetrieve.map(async (id) => {
         if (id.match(/^[0-9a-fA-F]{24}$/)) {
           const patient = await Patient.findById(id);
-          // console.log(patient);
           if (!patient) {
             res
               .status(500)
@@ -108,11 +109,11 @@ const getPatientsByIds = async (req, res) => {
 const getPatientByNric = async (req, res) => {
   try {
     const { nric } = req.params;
-    const patient = await Patient.findOne({nric: String(nric)})
+    const patient = await Patient.findOne({ nric: String(nric) });
     if (!patient) {
       return res
         .status(500)
-        .json({ message: `cannot find any patient with NRIC ${nric}` }); 
+        .json({ message: `cannot find any patient with NRIC ${nric}` });
     }
     res.status(200).json(patient);
   } catch (e) {
@@ -124,7 +125,6 @@ const getAlertsByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
     const patient = await Patient.findById(id);
-    // console.log(patient);
     if (!patient) {
       return res
         .status(500)
@@ -142,15 +142,12 @@ const getRemindersByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
     const patient = await Patient.findById(id);
-    // console.log(patient);
     if (!patient) {
       return res
         .status(500)
         .json({ message: `cannot find any patient with ID ${id}` });
     }
-
-    const reminders = await Reminder.find({ patient: id });
-    // console.log(reminders);
+    const reminders = await Reminder.find({ patient: id }).populate("patient");
     res.status(200).json(reminders);
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -161,7 +158,7 @@ const getVitalByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
     const patient = await Patient.findById(id).populate('vital');
-    // console.log(patient);
+
     if (!patient) {
       return res
         .status(500)
@@ -267,7 +264,9 @@ const dischargePatientById = async (req, res) => {
     }
 
     patient.isDischarged = true;
-    patient.dischargeDateTime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
+    patient.dischargeDateTime = new Date(
+      new Date().getTime() + 8 * 60 * 60 * 1000
+    );
     await patient.save();
 
     const smartBed = await SmartBed.findOne({ patient: id });
@@ -284,9 +283,9 @@ const dischargePatientById = async (req, res) => {
     const smartWearable = await SmartWearable.findOne({ patient: id });
 
     if (!smartWearable) {
-      return res
-        .status(500)
-        .json({ message: `cannot find any smart wearable with Patient ID ${id}` });
+      return res.status(500).json({
+        message: `cannot find any smart wearable with Patient ID ${id}`,
+      });
     }
 
     if (smartWearable.patient != undefined) {
@@ -332,9 +331,9 @@ const admitPatientById = async (req, res) => {
 
     const smartWearable = await SmartWearable.findById(smartWearableId);
     if (!smartWearable) {
-      return res
-        .status(500)
-        .json({ message: `cannot find any smartWearable with SmartWearable ID ${id}` });
+      return res.status(500).json({
+        message: `cannot find any smartWearable with SmartWearable ID ${id}`,
+      });
     }
     smartWearable.patient = id;
     await smartWearable.save();
@@ -379,16 +378,16 @@ const getNursesByPatientId = async (req, res) => {
     const bed = await SmartBed.findOne({ patient: id });
 
     if (!bed) {
-      return res.status(500).json({ message: 'Bed not found for the patient' });
+      return res.status(500).json({ message: "Bed not found for the patient" });
     }
-    
+
     const nurses = await Nurse.find({ smartBeds: bed._id });
     res.status(200).json(nurses);
   } catch (e) {
     console.error(e);
     res.status(500).json({ success: e.message });
   }
-}
+};
 
 const getVirtualNurseByPatientId = async (req, res) => {
   try {
@@ -402,26 +401,24 @@ const getVirtualNurseByPatientId = async (req, res) => {
 
     const ward = await Ward.findOne({ smartBeds: smartBed._id });
     if (!ward) {
-      return res
-        .status(500)
-        .json({ message: `cannot find any ward with Smart Bed ID ${smartBed._id}` });
+      return res.status(500).json({
+        message: `cannot find any ward with Smart Bed ID ${smartBed._id}`,
+      });
     }
 
     const vn = await virtualNurse.findOne({ wards: ward._id });
     if (!vn) {
-      return res
-        .status(500)
-        .json({ message: `cannot find any Virtual Nurse with Ward ID ${ward._id}` });
-        
+      return res.status(500).json({
+        message: `cannot find any Virtual Nurse with Ward ID ${ward._id}`,
+      });
     }
-
 
     res.status(200).json(vn);
   } catch (e) {
     console.error(e);
     res.status(500).json({ success: e.message });
   }
-}
+};
 
 module.exports = {
   createPatient,
@@ -438,5 +435,5 @@ module.exports = {
   admitPatientById,
   deletePatientById,
   getNursesByPatientId,
-  getVirtualNurseByPatientId
+  getVirtualNurseByPatientId,
 };

@@ -38,7 +38,7 @@ passport.use(
 
         return done(null, user);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     }
   )
