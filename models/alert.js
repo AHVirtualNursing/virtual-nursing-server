@@ -70,8 +70,7 @@ const NoteLog = new mongoose.Schema({
     required: true,
   },
   addedBy: {
-    type: String,
-    required: true,
+    type: String
   },
 });
 
@@ -98,7 +97,7 @@ const alertSchema = new mongoose.Schema(
       ref: "Patient",
     },
     handledBy: {
-      type: String,
+      type: NoteLog,
     },
     followUps: {
       type: [followUpLog],
