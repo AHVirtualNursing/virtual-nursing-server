@@ -117,7 +117,7 @@ const updateSmartBedById = async (req, res) => {
       isBrakeSet,
       isLowestPosition,
       isBedExitAlarmOn,
-      isBedAlarmTriggered,
+      isPatientOnBed,
       bedAlarmProtocolBreachReason,
       patient
     } = req.body;
@@ -150,10 +150,10 @@ const updateSmartBedById = async (req, res) => {
     if (isBedExitAlarmOn !== undefined) {
       smartbed.isBedExitAlarmOn = isBedExitAlarmOn;
     }
-    if (isBedAlarmTriggered != undefined) {
-      smartbed.isBedAlarmTriggered = isBedAlarmTriggered;
+    if (isPatientOnBed != undefined) {
+      smartbed.isPatientOnBed = isPatientOnBed;
 
-      if(isBedAlarmTriggered){
+      if(!isPatientOnBed && smartbed.isBedExitAlarmOn){
         sendBedAlarmAlert(smartbed.patient)
       }
     }
@@ -325,7 +325,7 @@ const sendBedAlarmAlert = async (patient) => {
   const request = {
     body: {
       patient: patient,
-      description: "Bed Alarm is Triggered",
+      description: "Bed Exit Alarm is Triggered",
       notes: [],
       alertType: alertTypeEnum[1]
     },
