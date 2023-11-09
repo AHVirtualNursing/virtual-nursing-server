@@ -8,6 +8,8 @@ const Reminder = require("../models/reminder");
 const { Nurse } = require("../models/nurse");
 const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
+const { io } = require("socket.io-client");
+const SERVER_URL = "http://localhost:3001";
 
 const createPatient = async (req, res) => {
   try {
@@ -181,7 +183,7 @@ const updatePatientById = async (req, res) => {
         .status(500)
         .json({ message: `cannot find any patient with ID ${id}` });
     }
-
+    const socket = io(SERVER_URL);
     const {
       infoLogs,
       condition,
@@ -240,8 +242,9 @@ const updatePatientById = async (req, res) => {
       }
       patient.alertConfig = alertConfig;
     }
-
+    
     const updatedPatient = await patient.save();
+    socket.emit("update-patient", updatedPatient);
     res.status(200).json(updatedPatient);
   } catch (e) {
     if (e.name === "ValidationError") {
