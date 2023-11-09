@@ -17,7 +17,6 @@ const configureSocket = (server) => {
   const dvsClientConnections = new Map();
   const virtualNurseChatConnections = new Map();
   const bedsideNurseChatConnections = new Map();
-  const patientConnections = new Map();
 
   io.on("connection", (socket) => {
     socket.on("connectSmartWatch", async (patientId) => {
@@ -169,13 +168,6 @@ const configureSocket = (server) => {
       );
       if (virtualNurseSocket) {
         virtualNurseSocket.emit("updateVirtualNurseChat", chat);
-      }
-    });
-
-    socket.on("fallRiskUpdate", (patient) => {
-      const patientSocket = patientConnections.get(patient._id);
-      if (patientSocket) {
-        patientSocket.emit("newFallRisk", patient.fallRisk);
       }
     });
 
