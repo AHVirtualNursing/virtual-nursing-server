@@ -1,7 +1,9 @@
 const SmartBed = require("../models/smartbed");
-const Nurse = require("../models/nurse");
+const { Nurse }= require("../models/nurse");
 const Patient = require("../models/patient");
 const Ward = require("../models/ward");
+const {alertTypeEnum} = require("../models/alert");
+const AlertController = require("../controllers/alertController");
 
 const createSmartBed = async (req, res) => {
   try {
@@ -114,10 +116,13 @@ const updateSmartBedById = async (req, res) => {
       isLeftLowerRail,
       isBrakeSet,
       isLowestPosition,
-      isBedAlarmOn,
+      isBedExitAlarmOn,
+      isBedAlarmTriggered,
       bedAlarmProtocolBreachReason,
-      patient,
+      patient
     } = req.body;
+
+    console.log(req.body)
     if (name) {
       smartbed.name = name;
     }
@@ -142,8 +147,15 @@ const updateSmartBedById = async (req, res) => {
     if (isLowestPosition !== undefined) {
       smartbed.isLowestPosition = isLowestPosition;
     }
-    if (isBedAlarmOn !== undefined) {
-      smartbed.isBedAlarmOn = isBedAlarmOn;
+    if (isBedExitAlarmOn !== undefined) {
+      smartbed.isBedExitAlarmOn = isBedExitAlarmOn;
+    }
+    if (isBedAlarmTriggered != undefined) {
+      smartbed.isBedAlarmTriggered = isBedAlarmTriggered;
+
+      if(isBedAlarmTriggered){
+        sendBedAlarmAlert(smartbed.patient)
+      }
     }
     if (bedAlarmProtocolBreachReason) {
       smartbed.bedAlarmProtocolBreachReason = bedAlarmProtocolBreachReason;
@@ -171,7 +183,7 @@ const updateSmartBedById = async (req, res) => {
         .status(500)
         .json({ message: "Name of smartbed must be unique." });
     } else {
-      res.status(500).json({ success: e.message });
+      res.status(500).json({ error: e.message });
     }
   }
 };
@@ -307,6 +319,34 @@ const deleteSmartBedById = async (req, res) => {
     res.status(500).json({ success: e.message });
   }
 };
+
+const sendBedAlarmAlert = async (patient) => {
+
+  const request = {
+    body: {
+      patient: patient,
+      description: "Bed Alarm is Triggered",
+      notes: [],
+      alertType: alertTypeEnum[1]
+    },
+  };
+
+  const result = {
+    statusCode: null,
+    jsonData: null,
+    status: function (code) {
+      this.statusCode = code;
+      return this;
+    },
+    json: function (data) {
+      this.jsonData = data;
+      return this;
+    },
+  };
+
+  await AlertController.createAlert(request, result);
+
+}
 
 module.exports = {
   createSmartBed,

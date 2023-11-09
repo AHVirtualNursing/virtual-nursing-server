@@ -1,6 +1,6 @@
 const Ward = require("../models/ward");
 const SmartBed = require("../models/smartbed");
-const Nurse = require("../models/nurse");
+const { Nurse } = require("../models/nurse");
 const { getBedsPerRoom } = require("../helper/ward");
 const virtualNurse = require("../models/virtualNurse");
 

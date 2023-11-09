@@ -1,4 +1,4 @@
-const nurse = require("../models/nurse");
+const {Nurse} = require("../models/nurse");
 const ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
 const itAdmin = require("../models/itAdmin");
@@ -38,7 +38,7 @@ const getUserById = async (req, res) => {
         user = await virtualNurse.findById(id);
         break;
       case "bedside-nurse":
-        user = await nurse.findById(id);
+        user = await Nurse.findById(id);
         break;
     }
     if (user != null) {
@@ -101,7 +101,7 @@ const changePassword = async (req, res) => {
         user = await virtualNurse.findById(id);
         break;
       case "bedside-nurse":
-        user = await nurse.findById(id);
+        user = await Nurse.findById(id);
         break;
     }
 

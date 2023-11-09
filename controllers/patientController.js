@@ -1,11 +1,11 @@
-const Alert = require("../models/alert");
+const { Alert } = require("../models/alert");
 const AlertConfig = require("../models/alertConfig");
 const Patient = require("../models/patient");
 const SmartBed = require("../models/smartbed");
 const SmartWearable = require("../models/smartWearable");
 const bedStatusEnum = ["occupied", "vacant"];
 const Reminder = require("../models/reminder");
-const Nurse = require("../models/nurse");
+const { Nurse } = require("../models/nurse");
 const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
 

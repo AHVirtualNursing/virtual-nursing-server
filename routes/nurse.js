@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const Nurse = require("../models/nurse");
 const nurse = require("../controllers/nurseController");
 
 router.post("/", nurse.createNurse);

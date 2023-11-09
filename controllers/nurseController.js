@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb");
-const Nurse = require("../models/nurse");
+const { Nurse }= require("../models/nurse");
 const SmartBed = require("../models/smartbed");
 const Ward = require("../models/ward");
 const nurseStatusEnum = ["normal", "head"];
