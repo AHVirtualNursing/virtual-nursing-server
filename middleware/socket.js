@@ -17,7 +17,6 @@ const configureSocket = (server) => {
   const dvsClientConnections = new Map();
   const virtualNurseChatConnections = new Map();
   const bedsideNurseChatConnections = new Map();
-  const patientConnections = new Map();
 
   io.on("connection", (socket) => {
     socket.on("connectSmartWatch", async (patientId) => {
@@ -49,7 +48,7 @@ const configureSocket = (server) => {
     });
 
     socket.on("dvsClientConnections", (virtualNurseId) => {
-      console.log("connection established");
+      console.log(`Connection established with ${virtualNurseId}`);
       dvsClientConnections.set(virtualNurseId, socket);
     });
 
@@ -178,10 +177,12 @@ const configureSocket = (server) => {
       }
     });
 
-    socket.on("fallRiskUpdate", (patient) => {
-      const patientSocket = patientConnections.get(patient._id);
-      if (patientSocket) {
-        patientSocket.emit("newFallRisk", patient.fallRisk);
+    socket.on("fallRiskUpdate", (data) => {
+      const [patient, virtualNurseId] = data;
+      const fallRiskSocket = dvsClientConnections.get(virtualNurseId);
+      console.log(fallRiskSocket);
+      if (fallRiskSocket) {
+        fallRiskSocket.emit("newFallRisk", patient.fallRisk);
       }
     });
 
