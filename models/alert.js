@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 
 const alertStatusEnum = ["open", "handling", "complete"]
+const alertTypeEnum = ["Vital", "SmartBed"]
 
 const AlertVitals = new mongoose.Schema({
   reading: {
@@ -94,6 +95,14 @@ const alertSchema = new mongoose.Schema(
     },
     alertVitals: {
       type:[AlertVitals]
+    },
+    alertType:{
+      type: alertTypeEnum,
+      required: true
+    },
+    redelegate: {
+      type: Boolean,
+      default: false
     }
   },
   {
@@ -101,4 +110,11 @@ const alertSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.models.Alert || mongoose.model("Alert", alertSchema);
+
+const Alert =  mongoose.models.Alert || mongoose.model("Alert", alertSchema);
+
+module.exports = {
+  Alert,
+  alertTypeEnum,
+  alertStatusEnum
+}

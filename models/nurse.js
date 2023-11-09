@@ -41,5 +41,6 @@ const nurseSchema = new mongoose.Schema(
 );
 
 nurseSchema.add(User.schema);
+const Nurse = mongoose.models.Nurse || mongoose.model("Nurse", nurseSchema);
 
-module.exports = mongoose.models.Nurse || mongoose.model("Nurse", nurseSchema);
+module.exports = {Nurse, nurseStatusEnum}

@@ -1,4 +1,4 @@
-const nurse = require("../models/nurse");
+const { Nurse } = require("../models/nurse");
 const virtualNurse = require("../models/virtualNurse");
 const itAdmin = require("../models/itAdmin");
 
@@ -11,7 +11,7 @@ function getUserModel(userType) {
     case "it-admin":
       return itAdmin;
     case "mobile":
-      return nurse;
+      return Nurse;
     case "":
       return Error;
   }

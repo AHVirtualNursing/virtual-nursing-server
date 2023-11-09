@@ -1,8 +1,9 @@
 const { io } = require("socket.io-client");
-const Alert = require("../models/alert");
+const { Alert } = require("../models/alert");
 const Patient = require("../models/patient");
 const alertNotification = require("../helper/alertNotification");
 const SERVER_URL = "http://localhost:3001";
+const {sendAlert} = require("../helper/alertNotification");
 
 const createAlert = async (req, res) => {
   const socket = io(SERVER_URL);
@@ -17,7 +18,8 @@ const createAlert = async (req, res) => {
       description: req.body.description,
       notes: req.body.notes,
       patient: req.body.patient,
-      alertVitals: req.body.alertVitals
+      alertVitals: req.body.alertVitals,
+      alertType: req.body.alertType
     });
     await alert.save();
     console.log(alert)
@@ -192,6 +194,22 @@ const deleteAlertById = async (req, res) => {
   }
 };
 
+const redelegateAlert = async(req, res) => {
+  try {
+    const { id } = req.params;
+    const alert = await Alert.findById(id).populate([{ path: "patient" }]);
+    if (!alert) {
+      res.status(500).json({ message: `cannot find any alert with ID ${id}` });
+    }
+
+    await sendAlert(alert);
+
+    res.status(200).json(alert);
+  } catch (e) {
+    res.status(500).json({ success: false });
+  }
+}
+
 module.exports = {
   createAlert,
   getAllAlerts,
@@ -199,4 +217,5 @@ module.exports = {
   updateAlertById,
   createFollowUpForAlert,
   deleteAlertById,
+  redelegateAlert
 };
