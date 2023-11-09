@@ -200,6 +200,32 @@ const configureSocket = (server) => {
 
     })
 
+    socket.on("update-patient", async (patient) => {
+
+      const req = { params: { id: patient._id } };
+      const res = {
+        statusCode: null,
+        jsonData: null,
+        status: function (code) {
+          this.statusCode = code;
+          return this;
+        },
+        json: function (data) {
+          this.jsonData = data;
+          return this;
+        },
+      };
+      
+      await patientController.getVirtualNurseByPatientId(req, res);
+      const virtualNurse = res.jsonData;
+      const patientSocket = dvsClientConnections.get(String(virtualNurse._id));
+      
+      if(patientSocket){
+        patientSocket.emit("updatedPatient", patient);
+      }
+
+    })
+
     socket.on("fallRiskUpdate", (data) => {
       const [patient, virtualNurseId] = data;
       const fallRiskSocket = dvsClientConnections.get(virtualNurseId);
