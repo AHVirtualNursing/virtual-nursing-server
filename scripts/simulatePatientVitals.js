@@ -1,6 +1,7 @@
 const { io } = require("socket.io-client");
 const { initialiseDb } = require("./initialiseDb");
 const { sendMockPatientVitals } = require("./sendMockPatientVitals");
+const mongoose = require("mongoose");
 const Patient = require("../models/patient");
 
 const SERVER_URL = "http://localhost:3001";
@@ -82,16 +83,32 @@ async function simulatePatientVitals() {
   }
 
   async function simulateFallRisk() {
-    const fallRiskValues = ["Low", "Medium", "High"];
-
-    const patient = await Patient.findById(patientId);
-
-    fallRiskValues.map((fallRiskValue) => {
-      setTimeout(async () => {
-        patient.fallRisk = fallRiskValue;
-        await patient.save();
-      }, 60000);
+    mongoose.connect(process.env.MONGODB_LOCAL_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      autoIndex: false,
     });
+    const fallRiskValues = ["Low", "Medium", "High"];
+    let index = 0;
+
+    const updateFallRisk = async () => {
+      if (index >= fallRiskValues.length) {
+        index = 0;
+      }
+
+      const fallRiskValue = fallRiskValues[index];
+      const patient = await Patient.findById(patientId);
+      patient.fallRisk = fallRiskValue;
+      await patient.save();
+      if (patient) socket.emit("fallRiskUpdate", patient);
+
+      console.log(`Updated patient fall risk to ${fallRiskValue}`);
+      index++;
+
+      setTimeout(updateFallRisk, 10000);
+    };
+
+    updateFallRisk();
   }
 
   if (vitalType) {
