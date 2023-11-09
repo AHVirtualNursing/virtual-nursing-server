@@ -21,7 +21,6 @@ const scheduleNews2 = schedule.scheduleJob("* /5 * * * ", async () => {
 
   await patientController.getPatients(req, res);
   const patients = res.jsonData;
-  console.log(patients)
  
   for (const patient of patients) {
     await calculateNews2(patient);
@@ -55,8 +54,6 @@ const calculateNews2 = async (patient) => {
   if (!vital) {
     return;
   }
-
-  console.log(patient.name, vital._id);
 
   if (vital.respRate.length > 0) {
     respRate = vital.respRate[vital.respRate.length - 1]["reading"];

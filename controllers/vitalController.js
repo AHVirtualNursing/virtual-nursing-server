@@ -255,7 +255,6 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     await patient.save();
 
     if (request.body.description != "") {
-      console.log("in_");
       await AlertController.createAlert(request, result);
     }
 

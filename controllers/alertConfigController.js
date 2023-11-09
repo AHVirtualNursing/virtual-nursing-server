@@ -5,11 +5,9 @@ const createAlertConfig = async (req, res) => {
   try {
     const patient = await Patient.findById({ _id: req.body.patient });
     if (!patient) {
-      return res
-        .status(500)
-        .json({
-          message: `cannot find any patient with Patient ID ${req.body.patient}`,
-        });
+      return res.status(500).json({
+        message: `cannot find any patient with Patient ID ${req.body.patient}`,
+      });
     }
     const alertConfig = new AlertConfig({});
     await AlertConfig.create(alertConfig);
@@ -61,8 +59,14 @@ const updateAlertConfigById = async (req, res) => {
         .status(500)
         .json({ message: `cannot find any alertConfig with ID ${id}` });
     }
-    const { rrConfig, hrConfig, bpSysConfig, bpDiaConfig, spO2Config } =
-      req.body;
+    const {
+      rrConfig,
+      hrConfig,
+      bpSysConfig,
+      bpDiaConfig,
+      spO2Config,
+      tempConfig,
+    } = req.body;
     if (rrConfig) {
       alertConfig.rrConfig = rrConfig;
     }
@@ -78,11 +82,14 @@ const updateAlertConfigById = async (req, res) => {
     if (spO2Config) {
       alertConfig.spO2Config = spO2Config;
     }
+    if (tempConfig) {
+      alertConfig.temperatureConfig = tempConfig;
+    }
 
     const updatedAlertConfig = await alertConfig.save();
     res.status(200).json(updatedAlertConfig);
   } catch (e) {
-    console.log(e)
+    console.error(e);
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(500).json({ validationErrors });
@@ -113,11 +120,9 @@ const deleteAlertConfigById = async (req, res) => {
       }
     );
     if (!updatedPatient) {
-      return res
-        .status(500)
-        .json({
-          message: `cannot find any patient tagged to this alert with ID ${alert.patient}`,
-        });
+      return res.status(500).json({
+        message: `cannot find any patient tagged to this alert with ID ${alert.patient}`,
+      });
     }
     await AlertConfig.deleteOne({ _id: id });
     res.status(200).json(alertConfig);

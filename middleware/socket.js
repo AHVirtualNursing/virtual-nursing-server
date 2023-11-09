@@ -104,15 +104,9 @@ const configureSocket = (server) => {
       await patientController.getAlertsByPatientId(req, res);
       const alertList = res.jsonData;
 
-      // console.log(alertSocket);
       if (alertSocket) {
-        console.log("went inside if");
-        alertSocket.emit("alertIncoming", { alert: alert, patient: patient });
-        console.log("alertIncomingEmitted");
-        alertSocket.emit("patientAlertAdded", {
-          alertList: alertList,
-          patient: patient,
-        });
+        alertSocket.emit("alertIncoming", {alert: alert, patient: patient});
+        alertSocket.emit("patientAlertAdded", {alertList: alertList, patient: patient});
       }
     });
 

@@ -86,7 +86,7 @@ router.post("/login", (req, res, next) => {
     }
     req.login(user, (err) => {
       if (err) {
-        console.log(err);
+        console.error(err);
         return res
           .status(500)
           .json({ message: "An error occurred during login." });
