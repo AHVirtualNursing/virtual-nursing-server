@@ -89,7 +89,7 @@ const updateAlertConfigById = async (req, res) => {
     const updatedAlertConfig = await alertConfig.save();
     res.status(200).json(updatedAlertConfig);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(500).json({ validationErrors });
