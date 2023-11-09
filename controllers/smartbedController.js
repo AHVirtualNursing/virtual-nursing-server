@@ -102,7 +102,7 @@ const getNursesBySmartBedId = async (req, res) => {
 const updateSmartBedById = async (req, res) => {
   try {
     const { id } = req.params;
-    const smartbed = await SmartBed.findById(id);
+    const smartbed = await SmartBed.findById(id).populate("patient ward");;
     if (!smartbed) {
       return res
         .status(500)
@@ -153,9 +153,10 @@ const updateSmartBedById = async (req, res) => {
     }
     if (isPatientOnBed != undefined) {
       smartbed.isPatientOnBed = isPatientOnBed;
-
-      if(!isPatientOnBed && smartbed.isBedExitAlarmOn){
-        sendBedAlarmAlert(smartbed.patient)
+      console.log("before enter if")
+      if(!smartbed.isPatientOnBed && smartbed.isBedExitAlarmOn){
+        console.log("sending alert")
+        sendBedAlarmAlert(smartbed.patient._id)
       }
     }
     if (bedAlarmProtocolBreachReason) {

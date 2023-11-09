@@ -216,9 +216,11 @@ const configureSocket = (server) => {
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
       const patientSocket = dvsClientConnections.get(String(virtualNurse._id));
-
-      if(patientSocket){
+      console.log(patientSocket)
+      if (patientSocket) {
+        console.log("enter")
         patientSocket.emit("updatedSmartbed", smartbed);
+        console.log("post emit")
       }
 
     })
