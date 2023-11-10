@@ -10,6 +10,7 @@ const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
 const { io } = require("socket.io-client");
 const SERVER_URL = "http://localhost:3001";
+const socket = io(SERVER_URL);
 
 const createPatient = async (req, res) => {
   try {
@@ -183,7 +184,7 @@ const updatePatientById = async (req, res) => {
         .status(500)
         .json({ message: `cannot find any patient with ID ${id}` });
     }
-    const socket = io(SERVER_URL);
+
     const {
       infoLogs,
       condition,
@@ -283,19 +284,21 @@ const dischargePatientById = async (req, res) => {
     smartBed.patient = null;
     await smartBed.save();
 
-    const smartWearable = await SmartWearable.findOne({ patient: id });
+    
+    // const smartWearable = await SmartWearable.findOne({ patient: id });
 
-    if (!smartWearable) {
-      return res.status(500).json({
-        message: `cannot find any smart wearable with Patient ID ${id}`,
-      });
-    }
+    // if (!smartWearable) {
+    //   return res.status(500).json({
+    //     message: `cannot find any smart wearable with Patient ID ${id}`,
+    //   });
+    // }
 
-    if (smartWearable.patient != undefined) {
-      smartWearable.patient = undefined;
-      await smartWearable.save();
-    }
+    // if (smartWearable.patient != undefined) {
+    //   smartWearable.patient = undefined;
+    //   await smartWearable.save();
+    // }
 
+    socket.emit("update-patient", patient);
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {

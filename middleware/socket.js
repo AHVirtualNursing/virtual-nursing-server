@@ -239,13 +239,16 @@ const configureSocket = (server) => {
           return this;
         },
       };
-      
+
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
       const patientSocket = dvsClientConnections.get(String(virtualNurse._id));
       
-      if(patientSocket){
+      console.log(patient.isDischarged);
+      if(patientSocket && !patient.isDischarged){
         patientSocket.emit("updatedPatient", patient);
+      } else if (patientSocket && patient.isDischarged){
+        patientSocket.emit("dischargePatient", patient);
       }
 
     })
