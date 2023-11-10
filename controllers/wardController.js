@@ -328,7 +328,7 @@ const deleteWardById = async (req, res) => {
   }
 };
 
-const getAlertsByWardId = async(req, res) => {
+const getAlertsByWardId = async (req, res) => {
   try {
     const { id } = req.params;
     const ward = await Ward.findById(id).populate("smartBeds");
@@ -339,27 +339,28 @@ const getAlertsByWardId = async(req, res) => {
     }
 
     const smartbeds = ward.smartBeds;
-    
-    const patients = []
-    for (const smartbed of smartbeds){
-  
-      if (smartbed.patient && mongoose.Types.ObjectId.isValid(smartbed.patient)){
-        patients.push(smartbed.patient)
+
+    const patients = [];
+    for (const smartbed of smartbeds) {
+      if (
+        smartbed.patient &&
+        mongoose.Types.ObjectId.isValid(smartbed.patient)
+      ) {
+        patients.push(smartbed.patient);
       }
     }
     console.log(patients);
-    const alerts = []
+    const alerts = [];
     for (const patient of patients) {
       const patientAlerts = await Alert.find({ patient: patient });
-      alerts.push(patientAlerts);
+      alerts.push(...patientAlerts);
     }
-    
+
     res.status(200).json(alerts);
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
-
-}
+};
 
 module.exports = {
   createWard,
@@ -372,5 +373,5 @@ module.exports = {
   assignNurseToWard,
   assignVirtualNurseToWard,
   deleteWardById,
-  getAlertsByWardId
+  getAlertsByWardId,
 };
