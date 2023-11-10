@@ -38,14 +38,18 @@ const getWards = async (req, res) => {
   try {
     if (req.query.unassigned) {
       if (req.query.unassigned == "true") {
-        const wards = await Ward.find({ virtualNurse: { $exists: false } }).populate('virtualNurse');
+        const wards = await Ward.find({
+          virtualNurse: { $exists: false },
+        }).populate("virtualNurse");
         res.status(200).json({ success: true, data: wards });
       } else {
-        const wards = await Ward.find({ virtualNurse: { $exists: true } }).populate('virtualNurse');
+        const wards = await Ward.find({
+          virtualNurse: { $exists: true },
+        }).populate("virtualNurse");
         res.status(200).json({ success: true, data: wards });
       }
     } else {
-      const wards = await Ward.find({}).populate('virtualNurse');
+      const wards = await Ward.find({}).populate("virtualNurse");
       res.status(200).json({ success: true, data: wards });
     }
   } catch (e) {
@@ -56,7 +60,7 @@ const getWards = async (req, res) => {
 const getWardById = async (req, res) => {
   try {
     const { id } = req.params;
-    const ward = await Ward.findById(id).populate('virtualNurse');
+    const ward = await Ward.findById(id).populate("virtualNurse");
     if (!ward) {
       return res
         .status(500)
@@ -85,13 +89,13 @@ const getSmartBedsByWardId = async (req, res) => {
         if (id.match(/^[0-9a-fA-F]{24}$/)) {
           const smartBed = await SmartBed.findById(id).populate("patient");
           if (!smartBed) {
-            res
+            return res
               .status(500)
               .json({ message: `cannot find any smartbed with ID ${id}` });
           }
           return smartBed;
         } else {
-          res.status(500).json({ message: `${id} is in wrong format` });
+          return res.status(500).json({ message: `${id} is in wrong format` });
         }
       })
     );
@@ -104,32 +108,16 @@ const getSmartBedsByWardId = async (req, res) => {
 const getNursesByWardId = async (req, res) => {
   try {
     const { id } = req.params;
-    const ward = await Ward.findById(id);
+    const ward = await Ward.findById(id).populate("nurses");
     if (!ward) {
       return res
         .status(500)
         .json({ message: `cannot find any ward with ID ${id}` });
     }
 
-    const idsToRetrieve = ward.nurses.map((id) => id.toString());
-
-    const nurses = await Promise.all(
-      idsToRetrieve.map(async (id) => {
-        if (id.match(/^[0-9a-fA-F]{24}$/)) {
-          const nurse = await Nurse.findById(id).populate("headNurse");
-          if (!nurse) {
-            res
-              .status(500)
-              .json({ message: `cannot find any nurse with ID ${id}` });
-          }
-          return nurse;
-        } else {
-          res.status(500).json({ message: `${id} is in wrong format` });
-        }
-      })
-    );
-    res.status(200).json(nurses);
+    res.status(200).json(ward.nurses);
   } catch (e) {
+    console.error(e);
     res.status(500).json({ success: e.message });
   }
 };
@@ -264,7 +252,7 @@ const assignNurseToWard = async (req, res) => {
 
 const assignVirtualNurseToWard = async (req, res) => {
   try {
-  const { id } = req.params;
+    const { id } = req.params;
     const ward = await Ward.findById(id);
     if (!ward) {
       return res
@@ -275,14 +263,14 @@ const assignVirtualNurseToWard = async (req, res) => {
     const virtualNurseId = req.body.virtualNurse;
     const virtualNurseInstance = await virtualNurse.findById(virtualNurseId);
     if (!virtualNurseInstance) {
-      return res
-        .status(500)
-        .json({ message: `cannot find any virtual nurse with ID ${virtualNurseId}` });
+      return res.status(500).json({
+        message: `cannot find any virtual nurse with ID ${virtualNurseId}`,
+      });
     }
     if (virtualNurseInstance.wards.length > 1) {
-      return res
-        .status(500)
-        .json({ message: `virtual nurse with ID ${virtualNurseId} cannot be assigned more than 2 wards` });
+      return res.status(500).json({
+        message: `virtual nurse with ID ${virtualNurseId} cannot be assigned more than 2 wards`,
+      });
     }
 
     virtualNurseInstance.wards.push(id);
@@ -311,7 +299,7 @@ const assignVirtualNurseToWard = async (req, res) => {
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
-}
+};
 
 const deleteWardById = async (req, res) => {
   try {
