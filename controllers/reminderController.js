@@ -14,7 +14,7 @@ const getAllReminders = async (req, res) => {
 const getReminderById = async (req, res) => {
   try {
     const { id } = req.params;
-    const reminder = await Reminder.findById(id);
+    const reminder = await Reminder.findById(id).populate({ path: "patient" });
     if (!reminder) {
       return res
         .status(500)

@@ -129,5 +129,6 @@ const Alert =  mongoose.models.Alert || mongoose.model("Alert", alertSchema);
 module.exports = {
   Alert,
   alertTypeEnum,
-  alertStatusEnum
+  alertStatusEnum,
+  AlertVitalEnum
 }
