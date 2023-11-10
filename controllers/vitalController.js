@@ -1,7 +1,7 @@
 const Vital = require("../models/vital");
 const Patient = require("../models/patient");
 const AlertController = require("../controllers/alertController");
-const { alertTypeEnum } = require("../models/alert");
+const { alertTypeEnum, AlertVitalEnum } = require("../models/alert");
 
 const addVitalForPatient = async (req, res) => {
   try {
@@ -80,7 +80,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         description: "",
         notes: [],
         alertVitals: [],
-        alertType: alertTypeEnum[0]
+        alertType: alertTypeEnum[0],
       },
     };
 
@@ -96,8 +96,6 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         return this;
       },
     };
-
-    const alertVital = {};
 
     const vitalsReading = {
       datetime: vitalsData.datetime,
@@ -122,9 +120,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Respiratory rate has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "Respiratory Rate";
-        alertVital.reading = vitalsData.respRate;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = AlertVitalEnum[0];
+        newVital.reading = vitalsData.respRate;
+        request.body.alertVitals.push(newVital);
       }
     }
 
@@ -147,9 +147,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Heart rate has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "Heart Rate";
-        alertVital.reading = vitalsData.heartRate;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = AlertVitalEnum[1];
+        newVital.reading = vitalsData.heartRate;
+        request.body.alertVitals.push(newVital);
       }
     }
 
@@ -172,9 +174,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Systolic Blood Pressure has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "Systolic Blood Pressure";
-        alertVital.reading = vitalsData.bloodPressureSys;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = AlertVitalEnum[2];
+        newVital.reading = vitalsData.bloodPressureSys;
+        request.body.alertVitals.push(newVital);
       }
     }
 
@@ -197,9 +201,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Diastolic Blood Pressure has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "Diastolic Blood Pressure";
-        alertVital.reading = vitalsData.bloodPressureDia;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = AlertVitalEnum[3];
+        newVital.reading = vitalsData.bloodPressureDia;
+        request.body.alertVitals.push(newVital);
       }
     }
 
@@ -208,8 +214,8 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       vital.spO2.push(vitalsReading);
 
       if (
-        vitalsData.sp02 < alertConfig.spO2Config[0] ||
-        vitalsData.sp02 > alertConfig.spO2Config[1]
+        vitalsData.spO2 < alertConfig.spO2Config[0] ||
+        vitalsData.spO2 > alertConfig.spO2Config[1]
       ) {
         if (vitalsData.spO2 < alertConfig.spO2Config[0]) {
           request.body.description =
@@ -222,9 +228,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Oxygen Level has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "SPO2";
-        alertVital.reading = vitalsData.spO2;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = AlertVitalEnum[4];
+        newVital.reading = vitalsData.spO2;
+        request.body.alertVitals.push(newVital);
       }
     }
 
@@ -247,9 +255,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Temperature has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "Temperature";
-        alertVital.reading = vitalsData.temperature;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = AlertVitalEnum[5];
+        newVital.reading = vitalsData.temperature;
+        request.body.alertVitals.push(newVital);
       }
     }
     await vital.save();

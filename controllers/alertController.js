@@ -3,7 +3,7 @@ const { Alert } = require("../models/alert");
 const Patient = require("../models/patient");
 const alertNotification = require("../helper/alertNotification");
 const SERVER_URL = "http://localhost:3001";
-const {sendAlert} = require("../helper/alertNotification");
+const { sendAlert } = require("../helper/alertNotification");
 
 const createAlert = async (req, res) => {
   const socket = io(SERVER_URL);
@@ -19,7 +19,7 @@ const createAlert = async (req, res) => {
       notes: req.body.notes,
       patient: req.body.patient,
       alertVitals: req.body.alertVitals,
-      alertType: req.body.alertType
+      alertType: req.body.alertType,
     });
     await alert.save();
     patient.alerts.push(alert._id);
@@ -33,11 +33,11 @@ const createAlert = async (req, res) => {
     res.status(200).json({ success: true, data: alert });
   } catch (e) {
     if (e.name === "ValidationError") {
-      console.error(e)
+      console.error(e);
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       res.status(500).json({ validationErrors });
     } else {
-      console.error(e)
+      console.error(e);
       res.status(500).json({ success: false });
     }
   }
@@ -97,6 +97,7 @@ const updateAlertById = async (req, res) => {
     const updatedAlert = await alert.save();
     res.status(200).json(updatedAlert);
   } catch (e) {
+    console.error(e);
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(500).json({ validationErrors });
@@ -195,7 +196,7 @@ const deleteAlertById = async (req, res) => {
   }
 };
 
-const redelegateAlert = async(req, res) => {
+const redelegateAlert = async (req, res) => {
   try {
     const { id } = req.params;
     const alert = await Alert.findById(id).populate([{ path: "patient" }]);
@@ -209,7 +210,7 @@ const redelegateAlert = async(req, res) => {
   } catch (e) {
     res.status(500).json({ success: false });
   }
-}
+};
 
 module.exports = {
   createAlert,
@@ -218,5 +219,5 @@ module.exports = {
   updateAlertById,
   createFollowUpForAlert,
   deleteAlertById,
-  redelegateAlert
+  redelegateAlert,
 };
