@@ -23,7 +23,9 @@ const createPatient = async (req, res) => {
         condition: req.body.condition,
         infoLogs: req.body.infoLogs,
         copd: req.body.copd,
-        admissionDateTime: new Date(),
+        admissionDateTime: req.body.admissionDateTime
+          ? req.body.admissionDateTime
+          : new Date(),
       });
       newPatientRecord = await Patient.create(patient);
       res.status(200).json({ success: true, data: patient });

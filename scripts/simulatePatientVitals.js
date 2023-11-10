@@ -134,6 +134,8 @@ async function simulatePatientVitals() {
   if (vitalType) {
     if (vitalType === "s3") {
       sendMockPatientVitals(patientId);
+    } else if (vitalType === "db") {
+      initialiseDb();
     } else {
       if (!patientId) {
         patientId = await initialiseDb();
