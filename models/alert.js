@@ -106,8 +106,12 @@ const alertSchema = new mongoose.Schema(
       type: [AlertVitals],
     },
     alertType:{
-      type: alertTypeEnum,
-      required: true
+      type: String,
+      enum: {
+        values: alertTypeEnum,
+        message: "Invalid alert type: {VALUE}",
+      },
+      required: true,
     },
     redelegate: {
       type: Boolean,
