@@ -215,7 +215,7 @@ const configureSocket = (server) => {
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
       const patientSocket = dvsClientConnections.get(String(virtualNurse._id));
-      console.log(patientSocket)
+     
       if (patientSocket) {
         console.log("enter")
         patientSocket.emit("updatedSmartbed", smartbed);
@@ -244,13 +244,18 @@ const configureSocket = (server) => {
       const virtualNurse = res.jsonData;
       const patientSocket = dvsClientConnections.get(String(virtualNurse._id));
       
-      console.log(patient.isDischarged);
-      if(patientSocket && !patient.isDischarged){
+
+      if(patientSocket){
         patientSocket.emit("updatedPatient", patient);
-      } else if (patientSocket && patient.isDischarged){
+      } 
+    })
+
+    socket.on("discharge-patient", async(patient, virtualNurse) => {
+
+      const patientSocket = dvsClientConnections.get(String(virtualNurse._id));
+      if(patientSocket){
         patientSocket.emit("dischargePatient", patient);
       }
-
     })
 
     socket.on("fallRiskUpdate", (data) => {

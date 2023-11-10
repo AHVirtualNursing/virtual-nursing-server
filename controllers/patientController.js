@@ -273,6 +273,23 @@ const dischargePatientById = async (req, res) => {
     );
     await patient.save();
 
+    const req = { params: { id: id } };
+    const res = {
+      statusCode: null,
+      jsonData: null,
+      status: function (code) {
+        this.statusCode = code;
+        return this;
+      },
+      json: function (data) {
+        this.jsonData = data;
+        return this;
+      },
+    };
+
+   await getVirtualNurseByPatientId(req, res);
+   const virtualNurse = res.jsonData;
+
     const smartBed = await SmartBed.findOne({ patient: id });
 
     if (!smartBed) {
@@ -298,7 +315,7 @@ const dischargePatientById = async (req, res) => {
     //   await smartWearable.save();
     // }
 
-    socket.emit("update-patient", patient);
+    socket.emit("update-patient", patient, virtualNurse);
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
