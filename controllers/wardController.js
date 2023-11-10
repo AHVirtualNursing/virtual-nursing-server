@@ -3,6 +3,8 @@ const SmartBed = require("../models/smartbed");
 const { Nurse } = require("../models/nurse");
 const { getBedsPerRoom } = require("../helper/ward");
 const virtualNurse = require("../models/virtualNurse");
+const { Alert } = require("../models/alert");
+const mongoose = require("mongoose");
 
 const createWard = async (req, res) => {
   try {
@@ -326,6 +328,39 @@ const deleteWardById = async (req, res) => {
   }
 };
 
+const getAlertsByWardId = async(req, res) => {
+  try {
+    const { id } = req.params;
+    const ward = await Ward.findById(id).populate("smartBeds");
+    if (!ward) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any ward with ID ${id}` });
+    }
+
+    const smartbeds = ward.smartBeds;
+    
+    const patients = []
+    for (const smartbed of smartbeds){
+  
+      if (smartbed.patient && mongoose.Types.ObjectId.isValid(smartbed.patient)){
+        patients.push(smartbed.patient)
+      }
+    }
+    console.log(patients);
+    const alerts = []
+    for (const patient of patients) {
+      const patientAlerts = await Alert.find({ patient: patient });
+      alerts.push(patientAlerts);
+    }
+    
+    res.status(200).json(alerts);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+
+}
+
 module.exports = {
   createWard,
   getWards,
@@ -337,4 +372,5 @@ module.exports = {
   assignNurseToWard,
   assignVirtualNurseToWard,
   deleteWardById,
+  getAlertsByWardId
 };

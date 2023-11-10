@@ -4,7 +4,7 @@ const pushNotification = require("./pushNotification");
 const patientController = require("../controllers/patientController");
 
 const reminderJob = schedule.scheduleJob("* * * * * ", async () => {
-  console.log("Checking for timed out Reminders");
+
   try {
     const dueReminders = await getDueReminders();
     for (const reminder of dueReminders) {
