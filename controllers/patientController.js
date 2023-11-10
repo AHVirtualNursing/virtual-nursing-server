@@ -315,7 +315,7 @@ const dischargePatientById = async (req, res) => {
     //   await smartWearable.save();
     // }
 
-    socket.emit("update-patient", patient, virtualNurse);
+    socket.emit("discharge-patient", patient, virtualNurse);
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
