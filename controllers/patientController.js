@@ -273,8 +273,8 @@ const dischargePatientById = async (req, res) => {
     );
     await patient.save();
 
-    const req = { params: { id: id } };
-    const res = {
+    const request = { params: { id: id } };
+    const result = {
       statusCode: null,
       jsonData: null,
       status: function (code) {
@@ -287,8 +287,8 @@ const dischargePatientById = async (req, res) => {
       },
     };
 
-   await getVirtualNurseByPatientId(req, res);
-   const virtualNurse = res.jsonData;
+   await getVirtualNurseByPatientId(request, result);
+   const virtualNurse = result.jsonData;
 
     const smartBed = await SmartBed.findOne({ patient: id });
 
