@@ -122,7 +122,6 @@ const updateSmartBedById = async (req, res) => {
       patient
     } = req.body;
 
-    console.log(req.body)
     if (name) {
       smartbed.name = name;
     }
