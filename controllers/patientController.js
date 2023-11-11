@@ -281,7 +281,7 @@ const dischargePatientById = async (req, res) => {
       await page.waitForNavigation();
 
       await page.goto(
-        `${process.env.DVS_DEVELOPMENT_URL}/discharge?patientId=${patient._id}&vitalId=${patient.vitalId}&alertConfigId=${patient.alertConfigId}`,
+        `${process.env.DVS_DEVELOPMENT_URL}/dischargeReport?patientId=${patient._id}&vitalId=${patient.vitalId}&alertConfigId=${patient.alertConfigId}`,
         {
           waitUntil: "networkidle0",
         }
