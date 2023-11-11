@@ -123,5 +123,10 @@ const patientSchema = new mongoose.Schema(
   }
 );
 
-module.exports =
+const Patient =
   mongoose.models.Patient || mongoose.model("Patient", patientSchema);
+
+module.exports = {
+  Patient,
+  patientSchema,
+};

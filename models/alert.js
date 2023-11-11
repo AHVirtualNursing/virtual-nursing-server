@@ -130,5 +130,6 @@ module.exports = {
   Alert,
   alertTypeEnum,
   alertStatusEnum,
-  AlertVitalEnum
+  AlertVitalEnum,
+  alertSchema
 }

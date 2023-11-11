@@ -38,6 +38,11 @@ const alertConfigSchema = new mongoose.Schema(
   }
 );
 
-module.exports =
-  mongoose.models.AlertConfig ||
-  mongoose.model("AlertConfig", alertConfigSchema);
+const AlertConfig = mongoose.models.AlertConfig ||
+mongoose.model("AlertConfig", alertConfigSchema);
+
+module.exports = {
+  AlertConfig,
+  alertConfigSchema
+}
+  
