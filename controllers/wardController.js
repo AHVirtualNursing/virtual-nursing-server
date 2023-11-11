@@ -77,32 +77,24 @@ const getWardById = async (req, res) => {
 const getSmartBedsByWardId = async (req, res) => {
   try {
     const { id } = req.params;
-    const ward = await Ward.findById(id);
+    const ward = await Ward.findById(id).populate([
+      {
+        path: "smartBeds",
+        populate: [
+          {
+            path: "patient",
+          },
+        ],
+      },
+    ]);
     if (!ward) {
       return res
         .status(500)
         .json({ message: `cannot find any ward with ID ${id}` });
     }
-
-    const idsToRetrieve = ward.smartBeds.map((id) => id.toString());
-
-    const smartBeds = await Promise.all(
-      idsToRetrieve.map(async (id) => {
-        if (id.match(/^[0-9a-fA-F]{24}$/)) {
-          const smartBed = await SmartBed.findById(id).populate("patient");
-          if (!smartBed) {
-            return res
-              .status(500)
-              .json({ message: `cannot find any smartbed with ID ${id}` });
-          }
-          return smartBed;
-        } else {
-          return res.status(500).json({ message: `${id} is in wrong format` });
-        }
-      })
-    );
-    res.status(200).json(smartBeds);
+    res.status(200).json(ward.smartBeds);
   } catch (e) {
+    console.error(e);
     res.status(500).json({ success: e.message });
   }
 };
