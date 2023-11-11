@@ -96,6 +96,7 @@ const patientSchema = new mongoose.Schema(
     alertConfig: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "AlertConfig",
+      required: true
     },
     reminders: [
       {
