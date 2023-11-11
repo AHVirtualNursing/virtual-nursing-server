@@ -1,6 +1,7 @@
 const socket = require("socket.io");
 const vitalController = require("../controllers/vitalController");
 const patientController = require("../controllers/patientController");
+const { generateAndUploadDischargeReport } = require("./reportGenerator");
 
 const configureSocket = (server) => {
   const io = socket(server, {
@@ -11,6 +12,17 @@ const configureSocket = (server) => {
   });
 
   const clientConnections = new Map();
+
+  const findClientSocket = (clientConnectionIdentifier) => {
+    const clientSocket = clientConnections.get(clientConnectionIdentifier);
+    if (clientSocket) {
+      return clientSocket;
+    } else {
+      console.error(
+        `No such client connection identifier ${clientConnectionIdentifier} in client connections.`
+      );
+    }
+  };
 
   io.on("connection", (socket) => {
     socket.on("connectSmartWatch", async (patientId) => {
@@ -213,6 +225,11 @@ const configureSocket = (server) => {
       if (fallRiskSocket) {
         fallRiskSocket.emit("newFallRisk", patient.fallRisk);
       }
+    });
+
+    socket.on("dischargePatient", (data) => {
+      const {patientId, vitalId, alertConfigId } = data;
+      generateAndUploadDischargeReport(patientId, vitalId, alertConfigId);
     });
 
     socket.on("disconnect", () => {
