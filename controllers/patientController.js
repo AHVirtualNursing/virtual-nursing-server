@@ -2,15 +2,16 @@ const puppeteer = require("puppeteer");
 const { s3 } = require("../middleware/awsClient");
 const { PutObjectCommand } = require("@aws-sdk/client-s3");
 const { Alert } = require("../models/alert");
-const AlertConfig = require("../models/alertConfig");
-const Patient = require("../models/patient");
+const { AlertConfig } = require("../models/alertConfig");
+const { Patient } = require("../models/patient");
 const SmartBed = require("../models/smartbed");
 const SmartWearable = require("../models/smartWearable");
 const bedStatusEnum = ["occupied", "vacant"];
-const Reminder = require("../models/reminder");
+const { Reminder } = require("../models/reminder");
 const { Nurse } = require("../models/nurse");
 const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
+const { migratePatient } = require("../middleware/ahDb");
 
 const createPatient = async (req, res) => {
   try {
@@ -306,8 +307,11 @@ const dischargePatientById = async (req, res) => {
     patient.dischargeDateTime = new Date(
       new Date().getTime() + 8 * 60 * 60 * 1000
     );
+
     await patient.save();
 
+    migratePatient(patient, patient.alerts, patient.alertConfig, patient.reminders, patient.vital, patient.report);
+    
     const smartBed = await SmartBed.findOne({ patient: id });
 
     if (!smartBed) {
