@@ -77,32 +77,24 @@ const getWardById = async (req, res) => {
 const getSmartBedsByWardId = async (req, res) => {
   try {
     const { id } = req.params;
-    const ward = await Ward.findById(id);
+    const ward = await Ward.findById(id).populate([
+      {
+        path: "smartBeds",
+        populate: [
+          {
+            path: "patient",
+          },
+        ],
+      },
+    ]);
     if (!ward) {
       return res
         .status(500)
         .json({ message: `cannot find any ward with ID ${id}` });
     }
-
-    const idsToRetrieve = ward.smartBeds.map((id) => id.toString());
-
-    const smartBeds = await Promise.all(
-      idsToRetrieve.map(async (id) => {
-        if (id.match(/^[0-9a-fA-F]{24}$/)) {
-          const smartBed = await SmartBed.findById(id).populate("patient");
-          if (!smartBed) {
-            return res
-              .status(500)
-              .json({ message: `cannot find any smartbed with ID ${id}` });
-          }
-          return smartBed;
-        } else {
-          return res.status(500).json({ message: `${id} is in wrong format` });
-        }
-      })
-    );
-    res.status(200).json(smartBeds);
+    res.status(200).json(ward.smartBeds);
   } catch (e) {
+    console.error(e);
     res.status(500).json({ success: e.message });
   }
 };
@@ -169,10 +161,10 @@ const updateWardById = async (req, res) => {
         .json({ message: `cannot find any ward with ID ${id}` });
     }
 
-    const { wardNum, wardType, numRooms } = req.body;
+    const { wardNum, wardType, numRooms, virtualNurse } = req.body;
 
-    if (ward.beds.includes(1)) {
-      return res.status(500).json({ message: "Ward has smart beds assigned" });
+    if (virtualNurse) {
+      ward.virtualNurse = virtualNurse;
     }
 
     if (wardNum) {
@@ -193,6 +185,7 @@ const updateWardById = async (req, res) => {
     const updatedWard = await ward.save();
     res.status(200).json(updatedWard);
   } catch (e) {
+    console.error(e);
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(500).json({ validationErrors });
@@ -324,11 +317,12 @@ const deleteWardById = async (req, res) => {
     await Ward.deleteOne({ _id: id });
     res.status(200).json(ward);
   } catch (e) {
+    console.error(e);
     res.status(500).json({ message: e.message });
   }
 };
 
-const getAlertsByWardId = async(req, res) => {
+const getAlertsByWardId = async (req, res) => {
   try {
     const { id } = req.params;
     const ward = await Ward.findById(id).populate("smartBeds");
@@ -339,27 +333,28 @@ const getAlertsByWardId = async(req, res) => {
     }
 
     const smartbeds = ward.smartBeds;
-    
-    const patients = []
-    for (const smartbed of smartbeds){
-  
-      if (smartbed.patient && mongoose.Types.ObjectId.isValid(smartbed.patient)){
-        patients.push(smartbed.patient)
+
+    const patients = [];
+    for (const smartbed of smartbeds) {
+      if (
+        smartbed.patient &&
+        mongoose.Types.ObjectId.isValid(smartbed.patient)
+      ) {
+        patients.push(smartbed.patient);
       }
     }
     console.log(patients);
-    const alerts = []
+    const alerts = [];
     for (const patient of patients) {
       const patientAlerts = await Alert.find({ patient: patient });
-      alerts.push(patientAlerts);
+      alerts.push(...patientAlerts);
     }
-    
+
     res.status(200).json(alerts);
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
-
-}
+};
 
 module.exports = {
   createWard,
@@ -372,5 +367,5 @@ module.exports = {
   assignNurseToWard,
   assignVirtualNurseToWard,
   deleteWardById,
-  getAlertsByWardId
+  getAlertsByWardId,
 };
