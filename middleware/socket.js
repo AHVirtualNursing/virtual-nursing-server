@@ -104,8 +104,11 @@ const configureSocket = (server) => {
       const alertList = res.jsonData;
 
       if (alertSocket) {
-        alertSocket.emit("alertIncoming", {alert: alert, patient: patient});
-        alertSocket.emit("patientAlertAdded", {alertList: alertList, patient: patient});
+        alertSocket.emit("alertIncoming", { alert: alert, patient: patient });
+        alertSocket.emit("patientAlertAdded", {
+          alertList: alertList,
+          patient: patient,
+        });
       }
     });
 
@@ -143,9 +146,10 @@ const configureSocket = (server) => {
       }
     });
 
-    socket.on("connectVirtualNurseForChatMessaging", (nurseId) => {
+    socket.on("clientConnections", (nurseId) => {
       console.log("Virtual Nurse is connected to Socket");
       virtualNurseChatConnections.set(nurseId, socket);
+      dvsClientConnections.set(nurseId, socket); // just in case dvsClientConnections is wrong
     });
 
     socket.on("connectBedsideNurseForChatMessaging", (nurseId) => {
