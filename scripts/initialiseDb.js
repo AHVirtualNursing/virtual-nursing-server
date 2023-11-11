@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
 const axios = require("axios");
-const Patient = require("../models/patient");
+const { Patient } = require("../models/patient");
 
 async function callApiRequest(url, method, data, clientType) {
   const config = {

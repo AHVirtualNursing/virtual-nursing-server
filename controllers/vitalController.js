@@ -1,5 +1,5 @@
-const Vital = require("../models/vital");
-const Patient = require("../models/patient");
+const { Vital } = require("../models/vital");
+const { Patient } = require("../models/patient");
 const AlertController = require("../controllers/alertController");
 const { alertTypeEnum, AlertVitalEnum } = require("../models/alert");
 

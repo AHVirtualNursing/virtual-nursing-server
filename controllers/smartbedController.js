@@ -1,6 +1,6 @@
 const SmartBed = require("../models/smartbed");
 const { Nurse }= require("../models/nurse");
-const Patient = require("../models/patient");
+const { Patient } = require("../models/patient");
 const Ward = require("../models/ward");
 const {alertTypeEnum} = require("../models/alert");
 const AlertController = require("../controllers/alertController");

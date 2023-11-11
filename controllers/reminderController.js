@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const Reminder = require("../models/reminder");
-const Patient = require("../models/patient");
+const { Reminder } = require("../models/reminder");
+const { Patient } = require("../models/patient");
 
 const getAllReminders = async (req, res) => {
   try {

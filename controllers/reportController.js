@@ -1,5 +1,5 @@
-const Report = require("../models/report");
-const Patient = require("../models/patient");
+const { Report } = require("../models/report");
+const { Patient } = require("../models/patient");
 const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const { s3 } = require("../middleware/awsClient");
 

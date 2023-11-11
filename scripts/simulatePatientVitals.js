@@ -2,7 +2,7 @@ const { io } = require("socket.io-client");
 const { initialiseDb } = require("./initialiseDb");
 const { sendMockPatientVitals } = require("./sendMockPatientVitals");
 const mongoose = require("mongoose");
-const Patient = require("../models/patient");
+const { Patient } = require("../models/patient");
 const patientController = require("../controllers/patientController");
 
 const SERVER_URL = "http://localhost:3001";
