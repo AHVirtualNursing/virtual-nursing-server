@@ -1,7 +1,7 @@
 const { Vital } = require("../models/vital");
 const { Patient } = require("../models/patient");
 const AlertController = require("../controllers/alertController");
-const { alertTypeEnum, AlertVitalEnum } = require("../models/alert");
+const { alertTypeEnum, alertVitalEnum, Alert, alertStatusEnum } = require("../models/alert");
 
 const addVitalForPatient = async (req, res) => {
   try {
@@ -50,7 +50,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     }
 
     let vital = patient.vital;
-
+    
     if (!vital) {
       vital = new Vital({
         respRate: [],
@@ -122,7 +122,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         }
 
         const newVital = {};
-        newVital.vital = AlertVitalEnum[0];
+        newVital.vital = alertVitalEnum[0];
         newVital.reading = vitalsData.respRate;
         request.body.alertVitals.push(newVital);
       }
@@ -149,7 +149,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         }
 
         const newVital = {};
-        newVital.vital = AlertVitalEnum[1];
+        newVital.vital = alertVitalEnum[1];
         newVital.reading = vitalsData.heartRate;
         request.body.alertVitals.push(newVital);
       }
@@ -176,7 +176,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         }
 
         const newVital = {};
-        newVital.vital = AlertVitalEnum[2];
+        newVital.vital = alertVitalEnum[2];
         newVital.reading = vitalsData.bloodPressureSys;
         request.body.alertVitals.push(newVital);
       }
@@ -203,7 +203,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         }
 
         const newVital = {};
-        newVital.vital = AlertVitalEnum[3];
+        newVital.vital = alertVitalEnum[3];
         newVital.reading = vitalsData.bloodPressureDia;
         request.body.alertVitals.push(newVital);
       }
@@ -230,7 +230,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         }
 
         const newVital = {};
-        newVital.vital = AlertVitalEnum[4];
+        newVital.vital = alertVitalEnum[4];
         newVital.reading = vitalsData.spO2;
         request.body.alertVitals.push(newVital);
       }
@@ -257,7 +257,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         }
 
         const newVital = {};
-        newVital.vital = AlertVitalEnum[5];
+        newVital.vital = alertVitalEnum[5];
         newVital.reading = vitalsData.temperature;
         request.body.alertVitals.push(newVital);
       }
@@ -266,8 +266,30 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     patient.vital = vital;
     await patient.save();
 
+    console.log(request.body.alertVitals);
+
+    const alerts = patient.alerts;
+    console.log("Alerts Length: " + alerts.length);
     if (request.body.description != "") {
-      await AlertController.createAlert(request, result);
+  
+      if (alerts.length == 0) {
+        await AlertController.createAlert(request, result);
+      } else {
+
+        var lastAlert = alerts[alerts.length - 1];
+        lastAlert = await Alert.findById(lastAlert);
+       
+        if(lastAlert.alertType === alertTypeEnum[0] && (lastAlert.status === alertStatusEnum[0] || lastAlert.status === alertStatusEnum[1])) {
+          lastAlert.alertVitals = await updateAlertVitals(lastAlert.alertVitals, request.body.alertVitals);
+          const noteLog = {info: request.body.description, datetime: vitalsData.datetime};
+          lastAlert.notes.push(noteLog);
+          await lastAlert.save();
+          console.log(lastAlert.alertVitals);
+     
+        }  else {
+          await AlertController.createAlert(request, result);
+        }
+      }
     }
 
     return vital;
@@ -320,6 +342,21 @@ const getVitalById = async (req, res) => {
     res.status(500).json({ success: e.message });
   }
 };
+
+const  updateAlertVitals= async (currentAlertVitals, newAlertVitals) => {
+  newAlertVitals.forEach((newEntry) => {
+    const existingEntryIndex = currentAlertVitals.findIndex(
+      (entry) => entry.vital === newEntry.vital
+    );
+    if (existingEntryIndex !== -1) {
+      currentAlertVitals[existingEntryIndex] = newEntry;
+    } else {
+      currentAlertVitals.push(newEntry);
+    }
+  });
+
+  return currentAlertVitals;
+}
 
 module.exports = {
   addVitalForPatient,

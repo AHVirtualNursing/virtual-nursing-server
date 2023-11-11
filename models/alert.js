@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const alertStatusEnum = ["open", "handling", "complete"];
-const AlertVitalEnum = [
+const alertVitalEnum = [
   "Respiratory Rate",
   "Heart Rate",
   "Systolic Blood Pressure",
@@ -19,7 +19,7 @@ const AlertVitals = new mongoose.Schema({
   vital: {
     type: String,
     enum: {
-      values: AlertVitalEnum,
+      values: alertVitalEnum,
       message: "Invalid alert enum: {VALUE}",
     },
   },
@@ -130,6 +130,6 @@ module.exports = {
   Alert,
   alertTypeEnum,
   alertStatusEnum,
-  AlertVitalEnum,
+  alertVitalEnum,
   alertSchema
 }
