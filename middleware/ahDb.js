@@ -50,6 +50,7 @@ const migratePatient = async (
         const migratedAlert = new MigratedAlert(alertData);
         const migratedAlertId = await migratedAlert.save();
         migratedAlertIds.push(migratedAlertId);
+        await Alert.deleteOne({ _id: alertId });        
       });
     }
 
@@ -67,6 +68,7 @@ const migratePatient = async (
       const migratedAlertConfig = new MigratedAlertConfig(alertConfigData);
 
       migratedAlertConfigId = await migratedAlertConfig.save();
+      await AlertConfig.deleteOne({ _id: alertConfigId });        
     }
 
     const migratedReminderIds = [];
@@ -85,6 +87,7 @@ const migratePatient = async (
         const migratedReminder = new MigratedReminder(reminderData);
         const migratedReminderId = await migratedReminder.save();
         migratedReminderIds.push(migratedReminderId);
+        await Reminder.deleteOne({ _id: reminderId });        
       });
     }
 
@@ -102,6 +105,7 @@ const migratePatient = async (
       };
       const migratedVital = new MigratedVital(vitalData);
       migratedVitalId = await migratedVital.save();
+      await Vital.deleteOne({ _id: vitalId });        
     }
 
     const migratedReportIds = [];
@@ -117,6 +121,7 @@ const migratePatient = async (
         const migratedReport = new MigratedReport(reportData);
         const migratedReportId = await migratedReport.save();
         migratedReportIds.push(migratedReportId);
+        await Report.deleteOne({ _id: reportId });        
       });
     }
 
