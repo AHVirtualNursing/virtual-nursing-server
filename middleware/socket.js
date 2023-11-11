@@ -1,7 +1,6 @@
 const socket = require("socket.io");
 const vitalController = require("../controllers/vitalController");
 const patientController = require("../controllers/patientController");
-const { generateAndUploadDischargeReport } = require("./reportGenerator");
 
 const configureSocket = (server) => {
   const io = socket(server, {

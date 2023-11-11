@@ -1,3 +1,6 @@
+const puppeteer = require("puppeteer");
+const { s3 } = require("../middleware/awsClient");
+const { PutObjectCommand } = require("@aws-sdk/client-s3");
 const { Alert } = require("../models/alert");
 const AlertConfig = require("../models/alertConfig");
 const Patient = require("../models/patient");
@@ -157,7 +160,7 @@ const getRemindersByPatientId = async (req, res) => {
 const getVitalByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
-    const patient = await Patient.findById(id).populate('vital');
+    const patient = await Patient.findById(id).populate("vital");
 
     if (!patient) {
       return res
@@ -261,6 +264,42 @@ const dischargePatientById = async (req, res) => {
       return res
         .status(500)
         .json({ message: `cannot find any patient with ID ${id}` });
+    }
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    try {
+      await page.goto(process.env.DVS_DEVELOPMENT_URL, {
+        waitUntil: "networkidle0",
+      });
+
+      await page.type("#identifier", process.env.DEFAULT_USERNAME);
+      await page.type("#password", process.env.DEFAULT_PASSWORD);
+
+      await page.click("#submit");
+      await page.waitForNavigation();
+
+      await page.goto(
+        `${process.env.DVS_DEVELOPMENT_URL}/discharge?patientId=${patient._id}&vitalId=${patient.vitalId}&alertConfigId=${patient.alertConfigId}`,
+        {
+          waitUntil: "networkidle0",
+        }
+      );
+
+      const pdfBuffer = await page.pdf();
+
+      const command = new PutObjectCommand({
+        Bucket: "ah-virtual-nursing",
+        Key: "discharge-reports/report.pdf",
+        Body: pdfBuffer,
+      });
+
+      await s3.send(command);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await browser.close();
     }
 
     patient.isDischarged = true;
