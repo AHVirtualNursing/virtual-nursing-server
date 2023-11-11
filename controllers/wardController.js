@@ -169,10 +169,10 @@ const updateWardById = async (req, res) => {
         .json({ message: `cannot find any ward with ID ${id}` });
     }
 
-    const { wardNum, wardType, numRooms } = req.body;
+    const { wardNum, wardType, numRooms, virtualNurse } = req.body;
 
-    if (ward.beds.includes(1)) {
-      return res.status(500).json({ message: "Ward has smart beds assigned" });
+    if (virtualNurse) {
+      ward.virtualNurse = virtualNurse;
     }
 
     if (wardNum) {
@@ -193,6 +193,7 @@ const updateWardById = async (req, res) => {
     const updatedWard = await ward.save();
     res.status(200).json(updatedWard);
   } catch (e) {
+    console.error(e);
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
       return res.status(500).json({ validationErrors });
@@ -324,6 +325,7 @@ const deleteWardById = async (req, res) => {
     await Ward.deleteOne({ _id: id });
     res.status(200).json(ward);
   } catch (e) {
+    console.error(e);
     res.status(500).json({ message: e.message });
   }
 };
