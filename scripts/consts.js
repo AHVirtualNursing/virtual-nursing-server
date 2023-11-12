@@ -80,12 +80,14 @@ const patients = [
     name: "Pooh Heng",
     nric: "S9900001D",
     condition: "Brain Disease",
+    admissionDateTime: getDate(0),
     nurseIndex: 0,
   },
   {
     name: "Chip Mun",
     nric: "S9900001E",
     condition: "Nose Infection",
+    admissionDateTime: getDate(0),
     nurseIndex: 1,
   },
   {
@@ -113,6 +115,7 @@ const patients = [
     name: "Jaffar Mohammed",
     nric: "S9900001I",
     condition: "Cataract",
+    admissionDateTime: getDate(0),
     nurseIndex: 2,
   },
   {
@@ -133,12 +136,14 @@ const patients = [
     name: "Tarzan Tan",
     nric: "S9900001I",
     condition: "Eye Sty",
+    admissionDateTime: getDate(0),
     nurseIndex: 3,
   },
   {
     name: "Jane Cheng",
     nric: "S9900001J",
     condition: "Diarrhea",
+    admissionDateTime: getDate(0),
     nurseIndex: 3,
   },
   {
@@ -166,6 +171,7 @@ const patients = [
     name: "Woody Pecker",
     nric: "S9900001N",
     condition: "Migraine",
+    admissionDateTime: getDate(0),
     nurseIndex: 4,
   },
   {
@@ -179,12 +185,14 @@ const patients = [
     name: "Slingy Doug",
     nric: "S9900001P",
     condition: "Appendicitis",
+    admissionDateTime: getDate(0),
     nurseIndex: 5,
   },
   {
     name: "Hamm Tang",
     nric: "S9900001Q",
     condition: "Severe Obesity",
+    admissionDateTime: getDate(0),
     nurseIndex: 5,
   },
 ];

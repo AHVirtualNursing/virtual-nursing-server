@@ -159,7 +159,7 @@ const getRemindersByPatientId = async (req, res) => {
 const getVitalByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
-    const patient = await Patient.findById(id).populate('vital');
+    const patient = await Patient.findById(id).populate("vital");
 
     if (!patient) {
       return res
