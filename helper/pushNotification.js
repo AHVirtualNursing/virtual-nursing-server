@@ -12,7 +12,7 @@ const sendPushNotification = async (
   body,
   notificationType,
   dataId
-) => {
+) => { 
   await firebaseAdmin.messaging().send({
     token: devicePushToken,
     notification: {
