@@ -1,6 +1,7 @@
 const socket = require("socket.io");
 const vitalController = require("../controllers/vitalController");
 const patientController = require("../controllers/patientController");
+const admitPatientNotification = require("../helper/admitPatientNotification");
 
 const configureSocket = (server) => {
   const io = socket(server, {
@@ -206,6 +207,35 @@ const configureSocket = (server) => {
         patientSocket.emit("updatedPatient", patient);
       }
     });
+
+    socket.on("update-alert", async(alert) => {
+      const req = { params: { id: alert.patient } };
+      const res = {
+        statusCode: null,
+        jsonData: null,
+        status: function (code) {
+          this.statusCode = code;
+          return this;
+        },
+        json: function (data) {
+          this.jsonData = data;
+          return this;
+        },
+      };
+
+      await patientController.getVirtualNurseByPatientId(req, res);
+      const virtualNurse = res.jsonData;
+      const alertSocket = clientConnections.get(String(virtualNurse._id));
+
+      if (alertSocket) {
+        alertSocket.emit("updatedAlert", alert);
+      }
+
+    })
+
+    socket.on("admit-patient", async (patient) => {
+      admitPatientNotification.sendAdmitPatientNotification(patient);
+    })
 
     socket.on("fallRiskUpdate", (data) => {
       const [patient, virtualNurseId] = data;

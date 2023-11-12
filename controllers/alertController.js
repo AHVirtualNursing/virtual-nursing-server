@@ -4,9 +4,10 @@ const Patient = require("../models/patient");
 const alertNotification = require("../helper/alertNotification");
 const SERVER_URL = "http://localhost:3001";
 const { sendAlert } = require("../helper/alertNotification");
+const socket = io(SERVER_URL);
 
 const createAlert = async (req, res) => {
-  const socket = io(SERVER_URL);
+  
   try {
     const patient = await Patient.findById({ _id: req.body.patient });
     if (!patient) {
@@ -95,6 +96,7 @@ const updateAlertById = async (req, res) => {
     }
 
     const updatedAlert = await alert.save();
+    socket.emit("update-alert", alert);
     res.status(200).json(updatedAlert);
   } catch (e) {
     console.error(e);
