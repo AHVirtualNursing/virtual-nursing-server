@@ -31,7 +31,8 @@ const migratePatient = async (
     const migratedAlertIds = [];
     if (alerts) {
       alerts.map(async (alertId) => {
-        const alert = (await Alert.find(alertId))[0];
+        console.log(alertId);
+        const alert = Alert.findById(alertId);
         const alertData = {
           status: alert.status,
           enum: alert.enum,
@@ -47,7 +48,7 @@ const migratePatient = async (
         const migratedAlert = new MigratedAlert(alertData);
         const migratedAlertId = await migratedAlert.save();
         migratedAlertIds.push(migratedAlertId);
-        await Alert.deleteOne({ _id: alertId });        
+        await Alert.deleteOne({ _id: alertId });
       });
     }
 
@@ -65,13 +66,13 @@ const migratePatient = async (
       const migratedAlertConfig = new MigratedAlertConfig(alertConfigData);
 
       migratedAlertConfigId = await migratedAlertConfig.save();
-      await AlertConfig.deleteOne({ _id: alertConfigId });        
+      await AlertConfig.deleteOne({ _id: alertConfigId });
     }
 
     const migratedReminderIds = [];
     if (reminders) {
       reminders.map(async (reminderId) => {
-        const reminder = (await Reminder.find(reminderId))[0];
+        const reminder = await Reminder.findById(reminderId);
         const reminderData = {
           content: reminder.content,
           isComplete: reminder.isComplete,
@@ -84,7 +85,7 @@ const migratePatient = async (
         const migratedReminder = new MigratedReminder(reminderData);
         const migratedReminderId = await migratedReminder.save();
         migratedReminderIds.push(migratedReminderId);
-        await Reminder.deleteOne({ _id: reminderId });        
+        await Reminder.deleteOne({ _id: reminderId });
       });
     }
 
@@ -102,24 +103,25 @@ const migratePatient = async (
       };
       const migratedVital = new MigratedVital(vitalData);
       migratedVitalId = await migratedVital.save();
-      await Vital.deleteOne({ _id: vitalId });        
+      await Vital.deleteOne({ _id: vitalId });
     }
 
     const migratedReportIds = [];
     if (reports) {
       reports.map(async (reportId) => {
-        const report = Report.find(reportId)[0];
+        const report = Report.findById(reportId);
         const reportData = {
           name: report.name,
           type: report.type,
           content: report.content,
           url: report.url,
         };
-        const migratedReport = new MigratedReport(reportData);
-        const migratedReportId = await migratedReport.save();
-        migratedReportIds.push(migratedReportId);
         if (report.type == "event") {
           await Report.deleteOne({ _id: reportId });
+        } else if (report.type == "discharge") {
+          const migratedReport = new MigratedReport(reportData);
+          const migratedReportId = await migratedReport.save();
+          migratedReportIds.push(migratedReportId);
         }
       });
     }
