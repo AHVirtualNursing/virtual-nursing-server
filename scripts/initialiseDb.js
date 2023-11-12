@@ -58,22 +58,45 @@ Abnormal [HR]
 Patient 2
 Abnormal [SPO2]
 
+console log statemnets in send mock patient vitals file => "setting bed exit alarm to false"
 
+Triggers
+1. breach of protocol: bed exit alarm not set, fall risk high
+Attributes: isBedExitAlarmOn == false AND patient.fallRisk == high
+Behaviour: 
+- red colour warning sign, input box and confirm button will pop out
+- when nurse confirm the button, input disable, button disappear, red colour warning sign turn to orange (if fall risk is still high, else no more warning sign)
 
+2. create bed alert
+Attributes: isBedExitAlarmOn == true, isPatientOnBed == false
+Behaviour:
+- bed alert seen on dvs and mobile
 
-Fall Risk
-Low, Medium, High
-breach of protocol: bed exit alarm not set, fall risk high
-bed alert needs to be generated: bed exit alarm set and patient not on bed
+3. bed exit alarm on OR fall risk != high
+Attributes: isBedExitAlarmOn == true || patient.fallRisk != high
+Behaviour: 
+- no warning sign
 
-Bed Height
-warning sign for bed height: if isLowestPosition false 
+4. patient physically on bed
+Attributes: isPatientOnBed
+Behaviour:
+- true => coloured bed picture on patient overview
+- false => greyed out bed picture on patient overview
 
-Bed Brakes
-warning sign for bed brakes: if isBrakeSet false (per patient)
+5. bed isLowestPosition false
+Attributes: isLowestPosition == false
+Behaviour:
+- show orange warning beside the word "bed height"
 
-Bed Rails
-changing rail colour: change the rails around (4 patients)
+6. change in bed rails
+Attributes: isRightUpperRail, isRightLowerRail, isLeftUpperRail, isLeftLowerRail
+Behaviours:
+- bed rails on patient overview tile view page will update accordingly
+
+7. bed brakes
+Attributes: isBrakeSet
+Behaviour:
+- orange warning sign if brakes not set in bed status tab or tile view
 
 
 */
