@@ -14,6 +14,7 @@ const configureSocket = (server) => {
 
   io.on("connection", (socket) => {
     socket.on("connectSmartWatch", async (patientId) => {
+      console.log("smart watch connected to patient ", patientId)
       clientConnections.set(patientId, socket);
     });
 
