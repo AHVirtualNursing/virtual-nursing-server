@@ -6,12 +6,12 @@ const { AlertConfig } = require("../models/alertConfig");
 const { Patient } = require("../models/patient");
 const { SmartBed, bedStatusEnum } = require("../models/smartbed");
 const SmartWearable = require("../models/smartWearable");
-const bedStatusEnum = ["occupied", "vacant"];
 const { Reminder } = require("../models/reminder");
 const { Nurse } = require("../models/nurse");
 const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
 const admitPatientNotification = require("../helper/admitPatientNotification");
+const { migratePatient } = require("../middleware/ahDb");
 
 const createPatient = async (req, res) => {
   try {

@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
 const { patientSchema } = require("../models/patient");
 const { Alert, alertSchema } = require("../models/alert");
 const { AlertConfig, alertConfigSchema } = require("../models/alertConfig");
 const { Reminder, reminderSchema } = require("../models/reminder");
 const { Vital, vitalSchema } = require("../models/vital");
 const { Report, reportSchema } = require("../models/report");
+const { mongooseCreateConnection } = require("./mongoose");
 
 const migratePatient = async (
   patient,
@@ -16,10 +16,7 @@ const migratePatient = async (
 ) => {
   let ahDbConnection;
   try {
-    ahDbConnection = mongoose.createConnection(process.env.MONGODB_AH_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    ahDbConnection = mongooseCreateConnection(process.env.MONGODB_AH_URI);
 
     const Patient = ahDbConnection.model("patient", patientSchema);
     const MigratedAlert = ahDbConnection.model("alert", alertSchema);

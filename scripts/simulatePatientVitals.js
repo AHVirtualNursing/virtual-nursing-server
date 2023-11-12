@@ -1,9 +1,9 @@
 const { io } = require("socket.io-client");
 const { initialiseDb } = require("./initialiseDb");
 const { sendMockPatientVitals } = require("./sendMockPatientVitals");
-const mongoose = require("mongoose");
 const { Patient } = require("../models/patient");
 const patientController = require("../controllers/patientController");
+const { mongooseConnect } = require("../middleware/mongoose");
 
 const SERVER_URL = "http://localhost:3001";
 
@@ -84,11 +84,7 @@ async function simulatePatientVitals() {
   }
 
   async function simulateFallRisk() {
-    mongoose.connect(process.env.MONGODB_LOCAL_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      autoIndex: false,
-    });
+    mongooseConnect();
     const fallRiskValues = ["Low", "Medium", "High"];
     let index = 0;
 
