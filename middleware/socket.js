@@ -1,7 +1,6 @@
 const socket = require("socket.io");
 const vitalController = require("../controllers/vitalController");
 const patientController = require("../controllers/patientController");
-const admitPatientNotification = require("../helper/admitPatientNotification");
 
 const configureSocket = (server) => {
   const io = socket(server, {
@@ -231,10 +230,6 @@ const configureSocket = (server) => {
         alertSocket.emit("updatedAlert", alert);
       }
 
-    })
-
-    socket.on("admit-patient", async (patient) => {
-      admitPatientNotification.sendAdmitPatientNotification(patient);
     })
 
     socket.on("fallRiskUpdate", (data) => {
