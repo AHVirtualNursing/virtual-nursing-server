@@ -1,7 +1,7 @@
 const patientController = require("../controllers/patientController");
 const pushNotification = require("./pushNotification");
 const { alertStatusEnum, alertTypeEnum } = require("../models/alert");
-const SmartBed = require("../models/smartBed");
+const SmartBed = require("../models/smartbed");
 const { Nurse, nurseStatusEnum } = require("../models/nurse");
 const SERVER_URL = "http://localhost:3001";
 const { io } = require("socket.io-client");
