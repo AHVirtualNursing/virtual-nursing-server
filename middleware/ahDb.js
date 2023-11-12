@@ -118,7 +118,9 @@ const migratePatient = async (
         const migratedReport = new MigratedReport(reportData);
         const migratedReportId = await migratedReport.save();
         migratedReportIds.push(migratedReportId);
-        await Report.deleteOne({ _id: reportId });        
+        if (report.type == "event") {
+          await Report.deleteOne({ _id: reportId });
+        }
       });
     }
 
