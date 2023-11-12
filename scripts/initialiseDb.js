@@ -232,6 +232,7 @@ async function initialiseDb() {
         "PUT",
         {
           patient: patientId,
+          bedStatus: "occupied",
         }
       );
 
