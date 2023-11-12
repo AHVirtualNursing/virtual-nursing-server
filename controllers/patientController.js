@@ -330,7 +330,7 @@ const dischargePatientById = async (req, res) => {
 
       const command = new PutObjectCommand({
         Bucket: "ah-virtual-nursing",
-        Key: "discharge-reports/report.pdf",
+        Key: `reports/discharge-reports/${patient._id}-discharge-report.pdf`,
         Body: pdfBuffer,
       });
 

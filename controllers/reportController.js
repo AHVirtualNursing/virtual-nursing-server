@@ -1,6 +1,10 @@
 const { Report } = require("../models/report");
 const { Patient } = require("../models/patient");
-const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  PutObjectCommand,
+  DeleteObjectCommand,
+  ListObjectsV2Command,
+} = require("@aws-sdk/client-s3");
 const { s3 } = require("../middleware/awsClient");
 
 const getReports = async (req, res) => {
@@ -27,7 +31,7 @@ const getReportByReportId = async (req, res) => {
   }
 };
 
-const getReportsWithPatientParticulars = async (req, res) => {
+const getDischargeReports = async (req, res) => {
   try {
     const reports = await Patient.aggregate([
       {
@@ -54,6 +58,11 @@ const getReportsWithPatientParticulars = async (req, res) => {
           createdAt: "$reportDetails.createdAt",
         },
       },
+      {
+        $match: {
+          type: "discharge",
+        },
+      },
     ]);
 
     res.status(200).json(reports);
@@ -64,23 +73,64 @@ const getReportsWithPatientParticulars = async (req, res) => {
 
 const createReport = async (req, res) => {
   try {
-    const patient = await Patient.findById({ _id: req.body.patient });
+    const patientId = req.body.patient;
+    const type = req.body.type;
+    const patient = await Patient.findById({ _id: patientId });
     if (!patient) {
       return res.status(500).json({
-        message: `cannot find any patient with Patient ID ${req.body.patient}`,
+        message: `cannot find any patient with Patient ID ${patientId}`,
       });
     }
 
+    const bucket = "ah-virtual-nursing";
+    const file = req.file;
+
+    const listFilesCommand = new ListObjectsV2Command({
+      Bucket: bucket,
+      Prefix: `reports/${type}`,
+    });
+
+    const objectNames = [];
+    try {
+      const data = await s3.send(listFilesCommand);
+      const objects = data.Contents;
+      objects.forEach((object) => {
+        const objectName = object.Key;
+        objectNames.push(objectName);
+      });
+    } catch (error) {
+      console.error("Error listing objects:", error);
+    }
+
+    let destinationKey = `reports/${type}-reports/${patientId}-${type}-report`;
+    let reportName = req.body.name;
+
+    let index = 1;
+    while (objectNames.includes(destinationKey)) {
+      destinationKey = `reports/${type}-reports/${patientId}-${type}-report(${index})`;
+      reportName = reportName + `(${index})`;
+      index++;
+    }
+
+    const uploadFileCommand = new PutObjectCommand({
+      Bucket: bucket,
+      Key: destinationKey,
+      Body: file.buffer,
+    });
+
+    const url = `https://${bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${destinationKey}`;
+
+    await s3.send(uploadFileCommand);
+
     const report = new Report({
-      name: req.body.name,
+      name: reportName,
       type: req.body.type,
-      content: req.body.content,
-      url: req.body.url,
+      url: url,
     });
     await report.save();
 
     await Patient.findOneAndUpdate(
-      { _id: patient._id },
+      { _id: patientId },
       { $push: { reports: report._id } },
       {
         new: true,
@@ -167,7 +217,7 @@ module.exports = {
   getReports,
   createReport,
   getReportByReportId,
-  getReportsWithPatientParticulars,
+  getDischargeReports,
   updateReportByReportId,
   deleteReportByReportId,
 };
