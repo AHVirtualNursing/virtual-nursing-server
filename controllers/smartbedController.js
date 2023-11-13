@@ -4,6 +4,8 @@ const { Patient } = require("../models/patient");
 const Ward = require("../models/ward");
 const {alertTypeEnum} = require("../models/alert");
 const AlertController = require("../controllers/alertController");
+const { io } = require("socket.io-client");
+const SERVER_URL = "http://localhost:3001";
 
 const createSmartBed = async (req, res) => {
   try {
@@ -100,13 +102,13 @@ const getNursesBySmartBedId = async (req, res) => {
 const updateSmartBedById = async (req, res) => {
   try {
     const { id } = req.params;
-    const smartbed = await SmartBed.findById(id);
+    const smartbed = await SmartBed.findById(id).populate("patient ward");;
     if (!smartbed) {
       return res
         .status(500)
         .json({ message: `cannot find any smartbed with ID ${id}` });
     }
-
+    const socket = io(SERVER_URL);
     const {
       name,
       bedStatus,
@@ -151,9 +153,10 @@ const updateSmartBedById = async (req, res) => {
     }
     if (isPatientOnBed != undefined) {
       smartbed.isPatientOnBed = isPatientOnBed;
-
-      if(!isPatientOnBed && smartbed.isBedExitAlarmOn){
-        sendBedAlarmAlert(smartbed.patient)
+      console.log("before enter if")
+      if(!smartbed.isPatientOnBed && smartbed.isBedExitAlarmOn){
+        console.log("sending alert")
+        sendBedAlarmAlert(smartbed.patient._id)
       }
     }
     if (bedAlarmProtocolBreachReason) {
@@ -161,6 +164,7 @@ const updateSmartBedById = async (req, res) => {
     }
 
     const updatedSmartBed = await smartbed.save();
+    socket.emit("update-smartbed", updatedSmartBed);
     res.status(200).json(updatedSmartBed);
   } catch (e) {
     if (e.name === "ValidationError") {

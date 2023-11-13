@@ -235,6 +235,8 @@ const configureSocket = (server) => {
         },
       };
 
+      console.log("EMIT UPDATE ALERT");
+
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
       const alertSocket = clientConnections.get(String(virtualNurse._id));
@@ -242,7 +244,6 @@ const configureSocket = (server) => {
       if (alertSocket) {
         alertSocket.emit("updatedAlert", alert);
       }
-
     })
 
     socket.on("fallRiskUpdate", (data) => {
