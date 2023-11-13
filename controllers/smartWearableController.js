@@ -1,5 +1,5 @@
 const SmartWearable = require("../models/smartWearable");
-const Patient = require("../models/patient");
+const { Patient } = require("../models/patient");
 
 const createSmartWearable = async (req, res) => {
   try {

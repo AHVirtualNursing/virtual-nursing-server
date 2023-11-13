@@ -1,7 +1,6 @@
 /* IMPORTS */
 require("dotenv").config();
 const express = require("express");
-const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const cors = require("cors");
@@ -9,6 +8,7 @@ const cors = require("cors");
 /* MIDDLEWARE IMPORTS */
 const passport = require("./middleware/passport");
 const configureSocket = require("./middleware/socket");
+const { mongooseConnect } = require("./middleware/mongoose");
 
 /* ROUTES */
 const authRoutes = require("./routes/auth");
@@ -36,12 +36,7 @@ const news2Scheduler = require("./helper/news2");
 const app = express();
 
 
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    autoIndex: false,
-  })
+mongooseConnect(process.env.MONGODB_URI)
   .then(() => {
     console.log("MongoDB connected");
   })
