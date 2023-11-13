@@ -146,27 +146,25 @@ async function initialiseDb() {
     // create wards
     const wardIds = [];
     wards.map(async (ward) => {
-      const wardId = callApiRequest(`${SERVER_URL}/ward`, "POST", ward).then(
-        (wardId) => {
-          wardIds.push(wardId);
-        }
-      );
+      callApiRequest(`${SERVER_URL}/ward`, "POST", ward).then((wardId) => {
+        wardIds.push(wardId);
+      });
     });
 
     // create smartbeds
     const smartbedIds = [];
-    smartbeds.map(async (smartbed) => {
-      const smartbedId = callApiRequest(`${SERVER_URL}/smartbed`, "POST", {
+    await Promise.all(smartbeds.map(async (smartbed) => {
+      return callApiRequest(`${SERVER_URL}/smartbed`, "POST", {
         name: smartbed.name,
       }).then((smartbedId) => {
         smartbedIds.push(smartbedId);
       });
-    });
+    }));
 
     // create nurses
     const nurseIds = [];
-    nurses.map(async (nurse, index) => {
-      const nurseId = callApiRequest(
+    await Promise.all(nurses.map(async (nurse, index) => {
+      return callApiRequest(
         `${SERVER_URL}/auth/register?default=true`,
         "POST",
         {
@@ -180,29 +178,27 @@ async function initialiseDb() {
       ).then(async (nurseId) => {
         nurseIds.push(nurseId);
         await callApiRequest(
-          `${SERVER_URL}/smartbed/${smartbedIds[index]}/nurses
-      `,
+          `${SERVER_URL}/smartbed/${smartbedIds[index]}/nurses`,
           "PUT",
           {
             newNurses: [nurseId],
           }
-        )
-      }
-      );
-    });
+        );
+      });
+    }));
 
     // create smart wearables
     const smartWearableIds = [];
-    smartWearables.map(async (smartWearable) => {
-      const smartWearableId = callApiRequest(
-        `${SERVER_URL}/smartWearable`,
-        "POST",
-        smartWearable
-      ).then((smartWearableId) => smartWearableIds.push(smartWearableId));
-    });
+    await Promise.all(smartWearables.map(async (smartWearable) => {
+      return callApiRequest(`${SERVER_URL}/smartWearable`, "POST", smartWearable).then(
+        (smartWearableId) => smartWearableIds.push(smartWearableId)
+      );
+    }));
 
-    // create patient
     patients.map(async (patient, index) => {
+      // create patient
+      patient.smartbed = smartbedIds[index];
+
       const patientId = await callApiRequest(
         `${SERVER_URL}/patient`,
         "POST",
