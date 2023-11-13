@@ -427,7 +427,7 @@ const admitPatientById = async (req, res) => {
     }
     smartWearable.patient = id;
     await smartWearable.save();
-
+    socket.emit("update-smartbed", smartBed);
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
