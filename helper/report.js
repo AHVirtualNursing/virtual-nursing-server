@@ -1,4 +1,4 @@
-const { s3 } = require("./awsClient");
+const { s3 } = require("../middleware/awsClient");
 const {
   PutObjectCommand,
   DeleteObjectCommand,

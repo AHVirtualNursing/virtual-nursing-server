@@ -10,7 +10,7 @@ const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
 const admitPatientNotification = require("../helper/admitPatientNotification");
 const { migratePatient } = require("../middleware/ahDb");
-const { uploadReport } = require("../middleware/report");
+const { uploadReport } = require("../helper/report");
 
 const createPatient = async (req, res) => {
   try {

@@ -1,6 +1,6 @@
 const { Report } = require("../models/report");
 const { Patient } = require("../models/patient");
-const { uploadReport, deleteReport } = require("../middleware/report");
+const { uploadReport, deleteReport } = require("../helper/report");
 
 const getReports = async (req, res) => {
   try {

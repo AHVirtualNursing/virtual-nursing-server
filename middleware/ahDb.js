@@ -5,7 +5,7 @@ const { Reminder, reminderSchema } = require("../models/reminder");
 const { Vital, vitalSchema } = require("../models/vital");
 const { Report, reportSchema } = require("../models/report");
 const { mongooseCreateConnection } = require("./mongoose");
-const { deleteReport } = require("../middleware/report");
+const { deleteReport } = require("../helper/report");
 
 const migratePatient = async (
   patient,
