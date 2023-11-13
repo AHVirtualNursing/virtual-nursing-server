@@ -65,7 +65,7 @@ const updateAlertConfigById = async (req, res) => {
       bpSysConfig,
       bpDiaConfig,
       spO2Config,
-      tempConfig,
+      temperatureConfig,
     } = req.body;
     if (rrConfig) {
       alertConfig.rrConfig = rrConfig;
@@ -82,8 +82,8 @@ const updateAlertConfigById = async (req, res) => {
     if (spO2Config) {
       alertConfig.spO2Config = spO2Config;
     }
-    if (tempConfig) {
-      alertConfig.temperatureConfig = tempConfig;
+    if (temperatureConfig) {
+      alertConfig.temperatureConfig = temperatureConfig;
     }
 
     const updatedAlertConfig = await alertConfig.save();
