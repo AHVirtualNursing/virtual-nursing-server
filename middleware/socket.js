@@ -229,7 +229,6 @@ const configureSocket = (server) => {
       if (alertSocket) {
         alertSocket.emit("updatedAlert", alert);
       }
-
     })
 
     socket.on("fallRiskUpdate", (data) => {

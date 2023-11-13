@@ -1,7 +1,14 @@
 const Vital = require("../models/vital");
 const Patient = require("../models/patient");
 const AlertController = require("../controllers/alertController");
-const { alertTypeEnum, alertVitalEnum, Alert, alertStatusEnum } = require("../models/alert");
+const {
+  alertTypeEnum,
+  alertVitalEnum,
+  Alert,
+  alertStatusEnum,
+} = require("../models/alert");
+const { io } = require("socket.io-client");
+const SERVER_URL = "http://localhost:3001";
 
 const addVitalForPatient = async (req, res) => {
   try {
@@ -49,8 +56,10 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       throw new Error(`Cannot find any patient with Patient ID ${patientId}`);
     }
 
+    const socket = io(SERVER_URL);
+
     let vital = patient.vital;
-    
+
     if (!vital) {
       vital = new Vital({
         respRate: [],
@@ -262,31 +271,40 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         request.body.alertVitals.push(newVital);
       }
     }
-    await vital.save();
+    const updatedVital = await vital.save();
     patient.vital = vital;
     await patient.save();
+
+    socket.emit("update-vitals", updatedVital, patient._id);
 
     console.log(request.body.alertVitals);
 
     const alerts = patient.alerts;
     console.log("Alerts Length: " + alerts.length);
     if (request.body.description != "") {
-  
       if (alerts.length == 0) {
         await AlertController.createAlert(request, result);
       } else {
-
         var lastAlert = alerts[alerts.length - 1];
         lastAlert = await Alert.findById(lastAlert);
-       
-        if(lastAlert.alertType === alertTypeEnum[0] && (lastAlert.status === alertStatusEnum[0] || lastAlert.status === alertStatusEnum[1])) {
-          lastAlert.alertVitals = await updateAlertVitals(lastAlert.alertVitals, request.body.alertVitals);
-          const noteLog = {info: request.body.description, datetime: vitalsData.datetime};
+
+        if (
+          lastAlert.alertType === alertTypeEnum[0] &&
+          (lastAlert.status === alertStatusEnum[0] ||
+            lastAlert.status === alertStatusEnum[1])
+        ) {
+          lastAlert.alertVitals = await updateAlertVitals(
+            lastAlert.alertVitals,
+            request.body.alertVitals
+          );
+          const noteLog = {
+            info: request.body.description,
+            datetime: vitalsData.datetime,
+          };
           lastAlert.notes.push(noteLog);
           await lastAlert.save();
           console.log(lastAlert.alertVitals);
-     
-        }  else {
+        } else {
           await AlertController.createAlert(request, result);
         }
       }
@@ -343,7 +361,7 @@ const getVitalById = async (req, res) => {
   }
 };
 
-const  updateAlertVitals= async (currentAlertVitals, newAlertVitals) => {
+const updateAlertVitals = async (currentAlertVitals, newAlertVitals) => {
   newAlertVitals.forEach((newEntry) => {
     const existingEntryIndex = currentAlertVitals.findIndex(
       (entry) => entry.vital === newEntry.vital
@@ -356,7 +374,7 @@ const  updateAlertVitals= async (currentAlertVitals, newAlertVitals) => {
   });
 
   return currentAlertVitals;
-}
+};
 
 module.exports = {
   addVitalForPatient,

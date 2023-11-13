@@ -7,6 +7,9 @@ const Reminder = require("../models/reminder");
 const { Nurse } = require("../models/nurse");
 const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
+const { io } = require("socket.io-client");
+const SERVER_URL = "http://localhost:3001";
+const socket = io(SERVER_URL);
 const admitPatientNotification = require("../helper/admitPatientNotification");
 
 const createPatient = async (req, res) => {
@@ -278,8 +281,9 @@ const updatePatientById = async (req, res) => {
       }
       patient.alertConfig = alertConfig;
     }
-
+    
     const updatedPatient = await patient.save();
+    socket.emit("update-patient", updatedPatient);
     res.status(200).json(updatedPatient);
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -307,6 +311,23 @@ const dischargePatientById = async (req, res) => {
     );
     await patient.save();
 
+    const request = { params: { id: id } };
+    const result = {
+      statusCode: null,
+      jsonData: null,
+      status: function (code) {
+        this.statusCode = code;
+        return this;
+      },
+      json: function (data) {
+        this.jsonData = data;
+        return this;
+      },
+    };
+
+   await getVirtualNurseByPatientId(request, result);
+   const virtualNurse = result.jsonData;
+
     const smartBed = await SmartBed.findOne({ patient: id });
 
     if (!smartBed) {
@@ -318,19 +339,21 @@ const dischargePatientById = async (req, res) => {
     smartBed.patient = null;
     await smartBed.save();
 
-    const smartWearable = await SmartWearable.findOne({ patient: id });
+    
+    // const smartWearable = await SmartWearable.findOne({ patient: id });
 
-    if (!smartWearable) {
-      return res.status(500).json({
-        message: `cannot find any smart wearable with Patient ID ${id}`,
-      });
-    }
+    // if (!smartWearable) {
+    //   return res.status(500).json({
+    //     message: `cannot find any smart wearable with Patient ID ${id}`,
+    //   });
+    // }
 
-    if (smartWearable.patient != undefined) {
-      smartWearable.patient = undefined;
-      await smartWearable.save();
-    }
+    // if (smartWearable.patient != undefined) {
+    //   smartWearable.patient = undefined;
+    //   await smartWearable.save();
+    // }
 
+    socket.emit("discharge-patient", patient, virtualNurse);
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
