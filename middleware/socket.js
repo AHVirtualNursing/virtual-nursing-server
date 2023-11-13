@@ -189,7 +189,7 @@ const configureSocket = (server) => {
 
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
-      const clientSocket = findClientSocket(virtualNurseId.toString());
+      const clientSocket = findClientSocket(virtualNurse._id.toString());
 
       if (clientSocket) {
         clientSocket.emit("updatedSmartbed", smartbed);
@@ -213,10 +213,10 @@ const configureSocket = (server) => {
 
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
-      const clientSocket = findClientSocket(virtualNurseId.toString());
+      const clientSocket = findClientSocket(virtualNurse._id.toString());
 
       if (clientSocket) {
-        patientSocket.emit("updatedPatient", patient);
+        clientSocket.emit("updatedPatient", patient);
       }
     });
 
