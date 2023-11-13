@@ -253,11 +253,8 @@ async function initialiseDb() {
     console.log("\x1b[34m", patientIds);
   }
 
-  setInterval(() => {
-    console.log("\x1b[34m", "****** DB INITIALISED ******");
-    console.log("\x1b[0m", "");
-    process.exit(1);
-  }, 2000);
+  console.log("\x1b[34m", "****** DB INITIALISED ******");
+  console.log("\x1b[0m", "");
 }
 
 async function populateVitalsForPatient() {
@@ -321,14 +318,12 @@ async function populateVitalsForPatient() {
 
       const vitalId = await callApiRequest(`${SERVER_URL}/vital`, "POST", req);
     }
-
     idx++;
   }
-  setInterval(() => {
-    console.log("\x1b[34m", "****** VITALS INITIALISED ******");
-    console.log("\x1b[0m", "");
-    process.exit(1);
-  }, 2000);
+
+  console.log("\x1b[34m", "****** VITALS INITIALISED ******");
+  console.log("\x1b[0m", "");
+  process.exit(1);
 }
 
 function generateRandomVital(type) {
