@@ -5,6 +5,7 @@ const { Reminder, reminderSchema } = require("../models/reminder");
 const { Vital, vitalSchema } = require("../models/vital");
 const { Report, reportSchema } = require("../models/report");
 const { mongooseCreateConnection } = require("./mongoose");
+const { deleteReport } = require("../middleware/report");
 
 const migratePatient = async (
   patient,
@@ -17,7 +18,6 @@ const migratePatient = async (
   let ahDbConnection;
   try {
     ahDbConnection = mongooseCreateConnection(process.env.MONGODB_AH_URI);
-
     const Patient = ahDbConnection.model("patient", patientSchema);
     const MigratedAlert = ahDbConnection.model("alert", alertSchema);
     const MigratedAlertConfig = ahDbConnection.model(
@@ -31,8 +31,7 @@ const migratePatient = async (
     const migratedAlertIds = [];
     if (alerts) {
       alerts.map(async (alertId) => {
-        console.log(alertId);
-        const alert = Alert.findById(alertId);
+        const alert = await Alert.findById(alertId);
         const alertData = {
           status: alert.status,
           enum: alert.enum,
@@ -48,7 +47,6 @@ const migratePatient = async (
         const migratedAlert = new MigratedAlert(alertData);
         const migratedAlertId = await migratedAlert.save();
         migratedAlertIds.push(migratedAlertId);
-        await Alert.deleteOne({ _id: alertId });
       });
     }
 
@@ -66,7 +64,6 @@ const migratePatient = async (
       const migratedAlertConfig = new MigratedAlertConfig(alertConfigData);
 
       migratedAlertConfigId = await migratedAlertConfig.save();
-      await AlertConfig.deleteOne({ _id: alertConfigId });
     }
 
     const migratedReminderIds = [];
@@ -85,7 +82,6 @@ const migratePatient = async (
         const migratedReminder = new MigratedReminder(reminderData);
         const migratedReminderId = await migratedReminder.save();
         migratedReminderIds.push(migratedReminderId);
-        await Reminder.deleteOne({ _id: reminderId });
       });
     }
 
@@ -103,13 +99,13 @@ const migratePatient = async (
       };
       const migratedVital = new MigratedVital(vitalData);
       migratedVitalId = await migratedVital.save();
-      await Vital.deleteOne({ _id: vitalId });
     }
 
     const migratedReportIds = [];
     if (reports) {
       reports.map(async (reportId) => {
-        const report = Report.findById(reportId);
+        const report = await Report.findById(reportId);
+        console.log(report);
         const reportData = {
           name: report.name,
           type: report.type,
@@ -117,7 +113,8 @@ const migratePatient = async (
           url: report.url,
         };
         if (report.type == "event") {
-          await Report.deleteOne({ _id: reportId });
+          console.log("Deleting event report, ", report);
+          await deleteReport(reportId);
         } else if (report.type == "discharge") {
           const migratedReport = new MigratedReport(reportData);
           const migratedReportId = await migratedReport.save();

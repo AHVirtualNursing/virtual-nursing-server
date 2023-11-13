@@ -10,7 +10,7 @@ const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
 const admitPatientNotification = require("../helper/admitPatientNotification");
 const { migratePatient } = require("../middleware/ahDb");
-const { uploadReport } = require("../middleware/uploadReport");
+const { uploadReport } = require("../middleware/report");
 
 const createPatient = async (req, res) => {
   try {
@@ -304,6 +304,39 @@ const dischargePatientById = async (req, res) => {
         .json({ message: `cannot find any patient with ID ${id}` });
     }
 
+    await migratePatient(
+      patient,
+      patient.alerts,
+      patient.alertConfig,
+      patient.reminders,
+      patient.vital,
+      patient.reports
+    );
+
+    const smartBed = await SmartBed.findOne({ patient: id });
+
+    if (!smartBed) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any smartbed with Patient ID ${id}` });
+    }
+    smartBed.bedStatus = bedStatusEnum[1];
+    smartBed.patient = null;
+    await smartBed.save();
+
+    const smartWearable = await SmartWearable.findOne({ patient: id });
+
+    if (!smartWearable) {
+      return res.status(500).json({
+        message: `cannot find any smart wearable with Patient ID ${id}`,
+      });
+    }
+
+    if (smartWearable.patient != undefined) {
+      smartWearable.patient = undefined;
+      await smartWearable.save();
+    }
+
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
@@ -334,23 +367,7 @@ const dischargePatientById = async (req, res) => {
       await browser.close();
     }
 
-    patient.isDischarged = true;
-    patient.dischargeDateTime = new Date(
-      new Date().getTime() + 8 * 60 * 60 * 1000
-    );
-
-    await patient.save();
-
-    await migratePatient(
-      patient,
-      patient.alerts,
-      null,
-      patient.reminders,
-      patient.vital,
-      patient.report
-    );
-
-    patient.condition = undefined;
+    // patient.condition = undefined;
     patient.infoLogs = undefined;
     patient.copd = undefined;
     patient.o2Intake = undefined;
@@ -360,33 +377,12 @@ const dischargePatientById = async (req, res) => {
     patient.order = undefined;
     patient.alertConfig = undefined;
     patient.infoLogs = undefined;
+    patient.isDischarged = true;
+    patient.dischargeDateTime = new Date(
+      new Date().getTime() + 8 * 60 * 60 * 1000
+    );
+
     await patient.save();
-
-    console.log(patient);
-
-    const smartBed = await SmartBed.findOne({ patient: id });
-
-    if (!smartBed) {
-      return res
-        .status(500)
-        .json({ message: `cannot find any smartbed with Patient ID ${id}` });
-    }
-    smartBed.bedStatus = bedStatusEnum[1];
-    smartBed.patient = null;
-    await smartBed.save();
-
-    const smartWearable = await SmartWearable.findOne({ patient: id });
-
-    if (!smartWearable) {
-      return res.status(500).json({
-        message: `cannot find any smart wearable with Patient ID ${id}`,
-      });
-    }
-
-    if (smartWearable.patient != undefined) {
-      smartWearable.patient = undefined;
-      await smartWearable.save();
-    }
 
     res.status(200).json(patient);
   } catch (e) {

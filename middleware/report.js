@@ -1,6 +1,7 @@
 const { s3 } = require("./awsClient");
 const {
   PutObjectCommand,
+  DeleteObjectCommand,
   ListObjectsV2Command,
 } = require("@aws-sdk/client-s3");
 const { Patient } = require("../models/patient");
@@ -33,7 +34,7 @@ const uploadReport = async (patientId, type, name, file) => {
 
   let index = 1;
   while (objectNames.includes(destinationKey)) {
-    destinationKey = `reports/${type}-reports/${patientId}(${index})`;
+    destinationKey = `reports/${type}-reports/${patientId}-${type}-report(${index})`;
     reportName = `${name}(${index})`;
     index++;
   }
@@ -68,6 +69,39 @@ const uploadReport = async (patientId, type, name, file) => {
   return url;
 };
 
+const deleteReport = async (reportId) => {
+  const report = await Report.findById(reportId);
+  if (!report) {
+    throw new Error({ message: `cannot find any report with ID ${reportId}` });
+  }
+  const patientId = await Patient.findOne({ reports: reportId });
+  const updatedPatient = await Patient.findOneAndUpdate(
+    { _id: patientId },
+    { $pull: { reports: reportId } },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!updatedPatient) {
+    throw new Error({
+      message: `cannot find any patient tagged to report with ID ${reportId}`,
+    });
+  }
+
+  const key = report.url.split(".amazonaws.com/")[1];
+  await s3.send(
+    new DeleteObjectCommand({
+      Bucket: "ah-virtual-nursing",
+      Key: key,
+    })
+  );
+
+  await Report.deleteOne({ _id: reportId });
+};
+
 module.exports = {
   uploadReport,
+  deleteReport,
 };
