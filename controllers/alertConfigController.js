@@ -1,5 +1,5 @@
-const AlertConfig = require("../models/alertConfig");
-const Patient = require("../models/patient");
+const { AlertConfig } = require("../models/alertConfig");
+const { Patient } = require("../models/patient");
 
 const createAlertConfig = async (req, res) => {
   try {

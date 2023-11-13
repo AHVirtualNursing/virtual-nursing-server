@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
 require("dotenv").config();
 const axios = require("axios");
-const Patient = require("../models/patient");
+const { Patient } = require("../models/patient");
+const { mongooseConnect } = require("../middleware/mongoose");
 
 async function callApiRequest(url, method, data, clientType) {
   const config = {
@@ -35,11 +35,7 @@ async function callApiRequest(url, method, data, clientType) {
 
 async function initialiseDb() {
   const SERVER_URL = "http://localhost:3001";
-  mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    autoIndex: false,
-  });
+  mongooseConnect()
 
   const patient = await Patient.findOne({ name: "Hazel Lim" });
   if (patient) {
