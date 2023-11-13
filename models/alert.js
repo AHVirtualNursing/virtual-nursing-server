@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const alertStatusEnum = ["open", "handling", "complete"];
-const AlertVitalEnum = [
+const alertVitalEnum = [
   "Respiratory Rate",
   "Heart Rate",
   "Systolic Blood Pressure",
@@ -19,7 +19,7 @@ const AlertVitals = new mongoose.Schema({
   vital: {
     type: String,
     enum: {
-      values: AlertVitalEnum,
+      values: alertVitalEnum,
       message: "Invalid alert enum: {VALUE}",
     },
   },
@@ -70,8 +70,7 @@ const NoteLog = new mongoose.Schema({
     required: true,
   },
   addedBy: {
-    type: String,
-    required: true,
+    type: String
   },
 });
 
@@ -98,7 +97,7 @@ const alertSchema = new mongoose.Schema(
       ref: "Patient",
     },
     handledBy: {
-      type: String,
+      type: NoteLog,
     },
     followUps: {
       type: [followUpLog],
@@ -107,8 +106,12 @@ const alertSchema = new mongoose.Schema(
       type: [AlertVitals],
     },
     alertType:{
-      type: alertTypeEnum,
-      required: true
+      type: String,
+      enum: {
+        values: alertTypeEnum,
+        message: "Invalid alert type: {VALUE}",
+      },
+      required: true,
     },
     redelegate: {
       type: Boolean,
@@ -126,5 +129,6 @@ const Alert =  mongoose.models.Alert || mongoose.model("Alert", alertSchema);
 module.exports = {
   Alert,
   alertTypeEnum,
-  alertStatusEnum
+  alertStatusEnum,
+  alertVitalEnum
 }

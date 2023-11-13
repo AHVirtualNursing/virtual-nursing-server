@@ -58,22 +58,45 @@ Abnormal [HR]
 Patient 2
 Abnormal [SPO2]
 
+console log statemnets in send mock patient vitals file => "setting bed exit alarm to false"
 
+Triggers
+1. breach of protocol: bed exit alarm not set, fall risk high
+Attributes: isBedExitAlarmOn == false AND patient.fallRisk == high
+Behaviour: 
+- red colour warning sign, input box and confirm button will pop out
+- when nurse confirm the button, input disable, button disappear, red colour warning sign turn to orange (if fall risk is still high, else no more warning sign)
 
+2. create bed alert
+Attributes: isBedExitAlarmOn == true, isPatientOnBed == false
+Behaviour:
+- bed alert seen on dvs and mobile
 
-Fall Risk
-Low, Medium, High
-breach of protocol: bed exit alarm not set, fall risk high
-bed alert needs to be generated: bed exit alarm set and patient not on bed
+3. bed exit alarm on OR fall risk != high
+Attributes: isBedExitAlarmOn == true || patient.fallRisk != high
+Behaviour: 
+- no warning sign
 
-Bed Height
-warning sign for bed height: if isLowestPosition false 
+4. patient physically on bed
+Attributes: isPatientOnBed
+Behaviour:
+- true => coloured bed picture on patient overview
+- false => greyed out bed picture on patient overview
 
-Bed Brakes
-warning sign for bed brakes: if isBrakeSet false (per patient)
+5. bed isLowestPosition false
+Attributes: isLowestPosition == false
+Behaviour:
+- show orange warning beside the word "bed height"
 
-Bed Rails
-changing rail colour: change the rails around (4 patients)
+6. change in bed rails
+Attributes: isRightUpperRail, isRightLowerRail, isLeftUpperRail, isLeftLowerRail
+Behaviours:
+- bed rails on patient overview tile view page will update accordingly
+
+7. bed brakes
+Attributes: isBrakeSet
+Behaviour:
+- orange warning sign if brakes not set in bed status tab or tile view
 
 
 */
@@ -125,27 +148,25 @@ async function initialiseDb() {
     // create wards
     const wardIds = [];
     wards.map(async (ward) => {
-      const wardId = callApiRequest(`${SERVER_URL}/ward`, "POST", ward).then(
-        (wardId) => {
-          wardIds.push(wardId);
-        }
-      );
+      callApiRequest(`${SERVER_URL}/ward`, "POST", ward).then((wardId) => {
+        wardIds.push(wardId);
+      });
     });
 
     // create smartbeds
     const smartbedIds = [];
-    smartbeds.map(async (smartbed) => {
-      const smartbedId = callApiRequest(`${SERVER_URL}/smartbed`, "POST", {
+    await Promise.all(smartbeds.map(async (smartbed) => {
+      return callApiRequest(`${SERVER_URL}/smartbed`, "POST", {
         name: smartbed.name,
       }).then((smartbedId) => {
         smartbedIds.push(smartbedId);
       });
-    });
+    }));
 
     // create nurses
     const nurseIds = [];
-    nurses.map(async (nurse, index) => {
-      const nurseId = callApiRequest(
+    await Promise.all(nurses.map(async (nurse, index) => {
+      return callApiRequest(
         `${SERVER_URL}/auth/register?default=true`,
         "POST",
         {
@@ -159,29 +180,36 @@ async function initialiseDb() {
       ).then(async (nurseId) => {
         nurseIds.push(nurseId);
         await callApiRequest(
-          `${SERVER_URL}/smartbed/${smartbedIds[index]}/nurses
-      `,
+          `${SERVER_URL}/smartbed/${smartbedIds[index]}/nurses`,
           "PUT",
           {
             newNurses: [nurseId],
           }
         );
       });
+<<<<<<< HEAD
     });
+=======
+    }));
+>>>>>>> feat-add-full-db-init-script
 
     // create smart wearables
     const smartWearableIds = [];
-    smartWearables.map(async (smartWearable) => {
-      const smartWearableId = callApiRequest(
-        `${SERVER_URL}/smartWearable`,
-        "POST",
-        smartWearable
-      ).then((smartWearableId) => smartWearableIds.push(smartWearableId));
-    });
+    await Promise.all(smartWearables.map(async (smartWearable) => {
+      return callApiRequest(`${SERVER_URL}/smartWearable`, "POST", smartWearable).then(
+        (smartWearableId) => smartWearableIds.push(smartWearableId)
+      );
+    }));
 
+<<<<<<< HEAD
     const patientIds = [];
     // create patient
+=======
+>>>>>>> feat-add-full-db-init-script
     patients.map(async (patient, index) => {
+      // create patient
+      patient.smartbed = smartbedIds[index];
+
       const patientId = await callApiRequest(
         `${SERVER_URL}/patient`,
         "POST",
@@ -213,6 +241,7 @@ async function initialiseDb() {
         "PUT",
         {
           patient: patientId,
+          bedStatus: "occupied",
         }
       );
 
