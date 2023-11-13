@@ -1,9 +1,8 @@
 const { Alert } = require("../models/alert");
 const AlertConfig = require("../models/alertConfig");
 const Patient = require("../models/patient");
-const SmartBed = require("../models/smartbed");
+const { SmartBed, bedStatusEnum } = require("../models/smartbed");
 const SmartWearable = require("../models/smartWearable");
-const bedStatusEnum = ["occupied", "vacant"];
 const Reminder = require("../models/reminder");
 const { Nurse } = require("../models/nurse");
 const Ward = require("../models/ward");
@@ -11,6 +10,7 @@ const virtualNurse = require("../models/virtualNurse");
 const { io } = require("socket.io-client");
 const SERVER_URL = "http://localhost:3001";
 const socket = io(SERVER_URL);
+const admitPatientNotification = require("../helper/admitPatientNotification");
 
 const createPatient = async (req, res) => {
   try {
@@ -18,9 +18,9 @@ const createPatient = async (req, res) => {
     const readmittedPatient = await Patient.findOne({
       nric: String(patientNric),
     });
-
+    var patient = undefined;
     if (!readmittedPatient) {
-      const patient = new Patient({
+      patient = new Patient({
         name: req.body.name,
         nric: req.body.nric,
         condition: req.body.condition,
@@ -29,7 +29,7 @@ const createPatient = async (req, res) => {
         admissionDateTime: new Date(),
       });
       newPatientRecord = await Patient.create(patient);
-      res.status(200).json({ success: true, data: patient });
+      await patient.save();
     } else {
       readmittedPatient.condition = req.body.condition;
       readmittedPatient.infoLogs = req.body.infoLogs;
@@ -39,9 +39,30 @@ const createPatient = async (req, res) => {
       );
       readmittedPatient.isDischarged = false;
       readmittedPatient.dischargeDateTime = undefined;
-      await readmittedPatient.save();
-      res.status(200).json({ success: true, data: readmittedPatient });
+      patient = readmittedPatient;
     }
+
+    const smartbedId = req.body.smartbed;
+    const smartbed = await SmartBed.findById(smartbedId);
+
+    if (!smartbed) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any Smart Bed with ID ${smartbedId}` });
+    }
+
+    if (!(smartbed.bedStatus === bedStatusEnum[1])) {
+      return res.status(500).json({ message: `Smart Bed is not vacant` });
+    }
+
+    smartbed.patient = patient;
+    smartbed.save();
+    await patient.save();
+
+    const nurses = await Nurse.find({ smartBeds: smartbed._id });
+    admitPatientNotification.sendAdmitPatientNotification(patient, nurses);
+
+    res.status(200).json({ success: true, data: patient });
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
@@ -81,6 +102,23 @@ const getPatientById = async (req, res) => {
     }
     res.status(200).json(response);
   } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+const getSmartBedByPatientId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findById(id);
+    if (!patient) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any patient with ID ${id}` }); //status 400?
+    }
+    const smartbed = await SmartBed.findOne({ patient: id }).populate("ward");
+    res.status(200).json(smartbed);
+  } catch (e) {
+    console.error(e);
     res.status(500).json({ error: e.message });
   }
 };
@@ -160,7 +198,7 @@ const getRemindersByPatientId = async (req, res) => {
 const getVitalByPatientId = async (req, res) => {
   try {
     const { id } = req.params;
-    const patient = await Patient.findById(id).populate('vital');
+    const patient = await Patient.findById(id).populate("vital");
 
     if (!patient) {
       return res
@@ -459,4 +497,5 @@ module.exports = {
   deletePatientById,
   getNursesByPatientId,
   getVirtualNurseByPatientId,
+  getSmartBedByPatientId,
 };

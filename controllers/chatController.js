@@ -1,4 +1,5 @@
 const Chat = require("../models/chat");
+const { sendChat } = require("../helper/chatNotification");
 
 const createChat = async (req, res) => {
   try {
@@ -120,6 +121,8 @@ const createChatMessage = async (req, res) => {
         ],
       },
     ]);
+
+    await sendChat(existingChat, newChatMessage);
 
     res.status(200).json({ success: true, data: existingChat });
   } catch (e) {

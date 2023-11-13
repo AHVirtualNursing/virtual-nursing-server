@@ -1,7 +1,12 @@
 const Vital = require("../models/vital");
 const Patient = require("../models/patient");
 const AlertController = require("../controllers/alertController");
-const { alertTypeEnum } = require("../models/alert");
+const {
+  alertTypeEnum,
+  alertVitalEnum,
+  Alert,
+  alertStatusEnum,
+} = require("../models/alert");
 const { io } = require("socket.io-client");
 const SERVER_URL = "http://localhost:3001";
 
@@ -84,7 +89,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         description: "",
         notes: [],
         alertVitals: [],
-        alertType: alertTypeEnum[0]
+        alertType: alertTypeEnum[0],
       },
     };
 
@@ -100,8 +105,6 @@ const processVitalForPatient = async (patientId, vitalsData) => {
         return this;
       },
     };
-
-    const alertVital = {};
 
     const vitalsReading = {
       datetime: vitalsData.datetime,
@@ -126,9 +129,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Respiratory rate has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "Respiratory Rate";
-        alertVital.reading = vitalsData.respRate;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = alertVitalEnum[0];
+        newVital.reading = vitalsData.respRate;
+        request.body.alertVitals.push(newVital);
       }
     }
 
@@ -151,9 +156,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Heart rate has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "Heart Rate";
-        alertVital.reading = vitalsData.heartRate;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = alertVitalEnum[1];
+        newVital.reading = vitalsData.heartRate;
+        request.body.alertVitals.push(newVital);
       }
     }
 
@@ -176,9 +183,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Systolic Blood Pressure has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "Systolic Blood Pressure";
-        alertVital.reading = vitalsData.bloodPressureSys;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = alertVitalEnum[2];
+        newVital.reading = vitalsData.bloodPressureSys;
+        request.body.alertVitals.push(newVital);
       }
     }
 
@@ -201,9 +210,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Diastolic Blood Pressure has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "Diastolic Blood Pressure";
-        alertVital.reading = vitalsData.bloodPressureDia;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = alertVitalEnum[3];
+        newVital.reading = vitalsData.bloodPressureDia;
+        request.body.alertVitals.push(newVital);
       }
     }
 
@@ -212,8 +223,8 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       vital.spO2.push(vitalsReading);
 
       if (
-        vitalsData.sp02 < alertConfig.spO2Config[0] ||
-        vitalsData.sp02 > alertConfig.spO2Config[1]
+        vitalsData.spO2 < alertConfig.spO2Config[0] ||
+        vitalsData.spO2 > alertConfig.spO2Config[1]
       ) {
         if (vitalsData.spO2 < alertConfig.spO2Config[0]) {
           request.body.description =
@@ -226,9 +237,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Oxygen Level has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "SPO2";
-        alertVital.reading = vitalsData.spO2;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = alertVitalEnum[4];
+        newVital.reading = vitalsData.spO2;
+        request.body.alertVitals.push(newVital);
       }
     }
 
@@ -251,9 +264,11 @@ const processVitalForPatient = async (patientId, vitalsData) => {
             "Temperature has risen above threshold" +
             "\n";
         }
-        alertVital.vital = "Temperature";
-        alertVital.reading = vitalsData.temperature;
-        request.body.alertVitals.push(alertVital);
+
+        const newVital = {};
+        newVital.vital = alertVitalEnum[5];
+        newVital.reading = vitalsData.temperature;
+        request.body.alertVitals.push(newVital);
       }
     }
     const updatedVital = await vital.save();
@@ -262,9 +277,37 @@ const processVitalForPatient = async (patientId, vitalsData) => {
 
     socket.emit("update-vitals", updatedVital, patient._id);
 
+    console.log(request.body.alertVitals);
 
+    const alerts = patient.alerts;
+    console.log("Alerts Length: " + alerts.length);
     if (request.body.description != "") {
-      await AlertController.createAlert(request, result);
+      if (alerts.length == 0) {
+        await AlertController.createAlert(request, result);
+      } else {
+        var lastAlert = alerts[alerts.length - 1];
+        lastAlert = await Alert.findById(lastAlert);
+
+        if (
+          lastAlert.alertType === alertTypeEnum[0] &&
+          (lastAlert.status === alertStatusEnum[0] ||
+            lastAlert.status === alertStatusEnum[1])
+        ) {
+          lastAlert.alertVitals = await updateAlertVitals(
+            lastAlert.alertVitals,
+            request.body.alertVitals
+          );
+          const noteLog = {
+            info: request.body.description,
+            datetime: vitalsData.datetime,
+          };
+          lastAlert.notes.push(noteLog);
+          await lastAlert.save();
+          console.log(lastAlert.alertVitals);
+        } else {
+          await AlertController.createAlert(request, result);
+        }
+      }
     }
 
     return vital;
@@ -316,6 +359,21 @@ const getVitalById = async (req, res) => {
   } catch (e) {
     res.status(500).json({ success: e.message });
   }
+};
+
+const updateAlertVitals = async (currentAlertVitals, newAlertVitals) => {
+  newAlertVitals.forEach((newEntry) => {
+    const existingEntryIndex = currentAlertVitals.findIndex(
+      (entry) => entry.vital === newEntry.vital
+    );
+    if (existingEntryIndex !== -1) {
+      currentAlertVitals[existingEntryIndex] = newEntry;
+    } else {
+      currentAlertVitals.push(newEntry);
+    }
+  });
+
+  return currentAlertVitals;
 };
 
 module.exports = {

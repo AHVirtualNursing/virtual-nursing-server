@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb");
 const { Nurse }= require("../models/nurse");
-const SmartBed = require("../models/smartbed");
+const { SmartBed } = require("../models/smartbed");
 const Ward = require("../models/ward");
 const nurseStatusEnum = ["normal", "head"];
 
@@ -9,7 +9,7 @@ const createNurse = async (req, res, session) => {
     const wardId = req.body.ward;
     const ward = Ward.findById(wardId);
     if (!ward) {
-      res
+      return res
         .status(500)
         .json({ message: `cannot find assigned ward with ID ${wardId}` });
     }
@@ -53,13 +53,13 @@ const getNurses = async (req, res) => {
           if (id.match(/^[0-9a-fA-F]{24}$/)) {
             const nurse = await Nurse.findById(id);
             if (!nurse) {
-              res
+              return res
                 .status(500)
                 .json({ message: `cannot find any nurse with ID ${id}` });
             }
             return nurse;
           } else {
-            res.status(500).json({ message: `${id} is in wrong format` });
+            return res.status(500).json({ message: `${id} is in wrong format` });
           }
         })
       );
@@ -129,7 +129,6 @@ const getSmartBedsByNurseId = async (req, res) => {
       { path: "ward" },
       { path: "patient" },
     ]);
-    console.log(smartBeds);
     res.status(200).json(smartBeds);
   } catch (e) {
     res.status(400).json({ success: e.message });

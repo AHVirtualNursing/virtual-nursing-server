@@ -1,4 +1,4 @@
-const SmartBed = require("../models/smartbed");
+const { SmartBed } = require("../models/smartbed");
 const { Nurse }= require("../models/nurse");
 const Patient = require("../models/patient");
 const Ward = require("../models/ward");
@@ -163,17 +163,6 @@ const updateSmartBedById = async (req, res) => {
       smartbed.bedAlarmProtocolBreachReason = bedAlarmProtocolBreachReason;
     }
 
-    // dont call this unless testing
-    if (patient) {
-      const incomingPatient = await Patient.findById(patient);
-      if (incomingPatient) {
-        smartbed.patient = patient;
-      } else {
-        res
-          .status(500)
-          .json({ message: `Patient with ID: ${patient} not found` });
-      }
-    }
     const updatedSmartBed = await smartbed.save();
     socket.emit("update-smartbed", updatedSmartBed);
     res.status(200).json(updatedSmartBed);
