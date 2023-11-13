@@ -19,6 +19,7 @@ const createNurse = async (req, res, session) => {
       nurseStatus: req.body.nurseStatus,
       username: req.body.username,
       email: req.body.email,
+      password: req.body.password,
       ward: req.body.ward,
     });
 
