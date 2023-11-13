@@ -514,7 +514,6 @@ module.exports = {
   createPatient,
   getPatients,
   getPatientById,
-  getPatientsByIds,
   getPatientByNric,
   getAlertsByPatientId,
   getRemindersByPatientId,
