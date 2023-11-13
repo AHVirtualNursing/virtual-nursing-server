@@ -36,7 +36,7 @@ const news2Scheduler = require("./helper/news2");
 const app = express();
 
 mongoose
-  .connect(process.env.MONGODB_LOCAL_URI, {
+  .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     autoIndex: false,
