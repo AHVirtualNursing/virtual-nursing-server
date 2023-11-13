@@ -1,6 +1,4 @@
 const puppeteer = require("puppeteer");
-const { s3 } = require("../middleware/awsClient");
-const { PutObjectCommand } = require("@aws-sdk/client-s3");
 const { Alert } = require("../models/alert");
 const { AlertConfig } = require("../models/alertConfig");
 const { Patient } = require("../models/patient");
@@ -12,6 +10,7 @@ const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
 const admitPatientNotification = require("../helper/admitPatientNotification");
 const { migratePatient } = require("../middleware/ahDb");
+const { uploadReport } = require("../middleware/uploadReport");
 
 const createPatient = async (req, res) => {
   try {
@@ -328,13 +327,7 @@ const dischargePatientById = async (req, res) => {
 
       const pdfBuffer = await page.pdf();
 
-      const command = new PutObjectCommand({
-        Bucket: "ah-virtual-nursing",
-        Key: `reports/discharge-reports/${patient._id}-discharge-report.pdf`,
-        Body: pdfBuffer,
-      });
-
-      await s3.send(command);
+      await uploadReport(id, "discharge", `${id} Discharge Report`, pdfBuffer);
     } catch (error) {
       console.error(error);
     } finally {
@@ -348,8 +341,29 @@ const dischargePatientById = async (req, res) => {
 
     await patient.save();
 
-    migratePatient(patient, patient.alerts, patient.alertConfig, patient.reminders, patient.vital, patient.report);
-    
+    await migratePatient(
+      patient,
+      patient.alerts,
+      null,
+      patient.reminders,
+      patient.vital,
+      patient.report
+    );
+
+    patient.condition = undefined;
+    patient.infoLogs = undefined;
+    patient.copd = undefined;
+    patient.o2Intake = undefined;
+    patient.consciousness = undefined;
+    patient.alerts = undefined;
+    patient.reminders = undefined;
+    patient.order = undefined;
+    patient.alertConfig = undefined;
+    patient.infoLogs = undefined;
+    await patient.save();
+
+    console.log(patient);
+
     const smartBed = await SmartBed.findOne({ patient: id });
 
     if (!smartBed) {

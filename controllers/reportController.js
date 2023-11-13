@@ -1,11 +1,10 @@
 const { Report } = require("../models/report");
 const { Patient } = require("../models/patient");
 const {
-  PutObjectCommand,
   DeleteObjectCommand,
-  ListObjectsV2Command,
 } = require("@aws-sdk/client-s3");
 const { s3 } = require("../middleware/awsClient");
+const { uploadReport } = require("../middleware/uploadReport");
 
 const getReports = async (req, res) => {
   try {
@@ -74,7 +73,7 @@ const getDischargeReports = async (req, res) => {
 const createReport = async (req, res) => {
   try {
     const patientId = req.body.patient;
-    const type = req.body.type;
+    const {name, type} = req.body;
     const patient = await Patient.findById({ _id: patientId });
     if (!patient) {
       return res.status(500).json({
@@ -82,62 +81,11 @@ const createReport = async (req, res) => {
       });
     }
 
-    const bucket = "ah-virtual-nursing";
     const file = req.file;
 
-    const listFilesCommand = new ListObjectsV2Command({
-      Bucket: bucket,
-      Prefix: `reports/${type}`,
-    });
+    const uploadedReportUrl = await uploadReport(patientId, type, name, file)
 
-    const objectNames = [];
-    try {
-      const data = await s3.send(listFilesCommand);
-      const objects = data.Contents;
-      objects.forEach((object) => {
-        const objectName = object.Key;
-        objectNames.push(objectName);
-      });
-    } catch (error) {
-      console.error("Error listing objects:", error);
-    }
-
-    let destinationKey = `reports/${type}-reports/${patientId}-${type}-report`;
-    let reportName = req.body.name;
-
-    let index = 1;
-    while (objectNames.includes(destinationKey)) {
-      destinationKey = `reports/${type}-reports/${patientId}-${type}-report(${index})`;
-      reportName = reportName + `(${index})`;
-      index++;
-    }
-
-    const uploadFileCommand = new PutObjectCommand({
-      Bucket: bucket,
-      Key: destinationKey,
-      Body: file.buffer,
-    });
-
-    const url = `https://${bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${destinationKey}`;
-
-    await s3.send(uploadFileCommand);
-
-    const report = new Report({
-      name: reportName,
-      type: req.body.type,
-      url: url,
-    });
-    await report.save();
-
-    await Patient.findOneAndUpdate(
-      { _id: patientId },
-      { $push: { reports: report._id } },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-    res.status(200).json({ success: true, data: report });
+    res.status(200).json({ success: true, data: uploadedReportUrl });
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
