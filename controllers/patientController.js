@@ -9,7 +9,7 @@ const { Nurse } = require("../models/nurse");
 const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
 const admitPatientNotification = require("../helper/admitPatientNotification");
-const { migratePatient } = require("../middleware/ahDb");
+const { migratePatient } = require("../helper/ahDb");
 const { uploadReport } = require("../helper/report");
 
 const createPatient = async (req, res) => {
