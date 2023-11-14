@@ -13,11 +13,7 @@ const SERVER_URL = "http://localhost:3001";
 let intervalId;
 
 async function sendMockPatientVitals() {
-  mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    autoIndex: false,
-  });
+  mongooseConnect();
 
   const socket = io(SERVER_URL);
   const patientMap = new Map();

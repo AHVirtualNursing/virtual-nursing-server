@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 require("dotenv").config();
 const axios = require("axios");
 const Patient = require("../models/patient");
@@ -9,6 +8,8 @@ const {
   patients,
   smartWearables,
 } = require("./consts");
+const { Patient } = require("../models/patient");
+const { mongooseConnect } = require("../middleware/mongoose");
 
 /*
 DB Initialisation
@@ -135,11 +136,7 @@ async function callApiRequest(url, method, data, clientType) {
 
 async function initialiseDb() {
   const SERVER_URL = "http://localhost:3001";
-  mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    autoIndex: false,
-  });
+  mongooseConnect()
 
   const patient = await Patient.findOne({ name: "Hazel Lim" });
   if (patient) {
@@ -295,11 +292,7 @@ async function initialiseDb() {
 
 async function populateVitalsForPatient() {
   const SERVER_URL = "http://localhost:3001";
-  mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    autoIndex: false,
-  });
+  mongooseConnect();
 
   let idx = 0; // Initialize the loop counter
 

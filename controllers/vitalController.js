@@ -1,5 +1,5 @@
-const Vital = require("../models/vital");
-const Patient = require("../models/patient");
+const { Vital } = require("../models/vital");
+const { Patient } = require("../models/patient");
 const AlertController = require("../controllers/alertController");
 const {
   alertTypeEnum,
@@ -303,6 +303,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
           };
           lastAlert.notes.push(noteLog);
           await lastAlert.save();
+          await updateAlert(lastAlert);
           console.log(lastAlert.alertVitals);
         } else {
           await AlertController.createAlert(request, result);
@@ -376,6 +377,23 @@ const updateAlertVitals = async (currentAlertVitals, newAlertVitals) => {
   return currentAlertVitals;
 };
 
+const updateAlert = async(alert) => {
+  const req = { params: { id: alert._id } , body: {}};
+  const res = {
+    statusCode: null,
+    jsonData: null,
+    status: function (code) {
+      this.statusCode = code;
+      return this;
+    },
+    json: function (data) {
+      this.jsonData = data;
+      return this;
+    },
+  };
+
+  await AlertController.updateAlertById(req, res);
+}
 module.exports = {
   addVitalForPatient,
   processVitalForPatient,

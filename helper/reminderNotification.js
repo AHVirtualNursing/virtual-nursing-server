@@ -1,5 +1,5 @@
 const schedule = require("node-schedule");
-const Reminder = require("../models/reminder");
+const { Reminder } = require("../models/reminder");
 const pushNotification = require("./pushNotification");
 const patientController = require("../controllers/patientController");
 

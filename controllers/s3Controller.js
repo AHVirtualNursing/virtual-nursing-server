@@ -84,7 +84,7 @@ const uploadAndParseMockData = async (req, res) => {
     console.error(error);
     res
       .status(500)
-      .json({ error: "Error uploading or pasrsing mock data from S3" });
+      .json({ error: "Error uploading or parsing mock data from S3" });
   }
 };
 
