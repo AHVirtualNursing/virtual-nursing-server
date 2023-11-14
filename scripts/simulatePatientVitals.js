@@ -133,7 +133,7 @@ async function simulatePatientVitals() {
       sendMockPatientVitals();
     } else if (vitalType === "db") {
       await initialiseDb();
-      // populateVitalsForPatient();
+      populateVitalsForPatient();
     } else {
       if (!patientId) {
         patientId = await initialiseDb();

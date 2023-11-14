@@ -205,8 +205,10 @@ async function initialiseDb() {
   );
 
   // create nurses
-  const nurseIds = [];
-  const headNurseIds = [];
+  let ward1HeadNurseId;
+  let ward2HeadNurseId;
+  const ward1NurseIds = [];
+  const ward2NurseIds = [];
   await Promise.all(
     nurses.map(async (nurse, index) => {
       const nurseId = await callApiRequest(
@@ -222,10 +224,16 @@ async function initialiseDb() {
         "mobile"
       );
 
-      if (nurse.nurseStatus == "head") {
-        headNurseIds.push(nurseId);
-      } else {
-        nurseIds.push(nurseId);
+      if (nurse.nurseStatus == "head" && nurse.wardIndex == 0) {
+        ward1HeadNurseId = nurseId
+      } else if (nurse.nurseStatus == "head" && nurse.wardIndex == 1) {
+        ward2HeadNurseId = nurseId
+      }
+
+      if (!ward1NurseIds.includes(nurseId) && nurse.wardIndex == 0) {
+        ward1NurseIds.push(nurseId);
+      } else if (!ward2NurseIds.includes(nurseId) && nurse.wardIndex == 1) {
+        ward2NurseIds.push(nurseId);
       }
 
       // assigning unassigned beds to all nurses in same ward
@@ -234,7 +242,7 @@ async function initialiseDb() {
           `${SERVER_URL}/smartbed/${smartbedIds[20]}/nurses`,
           "PUT",
           {
-            newNurses: [nurseId],
+            newNurses: ward1NurseIds,
           }
         );
 
@@ -242,7 +250,7 @@ async function initialiseDb() {
           `${SERVER_URL}/smartbed/${smartbedIds[21]}/nurses`,
           "PUT",
           {
-            newNurses: [nurseId],
+            newNurses: ward1NurseIds,
           }
         );
       } else {
@@ -250,68 +258,65 @@ async function initialiseDb() {
           `${SERVER_URL}/smartbed/${smartbedIds[22]}/nurses`,
           "PUT",
           {
-            newNurses: [nurseId],
+            newNurses: ward2NurseIds,
           }
         );
         await callApiRequest(
           `${SERVER_URL}/smartbed/${smartbedIds[23]}/nurses`,
           "PUT",
           {
-            newNurses: [nurseId],
+            newNurses: ward2NurseIds,
           }
         );
         await callApiRequest(
           `${SERVER_URL}/smartbed/${smartbedIds[24]}/nurses`,
           "PUT",
           {
-            newNurses: [nurseId],
+            newNurses: ward2NurseIds,
           }
         );
       }
 
-      // assign head nurse to all beds in ward
-      if (nurse.nurseStatus == "head") {
-        Promise.all(
-          smartbeds.map(async (smartbed) => {
-            await callApiRequest(
-              `${SERVER_URL}/smartbed/${
-                smartbedIds[smartbed.wardIndex]
-              }/nurses`,
-              "PUT",
-              {
-                newNurses: [nurseId],
-              }
-            );
-          })
-        );
-      }
+      const headNurseId =
+        nurse.wardIndex == 0 ? ward1HeadNurseId : ward2HeadNurseId
 
       // assigning bed to nurse of same index
       await callApiRequest(
         `${SERVER_URL}/smartbed/${smartbedIds[index]}/nurses`,
         "PUT",
         {
-          newNurses: [nurseId],
+          newNurses: [nurseId, headNurseId],
         }
       );
     })
   );
 
-  
-
   // assign nurses to head nurse
   await Promise.all(
-    nurseIds.map(async (nurseId, index) => {
+    ward1NurseIds.map(async (nurseId) => {
       await callApiRequest(
         `${SERVER_URL}/nurse/${nurseId}`,
         "PUT",
         {
-          headNurse: headNurseIds[index % 2],
+          headNurse: ward1HeadNurseId,
         },
         "mobile"
       );
     })
   );
+
+  await Promise.all(
+    ward2NurseIds.map(async (nurseId) => {
+        await callApiRequest(
+          `${SERVER_URL}/nurse/${nurseId}`,
+          "PUT",
+          {
+            headNurse: ward2HeadNurseId,
+          },
+          "mobile"
+        );
+      })
+    );
 
   // create smart wearables
   const smartWearableIds = await Promise.all(
@@ -343,13 +348,9 @@ async function initialiseDb() {
       });
 
       // admit patient
-      await callApiRequest(
-        `${SERVER_URL}/patient/${patientId}/admit`,
-        "PUT",
-        {
-          smartWearableId: smartWearableIds[index]
-        }
-      );
+      await callApiRequest(`${SERVER_URL}/patient/${patientId}/admit`, "PUT", {
+        smartWearableId: smartWearableIds[index],
+      });
       return patientId;
     })
   );
@@ -394,11 +395,12 @@ async function initialiseDb() {
 
 async function populateVitalsForPatient() {
   const SERVER_URL = "http://localhost:3001";
-  mongooseConnect();
+  await mongooseConnect();
 
-  let idx = 0; // Initialize the loop counter
+  let idx = 0;
+  const apiRequests = [];
 
-  while (idx < patients.length) {
+  while (idx < patientIds.length) {
     //generate array of datetimes every minute in a day for the patient
     admissionDate = new Date();
     admissionDate.setDate(patients[idx].admissionDateTime.getDate());
@@ -422,7 +424,7 @@ async function populateVitalsForPatient() {
     //generate array of respRate every minute in a day for a patient
     respRateArray = generateRandomVital("respRate");
 
-    for (let i = 0; i < 1440; i++) {
+    for (let i = 0; i < 48; i++) {
       const req = {
         patient: patientIds[idx],
         datetime: datetimes[i],
@@ -434,14 +436,16 @@ async function populateVitalsForPatient() {
         temperature: temperatureArray[i],
       };
 
-      const vitalId = await callApiRequest(`${SERVER_URL}/vital`, "POST", req);
+      const apiRequest = await callApiRequest(
+        `${SERVER_URL}/vital`,
+        "POST",
+        req
+      );
     }
     idx++;
   }
 
   console.log("\x1b[34m", "****** VITALS INITIALISED ******");
-  console.log("\x1b[0m", "");
-  process.exit(1);
 }
 
 function generateRandomVital(type) {
@@ -450,16 +454,16 @@ function generateRandomVital(type) {
   let sourceArray;
   switch (type) {
     case "heartRate":
-      sourceArray = [66, 76, 85, 90, 102, 115, 100, 95, 70, 55];
+      sourceArray = [66, 76, 85, 90, 79, 98, 99, 95, 70, 61];
       break;
     case "spO2":
-      sourceArray = [96, 95, 97, 97, 96, 95, 93, 95, 96, 95, 88, 90];
+      sourceArray = [96, 95, 97, 97, 96, 95, 93, 95, 96, 95, 92, 94];
       break;
     case "bloodPressureSys":
-      sourceArray = [90, 100, 114, 120, 126, 120, 110, 89, 75, 73];
+      sourceArray = [90, 100, 114, 120, 126, 120, 110, 99, 95, 106];
       break;
     case "bloodPressureDia":
-      sourceArray = [76, 79, 82, 86, 90, 80, 74, 60, 54, 57];
+      sourceArray = [76, 79, 62, 66, 65, 80, 74, 60, 54, 57];
       break;
     case "temperature":
       sourceArray = [
@@ -472,7 +476,7 @@ function generateRandomVital(type) {
   }
 
   const randomArray = [];
-  for (let i = 0; i < 1440; i++) {
+  for (let i = 0; i < 48; i++) {
     const randomIndex = Math.floor(Math.random() * sourceArray.length);
     randomArray.push(sourceArray[randomIndex]);
   }
@@ -487,7 +491,7 @@ function datetimeInADay(date) {
   const endDate = new Date(); // Get the current date and time
   endDate.setDate(endDate.getDate() + 1); // Set the end date to the next day
 
-  const minuteInterval = 1; // Generate datetime values for every minute
+  const minuteInterval = 30; // Generate datetime values for every minute
 
   const dateTimes = [];
   for (
