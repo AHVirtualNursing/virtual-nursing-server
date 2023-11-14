@@ -171,7 +171,7 @@ const configureSocket = (server) => {
     });
 
     socket.on("update-smartbed", async (smartbed) => {
-      const req = { params: { id: smartbed.patient } };
+      const req = { params: { id: smartbed.patient._id } };
       const res = {
         statusCode: null,
         jsonData: null,

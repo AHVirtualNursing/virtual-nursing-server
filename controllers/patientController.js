@@ -322,18 +322,18 @@ const dischargePatientById = async (req, res) => {
     smartBed.patient = null;
     await smartBed.save();
 
-    // const smartWearable = await SmartWearable.findOne({ patient: id });
+    const smartWearable = await SmartWearable.findOne({ patient: id });
 
-    // if (!smartWearable) {
-    //   return res.status(500).json({
-    //     message: `cannot find any smart wearable with Patient ID ${id}`,
-    //   });
-    // }
+    if (!smartWearable) {
+      return res.status(500).json({
+        message: `cannot find any smart wearable with Patient ID ${id}`,
+      });
+    }
 
-    // if (smartWearable.patient != undefined) {
-    //   smartWearable.patient = undefined;
-    //   await smartWearable.save();
-    // }
+    if (smartWearable.patient != undefined) {
+      smartWearable.patient = undefined;
+      await smartWearable.save();
+    }
 
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -409,7 +409,7 @@ const admitPatientById = async (req, res) => {
     patient.consciousness = consciousness;
     await patient.save();
 
-    const smartBed = await SmartBed.findOne({ patient: id });
+    const smartBed = await SmartBed.findOne({ patient: id }).populate('patient');
 
     if (!smartBed) {
       return res
