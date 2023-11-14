@@ -1,13 +1,19 @@
+const puppeteer = require("puppeteer");
 const { Alert } = require("../models/alert");
-const AlertConfig = require("../models/alertConfig");
-const Patient = require("../models/patient");
+const { AlertConfig } = require("../models/alertConfig");
+const { Patient } = require("../models/patient");
 const { SmartBed, bedStatusEnum } = require("../models/smartbed");
 const SmartWearable = require("../models/smartWearable");
-const Reminder = require("../models/reminder");
+const { Reminder } = require("../models/reminder");
 const { Nurse } = require("../models/nurse");
 const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
+const { io } = require("socket.io-client");
+const SERVER_URL = "http://localhost:3001";
+const socket = io(SERVER_URL);
 const admitPatientNotification = require("../helper/admitPatientNotification");
+const { migratePatient } = require("../helper/ahDb");
+const { uploadReport } = require("../helper/report");
 
 const createPatient = async (req, res) => {
   try {
@@ -120,29 +126,6 @@ const getSmartBedByPatientId = async (req, res) => {
   }
 };
 
-const getPatientsByIds = async (req, res) => {
-  try {
-    const idsToRetrieve = req.query.ids.split(",");
-    const patients = await Promise.all(
-      idsToRetrieve.map(async (id) => {
-        if (id.match(/^[0-9a-fA-F]{24}$/)) {
-          const patient = await Patient.findById(id);
-          if (!patient) {
-            res
-              .status(500)
-              .json({ message: `cannot find any patient with ID ${id}` });
-          }
-          return patient;
-        } else {
-          res.status(500).json({ message: `${id} is in wrong format` });
-        }
-      })
-    );
-    res.status(200).json(patients);
-  } catch (e) {
-    res.status(500).json({ message: e.message });
-  }
-};
 
 const getPatientByNric = async (req, res) => {
   try {
@@ -280,6 +263,7 @@ const updatePatientById = async (req, res) => {
     }
 
     const updatedPatient = await patient.save();
+    socket.emit("update-patient", updatedPatient);
     res.status(200).json(updatedPatient);
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -301,11 +285,31 @@ const dischargePatientById = async (req, res) => {
         .json({ message: `cannot find any patient with ID ${id}` });
     }
 
-    patient.isDischarged = true;
-    patient.dischargeDateTime = new Date(
-      new Date().getTime() + 8 * 60 * 60 * 1000
+    await migratePatient(
+      patient,
+      patient.alerts,
+      patient.alertConfig,
+      patient.reminders,
+      patient.vital,
+      patient.reports
     );
-    await patient.save();
+
+    const request = { params: { id: id } };
+    const result = {
+      statusCode: null,
+      jsonData: null,
+      status: function (code) {
+        this.statusCode = code;
+        return this;
+      },
+      json: function (data) {
+        this.jsonData = data;
+        return this;
+      },
+    };
+
+    await getVirtualNurseByPatientId(request, result);
+    const virtualNurse = result.jsonData;
 
     const smartBed = await SmartBed.findOne({ patient: id });
 
@@ -318,19 +322,67 @@ const dischargePatientById = async (req, res) => {
     smartBed.patient = null;
     await smartBed.save();
 
-    const smartWearable = await SmartWearable.findOne({ patient: id });
+    // const smartWearable = await SmartWearable.findOne({ patient: id });
 
-    if (!smartWearable) {
-      return res.status(500).json({
-        message: `cannot find any smart wearable with Patient ID ${id}`,
+    // if (!smartWearable) {
+    //   return res.status(500).json({
+    //     message: `cannot find any smart wearable with Patient ID ${id}`,
+    //   });
+    // }
+
+    // if (smartWearable.patient != undefined) {
+    //   smartWearable.patient = undefined;
+    //   await smartWearable.save();
+    // }
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    try {
+      await page.goto(process.env.DVS_DEVELOPMENT_URL, {
+        waitUntil: "networkidle0",
       });
+
+      await page.type("#identifier", process.env.DEFAULT_USERNAME);
+      await page.type("#password", process.env.DEFAULT_PASSWORD);
+
+      await page.click("#submit");
+      await page.waitForNavigation();
+
+      await page.goto(
+        `${process.env.DVS_DEVELOPMENT_URL}/dischargeReport?patientId=${patient._id}&vitalId=${patient.vital}&alertConfigId=${patient.alertConfig}`,
+        {
+          waitUntil: "networkidle0",
+        }
+      );
+
+      const pdfBuffer = await page.pdf();
+
+      await uploadReport(id, "discharge", `${id} Discharge Report`, pdfBuffer);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await browser.close();
     }
 
-    if (smartWearable.patient != undefined) {
-      smartWearable.patient = undefined;
-      await smartWearable.save();
-    }
+    // patient.condition = undefined;
+    patient.infoLogs = undefined;
+    patient.copd = undefined;
+    patient.o2Intake = undefined;
+    patient.consciousness = undefined;
+    patient.alerts = undefined;
+    patient.reminders = undefined;
+    patient.order = undefined;
+    patient.alertConfig = undefined;
+    patient.infoLogs = undefined;
+    patient.isDischarged = true;
+    patient.dischargeDateTime = new Date(
+      new Date().getTime() + 8 * 60 * 60 * 1000
+    );
 
+    await patient.save();
+
+    socket.emit("discharge-patient", patient, virtualNurse);
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -375,7 +427,7 @@ const admitPatientById = async (req, res) => {
     }
     smartWearable.patient = id;
     await smartWearable.save();
-
+    socket.emit("update-smartbed", smartBed);
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -462,7 +514,6 @@ module.exports = {
   createPatient,
   getPatients,
   getPatientById,
-  getPatientsByIds,
   getPatientByNric,
   getAlertsByPatientId,
   getRemindersByPatientId,

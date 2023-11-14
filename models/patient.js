@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 
 const patientO2IntakeEnum = ["air", "oxygen"];
 const patientConsciousnessEnum = ["alert", "cvpu"];
-const patientAcuityLevelEnum = ["L1", "L2", "L3"];
-const patientFallRiskEnum = ["High", "Medium", "Low"];
+const patientAcuityLevelEnum = ["L1", "L2", "L3", "Pending Nurse Input"];
+const patientFallRiskEnum = ["High", "Medium", "Low", "Pending Nurse Input"];
 
 const infoLog = new mongoose.Schema({
   info: {
@@ -69,6 +69,7 @@ const patientSchema = new mongoose.Schema(
         values: patientAcuityLevelEnum,
         message: "Invalid patient acuity level: {VALUE}",
       }, 
+      default: patientAcuityLevelEnum[3]
     },
     fallRisk: {
       type: String,
@@ -76,6 +77,7 @@ const patientSchema = new mongoose.Schema(
         values: patientFallRiskEnum,
         message: "Invalid patient patient fall risk: {VALUE}",
       }, 
+      default: patientFallRiskEnum[3]
     },
     isDischarged: {
       type: Boolean,
@@ -124,5 +126,10 @@ const patientSchema = new mongoose.Schema(
   }
 );
 
-module.exports =
+const Patient =
   mongoose.models.Patient || mongoose.model("Patient", patientSchema);
+
+module.exports = {
+  Patient,
+  patientSchema,
+};

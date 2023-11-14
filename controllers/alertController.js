@@ -1,6 +1,6 @@
 const { io } = require("socket.io-client");
 const { Alert } = require("../models/alert");
-const Patient = require("../models/patient");
+const { Patient } = require("../models/patient");
 const alertNotification = require("../helper/alertNotification");
 const SERVER_URL = "http://localhost:3001";
 const { sendAlert } = require("../helper/alertNotification");
@@ -210,7 +210,7 @@ const redelegateAlert = async (req, res) => {
 
     res.status(200).json(alert);
   } catch (e) {
-    res.status(500).json({ success: false });
+    res.status(500).json({ error: e.message });
   }
 };
 

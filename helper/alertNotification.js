@@ -1,11 +1,12 @@
 const patientController = require("../controllers/patientController");
 const pushNotification = require("./pushNotification");
-const { alertStatusEnum, alertTypeEnum } = require("../models/alert");
+const { alertStatusEnum, alertTypeEnum, Alert } = require("../models/alert");
 const { SmartBed } = require("../models/smartbed");
 const { Nurse, nurseStatusEnum } = require("../models/nurse");
 const SERVER_URL = "http://localhost:3001";
 const { io } = require("socket.io-client");
 const socket = io(SERVER_URL);
+const AlertController = require("../controllers/alertController");
 
 const sendAlert = async (alert) => {
   try {
@@ -69,6 +70,7 @@ const startAlertStatusCheckTimer = (alert) => {
   const delayInMilliseconds = 60000;
 
   setTimeout(async () => {
+    alert = await Alert.findById(alert._id);
     if (alert.status === alertStatusEnum[0]) {
       await handleUnacknowledgedAlert(alert);
     }
