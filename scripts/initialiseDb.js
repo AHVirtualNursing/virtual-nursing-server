@@ -345,7 +345,7 @@ async function initialiseDb() {
 
   // create abnormal vitals for a patient to trigger alert
   await callApiRequest(`${SERVER_URL}/vital`, "POST", {
-    patient: patientIds[0],
+    patient: patientIds[2],
     heartRate: 140,
     respRate: 15,
     bloodPressureSys: 67,
@@ -362,7 +362,7 @@ async function initialiseDb() {
   });
 
   await callApiRequest(`${SERVER_URL}/vital`, "POST", {
-    patient: patientIds[0],
+    patient: patientIds[2],
     heartRate: 80,
     respRate: 15,
     bloodPressureSys: 67,
