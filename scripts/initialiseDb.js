@@ -190,22 +190,20 @@ async function initialiseDb() {
 
   // assign smartbed to ward
   await Promise.all(
-    smartbeds.map(
-      async (smartbed, index) => {
-        await callApiRequest(
-          `${SERVER_URL}/ward/${wardIds[smartbed.wardIndex]}/smartbed/${
-            smartbedIds[index]
-          }`,
-          "PUT",
-          {
-            roomNum: smartbed.roomNum,
-            bedNum: smartbed.bedNum,
-          }
-        );
-      }
-    )
-  )
-  
+    smartbeds.map(async (smartbed, index) => {
+      await callApiRequest(
+        `${SERVER_URL}/ward/${wardIds[smartbed.wardIndex]}/smartbed/${
+          smartbedIds[index]
+        }`,
+        "PUT",
+        {
+          roomNum: smartbed.roomNum,
+          bedNum: smartbed.bedNum,
+        }
+      );
+    })
+  );
+
   // create nurses
   const nurseIds = [];
   const headNurseIds = [];
@@ -230,6 +228,46 @@ async function initialiseDb() {
         nurseIds.push(nurseId);
       }
 
+      if (nurse.wardIndex == 0) {
+        await callApiRequest(
+          `${SERVER_URL}/smartbed/${smartbedIds[20]}/nurses`,
+          "PUT",
+          {
+            newNurses: [nurseId],
+          }
+        );
+
+        await callApiRequest(
+          `${SERVER_URL}/smartbed/${smartbedIds[21]}/nurses`,
+          "PUT",
+          {
+            newNurses: [nurseId],
+          }
+        );
+      } else {
+        await callApiRequest(
+          `${SERVER_URL}/smartbed/${smartbedIds[22]}/nurses`,
+          "PUT",
+          {
+            newNurses: [nurseId],
+          }
+        );
+        await callApiRequest(
+          `${SERVER_URL}/smartbed/${smartbedIds[23]}/nurses`,
+          "PUT",
+          {
+            newNurses: [nurseId],
+          }
+        );
+        await callApiRequest(
+          `${SERVER_URL}/smartbed/${smartbedIds[24]}/nurses`,
+          "PUT",
+          {
+            newNurses: [nurseId],
+          }
+        );
+      }
+
       await callApiRequest(
         `${SERVER_URL}/smartbed/${smartbedIds[index]}/nurses`,
         "PUT",
@@ -240,6 +278,7 @@ async function initialiseDb() {
     })
   );
 
+  // assign nurses to head nurse
   await Promise.all(
     nurseIds.map(async (nurseId, index) => {
       await callApiRequest(

@@ -208,8 +208,6 @@ const smartbeds = [
   { name: "smart bed 8", wardIndex: 0, roomNum: 2, bedNum: 8 },
   { name: "smart bed 9", wardIndex: 0, roomNum: 2, bedNum: 9 },
   { name: "smart bed 10", wardIndex: 0, roomNum: 2, bedNum: 10 },
-  { name: "smart bed 11", wardIndex: 0, roomNum: 3, bedNum: 11 },
-  { name: "smart bed 12", wardIndex: 0, roomNum: 3, bedNum: 12 },
   { name: "smart bed 13", wardIndex: 1, roomNum: 1, bedNum: 1 },
   { name: "smart bed 14", wardIndex: 1, roomNum: 1, bedNum: 2 },
   { name: "smart bed 15", wardIndex: 1, roomNum: 1, bedNum: 3 },
@@ -220,9 +218,11 @@ const smartbeds = [
   { name: "smart bed 20", wardIndex: 1, roomNum: 2, bedNum: 8 },
   { name: "smart bed 21", wardIndex: 1, roomNum: 2, bedNum: 9 },
   { name: "smart bed 22", wardIndex: 1, roomNum: 2, bedNum: 10 },
-  { name: "smart bed 22", wardIndex: 1, roomNum: 3, bedNum: 11 },
-  { name: "smart bed 23", wardIndex: 1, roomNum: 3, bedNum: 12 },
-  { name: "smart bed 24", wardIndex: 1, roomNum: 3, bedNum: 13 },
+  { name: "smart bed 11", wardIndex: 0, roomNum: 3, bedNum: 11 },
+  { name: "smart bed 12", wardIndex: 0, roomNum: 3, bedNum: 12 },
+  { name: "smart bed 23", wardIndex: 1, roomNum: 3, bedNum: 11 },
+  { name: "smart bed 24", wardIndex: 1, roomNum: 3, bedNum: 12 },
+  { name: "smart bed 25", wardIndex: 1, roomNum: 3, bedNum: 13 },
 
 ];
 

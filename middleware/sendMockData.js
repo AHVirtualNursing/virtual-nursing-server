@@ -1,5 +1,5 @@
 require("dotenv").config();
-const mongoose = require("mongoose");
+const {mongooseConnect} = require("../middleware/mongoose");
 const { io } = require("socket.io-client");
 const axios = require("axios");
 const xlsx = require("xlsx");
@@ -7,13 +7,13 @@ const { GetObjectCommand } = require("@aws-sdk/client-s3");
 const { s3 } = require("./awsClient");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { initialiseDb } = require("../scripts/initialiseDb");
-const Patient = require("../models/patient");
+const {Patient} = require("../models/patient");
 
 const SERVER_URL = "http://localhost:3001";
 let intervalId;
 
 async function sendMockPatientVitals() {
-  mongooseConnect();
+  await mongooseConnect();
 
   const socket = io(SERVER_URL);
   const patientMap = new Map();
