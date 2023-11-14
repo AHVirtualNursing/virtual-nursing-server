@@ -2,9 +2,8 @@ const { ObjectId } = require("mongodb");
 const { Nurse }= require("../models/nurse");
 const { SmartBed } = require("../models/smartbed");
 const Ward = require("../models/ward");
-const nurseStatusEnum = ["normal", "head"];
 
-const createNurse = async (req, res, session) => {
+const createNurse = async (req, res) => {
   try {
     const wardId = req.body.ward;
     const ward = Ward.findById(wardId);
@@ -29,7 +28,7 @@ const createNurse = async (req, res, session) => {
       {
         new: true,
         runValidators: true,
-        session,
+        // session,
       }
     );
 

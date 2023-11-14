@@ -100,6 +100,7 @@ Behaviour:
 
 
 */
+let patientIds = [];
 
 async function callApiRequest(url, method, data, clientType) {
   const config = {
@@ -109,181 +110,228 @@ async function callApiRequest(url, method, data, clientType) {
       "Content-Type": "application/json",
       "X-UserType": clientType ? clientType : "",
     },
-    data: "",
+    data: data,
   };
-
-  config.data = data;
 
   try {
     const response = await axios(config);
 
-    if (response.status == 200 || 201) {
+    if (response.status == 200 || response.status == 201) {
       console.log("\x1b[32m", `${url} ${method} request successful.`);
 
       if (method == "POST") {
         return response.data.data._id;
       } else if (method == "GET") {
-        return response.data._id;
+        return response.data;
       }
     } else {
       console.error(`Error calling ${url} request: ${response.status}`);
     }
   } catch (error) {
     console.log("\x1b[31m", `Error calling ${url}: ${error.message}`);
+    throw error;
   }
 }
 
 async function initialiseDb() {
   const SERVER_URL = "http://localhost:3001";
-  mongooseConnect()
+  await mongooseConnect();
 
   const patient = await Patient.findOne({ name: "Hazel Lim" });
   if (patient) {
     return patient._id.toString();
-  } else {
-    // create wards
-    const wardIds = [];
-    await Promise.all(
-      wards.map(async (ward) => {
-        return callApiRequest(`${SERVER_URL}/ward`, "POST", ward).then(
-          (wardId) => {
-            wardIds.push(wardId);
-          }
-        );
-      })
-    );
-
-    // create smartbeds
-    const smartbedIds = [];
-    await Promise.all(
-      smartbeds.map(async (smartbed) => {
-        return callApiRequest(`${SERVER_URL}/smartbed`, "POST", {
-          name: smartbed.name,
-        }).then((smartbedId) => {
-          smartbedIds.push(smartbedId);
-        });
-      })
-    );
-
-    // create nurses
-    const nurseIds = [];
-    await Promise.all(
-      nurses.map(async (nurse, index) => {
-        return callApiRequest(
-          `${SERVER_URL}/auth/register?default=true`,
-          "POST",
-          {
-            username: nurse.username,
-            email: nurse.email,
-            name: nurse.name,
-            nurseStatus: nurse.nurseStatus,
-            ward: wardIds[nurse.wardIndex],
-          },
-          "mobile"
-        ).then(async (nurseId) => {
-          nurseIds.push(nurseId);
-          await callApiRequest(
-            `${SERVER_URL}/smartbed/${smartbedIds[index]}/nurses`,
-            "PUT",
-            {
-              newNurses: [nurseId],
-            }
-          );
-        });
-      })
-    );
-
-    // create smart wearables
-    const smartWearableIds = [];
-    await Promise.all(
-      smartWearables.map(async (smartWearable) => {
-        return callApiRequest(
-          `${SERVER_URL}/smartWearable`,
-          "POST",
-          smartWearable
-        ).then((smartWearableId) => smartWearableIds.push(smartWearableId));
-      })
-    );
-
-    const patientIds = [];
-    // create patient
-    await Promise.all(
-      patients.map(async (patient, index) => {
-        // create patient
-        patient.smartbed = smartbedIds[index];
-
-        const patientId = await callApiRequest(
-          `${SERVER_URL}/patient`,
-          "POST",
-          patient
-        );
-
-        patientIds.push([patientId, patient.name]);
-
-        // create default alert config
-        await callApiRequest(`${SERVER_URL}/alertConfig`, "POST", {
-          patient: patientId,
-        });
-
-        // assign smartbed to ward
-        await callApiRequest(
-          `${SERVER_URL}/ward/${wardIds[smartbeds[index].wardIndex]}/smartbed/${
-            smartbedIds[index]
-          }`,
-          "PUT",
-          {
-            roomNum: smartbeds[index].roomNum,
-            bedNum: smartbeds[index].bedNum,
-          }
-        );
-
-        // assign patient to smartbed
-        await callApiRequest(
-          `${SERVER_URL}/smartbed/${smartbedIds[index]}`,
-          "PUT",
-          {
-            patient: patientId,
-            bedStatus: "occupied",
-          }
-        );
-
-        // assign smart wearable to patient
-        await callApiRequest(
-          `${SERVER_URL}/smartWearable/${smartWearableIds[index]}`,
-          "PUT",
-          {
-            patient: patientId,
-          }
-        );
-      })
-    );
-
-    /* create it admin and virtual nurse */
-    await callApiRequest(
-      `${SERVER_URL}/auth/register?default=true`,
-      "POST",
-      {
-        name: "itadmin",
-        username: "itadmin",
-        email: "itadmin@gmail.com",
-      },
-      "it-admin"
-    );
-
-    await callApiRequest(
-      `${SERVER_URL}/auth/register?default=true`,
-      "POST",
-      {
-        name: "virtualnurse",
-        username: "virtualnurse",
-        email: "virtualnurse@gmail.com",
-        wards: wardIds,
-      },
-      "virtual-nurse"
-    );
-
-    console.log("\x1b[34m", patientIds);
   }
+
+  // create wards
+  const wardIds = await Promise.all(
+    wards.map(async (ward) => {
+      const wardId = await callApiRequest(`${SERVER_URL}/ward`, "POST", ward);
+      return wardId;
+    })
+  );
+
+  /* create it admin and virtual nurse */
+  await callApiRequest(
+    `${SERVER_URL}/auth/register?default=true`,
+    "POST",
+    {
+      name: "itadmin",
+      username: "itadmin",
+      email: "itadmin@gmail.com",
+    },
+    "it-admin"
+  );
+
+  await callApiRequest(
+    `${SERVER_URL}/auth/register?default=true`,
+    "POST",
+    {
+      name: "virtualnurse",
+      username: "virtualnurse",
+      email: "virtualnurse@gmail.com",
+      wards: wardIds,
+    },
+    "virtual-nurse"
+  );
+
+  // create smartbeds
+  const smartbedIds = await Promise.all(
+    smartbeds.map(async (smartbed) => {
+      const smartbedId = await callApiRequest(
+        `${SERVER_URL}/smartbed`,
+        "POST",
+        {
+          name: smartbed.name,
+        }
+      );
+      return smartbedId;
+    })
+  );
+
+  // create nurses
+  const nurseIds = [];
+  const headNurseIds = [];
+  await Promise.all(
+    nurses.map(async (nurse, index) => {
+      const nurseId = await callApiRequest(
+        `${SERVER_URL}/auth/register?default=true`,
+        "POST",
+        {
+          username: nurse.username,
+          email: nurse.email,
+          name: nurse.name,
+          nurseStatus: nurse.nurseStatus,
+          ward: String(wardIds[nurse.wardIndex]),
+        },
+        "mobile"
+      );
+
+      if (nurse.nurseStatus == "head") {
+        headNurseIds.push(nurseId);
+      } else {
+        nurseIds.push(nurseId);
+      }
+
+      await callApiRequest(
+        `${SERVER_URL}/smartbed/${smartbedIds[index]}/nurses`,
+        "PUT",
+        {
+          newNurses: [nurseId],
+        }
+      );
+    })
+  );
+
+  await Promise.all(
+    nurseIds.map(async (nurseId, index) => {
+      console.log(nurseId);
+      await callApiRequest(
+        `${SERVER_URL}/nurse/${nurseId}`,
+        "PUT",
+        {
+          headNurse: headNurseIds[index % 2],
+        },
+        "mobile"
+      );
+    })
+  );
+
+  // create smart wearables
+  const smartWearableIds = await Promise.all(
+    smartWearables.map(async (smartWearable) => {
+      const smartWearableId = await callApiRequest(
+        `${SERVER_URL}/smartWearable`,
+        "POST",
+        smartWearable
+      );
+      return smartWearableId;
+    })
+  );
+
+  // create patient
+  patientIds = await Promise.all(
+    patients.map(async (patient, index) => {
+      // create patient
+      patient.smartbed = smartbedIds[index];
+
+      const patientId = await callApiRequest(
+        `${SERVER_URL}/patient`,
+        "POST",
+        patient
+      );
+
+      // create default alert config
+      await callApiRequest(`${SERVER_URL}/alertConfig`, "POST", {
+        patient: patientId,
+      });
+
+      // assign smartbed to ward
+      await callApiRequest(
+        `${SERVER_URL}/ward/${wardIds[smartbeds[index].wardIndex]}/smartbed/${
+          smartbedIds[index]
+        }`,
+        "PUT",
+        {
+          roomNum: smartbeds[index].roomNum,
+          bedNum: smartbeds[index].bedNum,
+        }
+      );
+
+      // assign patient to smartbed
+      await callApiRequest(
+        `${SERVER_URL}/smartbed/${smartbedIds[index]}`,
+        "PUT",
+        {
+          patient: patientId,
+          bedStatus: "occupied",
+        }
+      );
+
+      // assign smart wearable to patient
+      await callApiRequest(
+        `${SERVER_URL}/smartWearable/${smartWearableIds[index]}`,
+        "PUT",
+        {
+          patient: patientId,
+        }
+      );
+      return patientId;
+    })
+  );
+
+  // create abnormal vitals for a patient to trigger alert
+  await callApiRequest(`${SERVER_URL}/vital`, "POST", {
+    patient: patientIds[0],
+    heartRate: 140,
+    respRate: 15,
+    bloodPressureSys: 67,
+    bloodPressureDia: 80,
+    spO2: 96,
+    temperature: 36,
+    datetime: "2023-11-14T14:30:00",
+  });
+
+  // set alert status to complete
+  let alert = await callApiRequest(`${SERVER_URL}/alert`, "GET");
+  await callApiRequest(`${SERVER_URL}/alert/${alert.data[0]._id}`, "PUT", {
+    status: "complete",
+  });
+
+  await callApiRequest(`${SERVER_URL}/vital`, "POST", {
+    patient: patientIds[0],
+    heartRate: 80,
+    respRate: 15,
+    bloodPressureSys: 67,
+    bloodPressureDia: 80,
+    spO2: 96,
+    temperature: 40,
+    datetime: "2023-11-14T17:34:25",
+  });
+
+  alert = await callApiRequest(`${SERVER_URL}/alert`, "GET");
+  await callApiRequest(`${SERVER_URL}/alert/${alert.data[1]._id}`, "PUT", {
+    status: "complete",
+  });
 
   console.log("\x1b[34m", "****** DB INITIALISED ******");
   console.log("\x1b[0m", "");
@@ -296,10 +344,6 @@ async function populateVitalsForPatient() {
   let idx = 0; // Initialize the loop counter
 
   while (idx < patients.length) {
-    const patientId = await callApiRequest(
-      `${SERVER_URL}/patient/nric/${patients[idx].nric}`,
-      "GET"
-    );
     //generate array of datetimes every minute in a day for the patient
     admissionDate = new Date();
     admissionDate.setDate(patients[idx].admissionDateTime.getDate());
@@ -325,7 +369,7 @@ async function populateVitalsForPatient() {
 
     for (let i = 0; i < 1440; i++) {
       const req = {
-        patient: patientId,
+        patient: patientIds[idx],
         datetime: datetimes[i],
         respRate: respRateArray[i],
         heartRate: heartRateArray[i],
