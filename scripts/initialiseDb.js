@@ -295,7 +295,7 @@ async function initialiseDb() {
 
 async function populateVitalsForPatient() {
   const SERVER_URL = "http://localhost:3001";
-  mongoose.connect(process.env.MONGODB_LOCAL_URI, {
+  mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     autoIndex: false,
