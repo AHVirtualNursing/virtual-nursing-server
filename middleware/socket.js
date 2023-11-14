@@ -14,20 +14,23 @@ const configureSocket = (server) => {
 
   const findClientSocket = (clientConnectionIdentifier) => {
     const clientSocket = clientConnections.get(clientConnectionIdentifier);
-    return clientSocket;
+    if (clientSocket) {
+      return clientSocket;
+    };
   };
 
   io.on("connection", (socket) => {
     socket.on("connectSmartWatch", async (patientId) => {
-      console.log("smart watch connected to patient ", patientId)
+      console.log("smart watch connected to patient ", patientId);
       clientConnections.set(patientId, socket);
     });
 
     socket.on("clientConnections", (virtualNurseId) => {
-      if (!findClientSocket(virtualNurseId)) {
-        clientConnections.set(virtualNurseId, socket);
-        console.log(`Connection established with ${virtualNurseId}`);
+      if (findClientSocket(virtualNurseId)) {
+        clientConnections.delete(virtualNurseId);
       }
+      clientConnections.set(virtualNurseId, socket);
+      console.log(`Connection established with ${virtualNurseId}`);
     });
 
     socket.on("connectBedsideNurseForChatMessaging", (nurseId) => {
@@ -215,7 +218,7 @@ const configureSocket = (server) => {
       }
     });
 
-    socket.on("update-alert", async(alert) => {
+    socket.on("update-alert", async (alert) => {
       const req = { params: { id: alert.patient } };
       const res = {
         statusCode: null,
@@ -230,7 +233,6 @@ const configureSocket = (server) => {
         },
       };
 
-      
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
       const alertSocket = findClientSocket(virtualNurse._id.toString());
@@ -238,7 +240,7 @@ const configureSocket = (server) => {
       if (alertSocket) {
         alertSocket.emit("updatedAlert", alert);
       }
-    })
+    });
 
 
     socket.on("discharge-patient", (patient, virtualNurse) => {
@@ -247,8 +249,6 @@ const configureSocket = (server) => {
       if(clientSocket){
         clientSocket.emit("dischargePatient", patient);
       }
-
-      
     });
 
     socket.on("disconnect", () => {
