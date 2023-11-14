@@ -228,6 +228,7 @@ async function initialiseDb() {
         nurseIds.push(nurseId);
       }
 
+      // assigning unassigned beds to all nurses in same ward
       if (nurse.wardIndex == 0) {
         await callApiRequest(
           `${SERVER_URL}/smartbed/${smartbedIds[20]}/nurses`,
@@ -268,6 +269,24 @@ async function initialiseDb() {
         );
       }
 
+      // assign head nurse to all beds in ward
+      if (nurse.nurseStatus == "head") {
+        Promise.all(
+          smartbeds.map(async (smartbed) => {
+            await callApiRequest(
+              `${SERVER_URL}/smartbed/${
+                smartbedIds[smartbed.wardIndex]
+              }/nurses`,
+              "PUT",
+              {
+                newNurses: [nurseId],
+              }
+            );
+          })
+        );
+      }
+
+      // assigning bed to nurse of same index
       await callApiRequest(
         `${SERVER_URL}/smartbed/${smartbedIds[index]}/nurses`,
         "PUT",
@@ -277,6 +296,8 @@ async function initialiseDb() {
       );
     })
   );
+
+  
 
   // assign nurses to head nurse
   await Promise.all(
@@ -321,22 +342,12 @@ async function initialiseDb() {
         patient: patientId,
       });
 
-      // assign patient to smartbed
+      // admit patient
       await callApiRequest(
-        `${SERVER_URL}/smartbed/${smartbedIds[index]}`,
+        `${SERVER_URL}/patient/${patientId}/admit`,
         "PUT",
         {
-          patient: patientId,
-          bedStatus: "occupied",
-        }
-      );
-
-      // assign smart wearable to patient
-      await callApiRequest(
-        `${SERVER_URL}/smartWearable/${smartWearableIds[index]}`,
-        "PUT",
-        {
-          patient: patientId,
+          smartWearableId: smartWearableIds[index]
         }
       );
       return patientId;
