@@ -210,7 +210,7 @@ const redelegateAlert = async (req, res) => {
 
     res.status(200).json(alert);
   } catch (e) {
-    res.status(500).json({ success: false });
+    res.status(500).json({ error: e.message });
   }
 };
 
