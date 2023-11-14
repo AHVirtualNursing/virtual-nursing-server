@@ -300,6 +300,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
           const noteLog = {
             info: request.body.description,
             datetime: vitalsData.datetime,
+            addedBy: "System"
           };
           lastAlert.notes.push(noteLog);
           await lastAlert.save();
