@@ -245,17 +245,17 @@ const configureSocket = (server) => {
       }
     })
 
-    socket.on("fallRiskUpdate", (data) => {
-      const [patient, virtualNurseId] = data;
-      const clientSocket = findClientSocket(virtualNurseId);
-      if (clientSocket) {
-        fallRiskSocket.emit("newFallRisk", patient.fallRisk);
-      }
-    });
 
-    socket.on("dischargePatient", (data) => {
-      const {patientId, vitalId, alertConfigId } = data;
-      generateAndUploadDischargeReport(patientId, vitalId, alertConfigId);
+    socket.on("discharge-patient", (patient, virtualNurse) => {
+      // const {patientId, vitalId, alertConfigId } = data;
+      // generateAndUploadDischargeReport(patientId, vitalId, alertConfigId);
+
+      const clientSocket = clientConnections.get(String(virtualNurse._id));
+      if(clientSocket){
+        clientSocket.emit("dischargePatient", patient);
+      }
+
+      
     });
 
     socket.on("disconnect", () => {
