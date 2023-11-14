@@ -70,7 +70,7 @@ const smartBedSchema = new mongoose.Schema(
     },
     isBedExitAlarmOn: {
       type: Boolean,
-      default: false,
+      default: true,
       required: true,
     },
     isPatientOnBed: {
