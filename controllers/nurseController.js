@@ -3,7 +3,7 @@ const { Nurse }= require("../models/nurse");
 const { SmartBed } = require("../models/smartbed");
 const Ward = require("../models/ward");
 
-const createNurse = async (req, res) => {
+const createNurse = async (req, res, session) => {
   try {
     const wardId = req.body.ward;
     const ward = Ward.findById(wardId);
@@ -28,7 +28,7 @@ const createNurse = async (req, res) => {
       {
         new: true,
         runValidators: true,
-        // session,
+        session,
       }
     );
 
