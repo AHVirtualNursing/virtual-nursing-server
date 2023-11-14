@@ -14,13 +14,7 @@ const configureSocket = (server) => {
 
   const findClientSocket = (clientConnectionIdentifier) => {
     const clientSocket = clientConnections.get(clientConnectionIdentifier);
-    if (clientSocket) {
-      return clientSocket;
-    } else {
-      console.error(
-        `No such client connection identifier ${clientConnectionIdentifier} in client connections.`
-      );
-    }
+    return clientSocket;
   };
 
   io.on("connection", (socket) => {
@@ -239,24 +233,22 @@ const configureSocket = (server) => {
       
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
-      const alertSocket = clientConnections.get(String(virtualNurse._id));
+      const alertSocket = findClientSocket(virtualNurse._id.toString());
 
       if (alertSocket) {
         alertSocket.emit("updatedAlert", alert);
       }
     })
 
-    socket.on("fallRiskUpdate", (data) => {
-      const [patient, virtualNurseId] = data;
-      const clientSocket = findClientSocket(virtualNurseId);
-      if (clientSocket) {
-        fallRiskSocket.emit("newFallRisk", patient.fallRisk);
-      }
-    });
 
-    socket.on("dischargePatient", (data) => {
-      const {patientId, vitalId, alertConfigId } = data;
-      generateAndUploadDischargeReport(patientId, vitalId, alertConfigId);
+    socket.on("discharge-patient", (patient, virtualNurse) => {
+    
+      const clientSocket = findClientSocket(virtualNurse._id.toString());
+      if(clientSocket){
+        clientSocket.emit("dischargePatient", patient);
+      }
+
+      
     });
 
     socket.on("disconnect", () => {

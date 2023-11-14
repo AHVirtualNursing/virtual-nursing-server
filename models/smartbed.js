@@ -65,12 +65,12 @@ const smartBedSchema = new mongoose.Schema(
     },
     isLowestPosition: {
       type: Boolean,
-      default: false,
+      default: true,
       required: true,
     },
     isBedExitAlarmOn: {
       type: Boolean,
-      default: false,
+      default: true,
       required: true,
     },
     isPatientOnBed: {
