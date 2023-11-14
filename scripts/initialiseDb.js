@@ -1,6 +1,5 @@
 require("dotenv").config();
 const axios = require("axios");
-const Patient = require("../models/patient");
 const {
   wards,
   nurses,
