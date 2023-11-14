@@ -1,6 +1,7 @@
 const { io } = require("socket.io-client");
-const { initialiseDb } = require("./initialiseDb");
-const { sendMockPatientVitals } = require("./sendMockPatientVitals");
+const { initialiseDb, populateVitalsForPatient } = require("./initialiseDb");
+const { sendMockPatientVitals } = require("../middleware/sendMockData");
+const mongoose = require("mongoose");
 const { Patient } = require("../models/patient");
 const patientController = require("../controllers/patientController");
 const { mongooseConnect } = require("../middleware/mongoose");
@@ -129,7 +130,10 @@ async function simulatePatientVitals() {
 
   if (vitalType) {
     if (vitalType === "s3") {
-      sendMockPatientVitals(patientId);
+      sendMockPatientVitals();
+    } else if (vitalType === "db") {
+      await initialiseDb();
+      populateVitalsForPatient();
     } else {
       if (!patientId) {
         patientId = await initialiseDb();

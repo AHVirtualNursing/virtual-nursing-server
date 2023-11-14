@@ -36,7 +36,7 @@ const news2Scheduler = require("./helper/news2");
 const app = express();
 
 
-mongooseConnect(process.env.MONGODB_URI)
+mongooseConnect()
   .then(() => {
     console.log("MongoDB connected");
   })
@@ -91,4 +91,3 @@ const server = app.listen(PORT, () => {
 });
 
 configureSocket(server);
-

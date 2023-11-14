@@ -34,7 +34,7 @@ const uploadReport = async (patientId, type, name, file) => {
 
   let index = 1;
   while (objectNames.includes(destinationKey)) {
-    destinationKey = `reports/${type}-reports/${patientId}-${type}-report(${index})`;
+    destinationKey = `reports/${type}-reports/${patientId}-${type}-report(${index}).pdf`;
     reportName = `${name}(${index})`;
     index++;
   }
