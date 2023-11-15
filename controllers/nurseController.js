@@ -68,8 +68,7 @@ const getNurses = async (req, res) => {
       res.status(200).json({ success: true, data: nurses });
     }
   } catch (e) {
-    console.error("Error", e)
-    res.status(500).json({ message: e });
+    res.status(500).json({ message: e.message });
   }
 };
 
