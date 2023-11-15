@@ -105,7 +105,6 @@ const migratePatient = async (
     if (reports) {
       reports.map(async (reportId) => {
         const report = await Report.findById(reportId);
-        console.log(report);
         const reportData = {
           name: report.name,
           type: report.type,

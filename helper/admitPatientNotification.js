@@ -5,7 +5,6 @@ const sendAdmitPatientNotification = async (patient, nurses) => {
   try {
     const body = "Ready to Admit " + patient.name;
     for (const nurse of nurses) {
-      console.log("sending");
       await pushNotification.sendPushNotification(
         nurse.mobilePushNotificationToken,
         "Patient Admittance",

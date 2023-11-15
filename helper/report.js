@@ -29,7 +29,7 @@ const uploadReport = async (patientId, type, name, file) => {
     console.error("Error listing objects:", error);
   }
 
-  let destinationKey = `reports/${type}-reports/${patientId}-${type}-report`;
+  let destinationKey = `reports/${type}-reports/${patientId}-${type}-report.pdf`;
   let reportName = name;
 
   let index = 1;
