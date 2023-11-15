@@ -5,7 +5,7 @@ const patientController = require("../controllers/patientController");
 const configureSocket = (server) => {
   const io = socket(server, {
     cors: {
-      origin: "http://localhost:3002",
+      origin: process.env.DVS_DEVELOPMENT_URL,
       methods: ["GET", "POST"],
     },
   });

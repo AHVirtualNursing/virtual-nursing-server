@@ -2,9 +2,8 @@ const { io } = require("socket.io-client");
 const { Alert } = require("../models/alert");
 const { Patient } = require("../models/patient");
 const alertNotification = require("../helper/alertNotification");
-const SERVER_URL = "http://localhost:3001";
 const { sendAlert } = require("../helper/alertNotification");
-const socket = io(SERVER_URL);
+const socket = io(process.env.SERVER_URL);
 
 const createAlert = async (req, res) => {
   
