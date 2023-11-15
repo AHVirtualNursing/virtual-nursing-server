@@ -287,14 +287,15 @@ const dischargePatientById = async (req, res) => {
         .json({ message: `cannot find any patient with ID ${id}` });
     }
 
-    await migratePatient(
-      patient,
-      patient.alerts,
-      patient.alertConfig,
-      patient.reminders,
-      patient.vital,
-      patient.reports
-    );
+    /* commented out for demo during steps, mongo cannot connect to AH db - gj 15/11 */
+    // await migratePatient(
+    //   patient,
+    //   patient.alerts,
+    //   patient.alertConfig,
+    //   patient.reminders,
+    //   patient.vital,
+    //   patient.reports
+    // );
 
     const request = { params: { id: id } };
     const result = {
@@ -337,7 +338,7 @@ const dischargePatientById = async (req, res) => {
       await smartWearable.save();
     }
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
 
     try {

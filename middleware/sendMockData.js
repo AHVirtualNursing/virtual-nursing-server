@@ -171,7 +171,6 @@ async function parseMockDataFromS3() {
 }
 
 function clearInterval() {
-  console.log(intervalId);
   console.log("Clearing mock data simulation interval");
   clearInterval(intervalId);
 }

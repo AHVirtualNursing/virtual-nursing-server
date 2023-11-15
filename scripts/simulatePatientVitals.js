@@ -85,7 +85,7 @@ async function simulatePatientVitals() {
   }
 
   async function simulateFallRisk() {
-    mongooseConnect();
+    await mongooseConnect();
     const fallRiskValues = ["Low", "Medium", "High"];
     let index = 0;
 
@@ -118,8 +118,6 @@ async function simulatePatientVitals() {
 
       if (patient && virtualNurseId)
         socket.emit("fallRiskUpdate", [patient, virtualNurseId]);
-
-      console.log(`Updated patient fall risk to ${fallRiskValue}`);
       index++;
 
       setTimeout(updateFallRisk, 10000);
