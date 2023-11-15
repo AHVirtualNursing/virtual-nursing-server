@@ -243,7 +243,7 @@ const configureSocket = (server) => {
     });
 
 
-    socket.on("discharge-patient", (patient, virtualNurse) => {
+    socket.on("discharge-patient", async (patient, virtualNurse) => {
     
       const clientSocket = findClientSocket(virtualNurse._id.toString());
       if(clientSocket){

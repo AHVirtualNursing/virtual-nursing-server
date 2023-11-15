@@ -336,7 +336,7 @@ const dischargePatientById = async (req, res) => {
       smartWearable.patient = undefined;
       await smartWearable.save();
     }
-
+    await socket.emit("discharge-patient", patient, virtualNurse);
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
@@ -384,7 +384,6 @@ const dischargePatientById = async (req, res) => {
 
     await patient.save();
 
-    socket.emit("discharge-patient", patient, virtualNurse);
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
