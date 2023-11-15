@@ -251,6 +251,31 @@ const configureSocket = (server) => {
       }
     });
 
+    socket.on("admit-patient", async(smartbed) =>  {
+      const req = { params: { id: smartbed.patient._id } };
+      const res = {
+        statusCode: null,
+        jsonData: null,
+        status: function (code) {
+          this.statusCode = code;
+          return this;
+        },
+        json: function (data) {
+          this.jsonData = data;
+          return this;
+        },
+      };
+
+      await patientController.getVirtualNurseByPatientId(req, res);
+      const virtualNurse = res.jsonData;
+      const clientSocket = findClientSocket(virtualNurse._id.toString());
+
+      if (clientSocket) {
+        clientSocket.emit("admitPatient", smartbed);
+      }
+
+    })
+
     socket.on("disconnect", () => {
       clientConnections.delete(socket.id);
     });

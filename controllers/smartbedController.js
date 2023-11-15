@@ -163,6 +163,7 @@ const updateSmartBedById = async (req, res) => {
       smartbed.bedAlarmProtocolBreachReason = bedAlarmProtocolBreachReason;
     }
 
+    console.log(smartbed.patient);
     const updatedSmartBed = await smartbed.save();
     socket.emit("update-smartbed", updatedSmartBed);
     res.status(200).json(updatedSmartBed);
