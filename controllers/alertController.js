@@ -78,7 +78,6 @@ const updateAlertById = async (req, res) => {
     }
 
     const { status, description, notes, handledBy, followUps } = req.body;
-    console.log(req.body);
     if (status) {
       alert.status = status;
     }

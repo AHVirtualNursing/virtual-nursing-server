@@ -93,7 +93,6 @@ const stopMockDataSimulation = async (req, res) => {
     clearInterval();
     res.status(200).json({ success: "Stopped mock data simulation"})
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "Failed to stop mock data simulation" });
   }
 };

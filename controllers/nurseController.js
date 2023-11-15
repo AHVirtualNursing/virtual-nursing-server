@@ -109,7 +109,6 @@ const getNurseById = async (req, res) => {
     }
     res.status(200).json(nurse);
   } catch (e) {
-    console.log(e);
     res.status(400).json({ success: false });
   }
 };

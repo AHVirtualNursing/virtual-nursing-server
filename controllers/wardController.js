@@ -343,7 +343,6 @@ const getAlertsByWardId = async (req, res) => {
         patients.push(smartbed.patient);
       }
     }
-    console.log(patients);
     const alerts = [];
     for (const patient of patients) {
       const patientAlerts = await Alert.find({ patient: patient });
