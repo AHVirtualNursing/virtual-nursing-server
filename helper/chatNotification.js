@@ -1,7 +1,6 @@
 const pushNotification = require("./pushNotification");
-const SERVER_URL = "http://localhost:3001";
 const { io } = require("socket.io-client");
-const socket = io(SERVER_URL);
+const socket = io(process.env.SERVER_URL);
 
 const sendChat = async (chat, latestMessage) => {
   try {

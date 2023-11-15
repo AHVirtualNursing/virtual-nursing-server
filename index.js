@@ -57,7 +57,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3002"],
+    origin: [process.env.SDMS_DEVELOPMENT_URL, process.env.DVS_DEVELOPMENT_URL],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })

@@ -66,7 +66,7 @@ const deleteUserById = async (req, res) => {
         break;
       case "bedside-nurse":
         try {
-          await axios.delete(`http://localhost:3001/nurse/${id}`);
+          await axios.delete(process.env.SERVER_URL + `/nurse/${id}`);
           return res
             .status(200)
             .json({ success: true, message: "Nurse deleted" });

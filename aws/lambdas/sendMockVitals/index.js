@@ -1,9 +1,8 @@
 const xlsx = require("xlsx");
 const { io } = require("socket.io-client");
-const SERVER_URL = "http://localhost:3001";
 
 const handler = async (event) => {
-  const socket = io(SERVER_URL);
+  const socket = io(process.env.SERVER_URL);
 
   try {
     const excelDataBuffer = Buffer.from(event.body, "base64");

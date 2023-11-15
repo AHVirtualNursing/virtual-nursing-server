@@ -3,9 +3,8 @@ const pushNotification = require("./pushNotification");
 const { alertStatusEnum, alertTypeEnum, Alert } = require("../models/alert");
 const { SmartBed } = require("../models/smartbed");
 const { Nurse, nurseStatusEnum } = require("../models/nurse");
-const SERVER_URL = "http://localhost:3001";
 const { io } = require("socket.io-client");
-const socket = io(SERVER_URL);
+const socket = io(process.env.SERVER_URL);
 const AlertController = require("../controllers/alertController");
 
 const sendAlert = async (alert) => {

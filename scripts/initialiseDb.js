@@ -134,7 +134,7 @@ async function callApiRequest(url, method, data, clientType) {
 }
 
 async function initialiseDb() {
-  const SERVER_URL = "http://localhost:3001";
+  const SERVER_URL = process.env.SERVER_URL;
   await mongooseConnect();
 
   const patient = await Patient.findOne({ name: "Hazel Lim" });
@@ -394,7 +394,7 @@ async function initialiseDb() {
 }
 
 async function populateVitalsForPatient() {
-  const SERVER_URL = "http://localhost:3001";
+  const SERVER_URL = process.env.SERVER_URL;
   await mongooseConnect();
 
   let idx = 0;

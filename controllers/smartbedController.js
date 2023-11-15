@@ -5,7 +5,6 @@ const Ward = require("../models/ward");
 const {alertTypeEnum} = require("../models/alert");
 const AlertController = require("../controllers/alertController");
 const { io } = require("socket.io-client");
-const SERVER_URL = "http://localhost:3001";
 
 const createSmartBed = async (req, res) => {
   try {
@@ -108,7 +107,7 @@ const updateSmartBedById = async (req, res) => {
         .status(500)
         .json({ message: `cannot find any smartbed with ID ${id}` });
     }
-    const socket = io(SERVER_URL);
+    const socket = io(process.env.SERVER_URL);
     const {
       name,
       bedStatus,

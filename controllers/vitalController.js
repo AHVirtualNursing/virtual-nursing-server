@@ -8,7 +8,6 @@ const {
   alertStatusEnum,
 } = require("../models/alert");
 const { io } = require("socket.io-client");
-const SERVER_URL = "http://localhost:3001";
 
 const addVitalForPatient = async (req, res) => {
   try {
@@ -56,7 +55,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       throw new Error(`Cannot find any patient with Patient ID ${patientId}`);
     }
 
-    const socket = io(SERVER_URL);
+    const socket = io(process.env.SERVER_URL);
 
     let vital = patient.vital;
 

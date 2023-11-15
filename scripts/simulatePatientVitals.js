@@ -6,7 +6,7 @@ const { Patient } = require("../models/patient");
 const patientController = require("../controllers/patientController");
 const { mongooseConnect } = require("../middleware/mongoose");
 
-const SERVER_URL = "http://localhost:3001";
+const SERVER_URL = process.env.SERVER_URL;
 
 async function simulatePatientVitals() {
   const socket = io(SERVER_URL);

@@ -9,13 +9,12 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { initialiseDb } = require("../scripts/initialiseDb");
 const {Patient} = require("../models/patient");
 
-const SERVER_URL = "http://localhost:3001";
 let intervalId;
 
 async function sendMockPatientVitals() {
   await mongooseConnect();
 
-  const socket = io(SERVER_URL);
+  const socket = io(process.env.SERVER_URL);
   const patientMap = new Map();
 
   const vitals = {
