@@ -174,6 +174,18 @@ async function initialiseDb() {
     "virtual-nurse"
   );
 
+  await callApiRequest(
+    `${SERVER_URL}/auth/register?default=true`,
+    "POST",
+    {
+      name: "puppeteer",
+      username: "puppeteer",
+      email: "puppeteer@gmail.com",
+      wards: [],
+    },
+    "virtual-nurse"
+  );
+
   // create smartbeds
   const smartbedIds = await Promise.all(
     smartbeds.map(async (smartbed) => {
