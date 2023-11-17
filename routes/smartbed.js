@@ -9,6 +9,7 @@ router.post("/", SmartBed.createSmartBed);
 router.put("/:id", SmartBed.updateSmartBedById);
 router.put("/:id/ward", SmartBed.unassignSmartBedFromWard);
 router.put("/:id/nurses", SmartBed.assignNursesToBed);
+router.put("/:id/reason", SmartBed.removeProtocolBreachReason);
 router.delete("/:id", SmartBed.deleteSmartBedById);
 
 module.exports = router;
