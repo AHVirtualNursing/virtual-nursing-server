@@ -61,6 +61,7 @@ const sendAlert = async (alert) => {
         console.error("Error sending alert push noti", error);
       }
     }
+    
 
     if (!alert.redelegate) {
       startAlertStatusCheckTimer(alert);

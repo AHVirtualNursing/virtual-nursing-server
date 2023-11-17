@@ -338,7 +338,7 @@ const dischargePatientById = async (req, res) => {
       await smartWearable.save();
     }
     await socket.emit("discharge-patient", patient, virtualNurse);
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
 
     try {
@@ -346,8 +346,8 @@ const dischargePatientById = async (req, res) => {
         waitUntil: "networkidle0",
       });
 
-      await page.type("#identifier", process.env.DEFAULT_USERNAME);
-      await page.type("#password", process.env.DEFAULT_PASSWORD);
+      await page.type("#identifier", process.env.PUPPETEER_USERNAME);
+      await page.type("#password", process.env.PUPPETEER_PASSWORD);
 
       await page.click("#submit");
       await page.waitForNavigation();
