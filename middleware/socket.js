@@ -1,6 +1,7 @@
 const socket = require("socket.io");
 const vitalController = require("../controllers/vitalController");
 const patientController = require("../controllers/patientController");
+const { SmartBed } = require("../models/smartbed");
 
 const configureSocket = (server) => {
   const io = socket(server, {
@@ -100,6 +101,8 @@ const configureSocket = (server) => {
         },
       };
 
+      const smartbed = await SmartBed.find({patient: alert.patient})
+
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
 
@@ -112,7 +115,7 @@ const configureSocket = (server) => {
       const alertList = res.jsonData;
 
       if (clientSocket) {
-        clientSocket.emit("alertIncoming", { alert: alert, patient: patient });
+        clientSocket.emit("alertIncoming", { alert: alert, patient: patient, smartbed: smartbed});
         clientSocket.emit("patientAlertAdded", {
           alertList: alertList,
           patient: patient,
