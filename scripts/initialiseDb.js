@@ -294,19 +294,22 @@ async function initialiseDb() {
   // assign nurses to head nurse
   await Promise.all(
     ward1NurseIds.map(async (nurseId) => {
-      await callApiRequest(
-        `${SERVER_URL}/nurse/${nurseId}`,
-        "PUT",
-        {
-          headNurse: ward1HeadNurseId,
-        },
-        "mobile"
-      );
+      if (nurseId != ward1HeadNurseId) {
+        await callApiRequest(
+          `${SERVER_URL}/nurse/${nurseId}`,
+          "PUT",
+          {
+            headNurse: ward1HeadNurseId,
+          },
+          "mobile"
+        );
+      }
     })
   );
 
   await Promise.all(
     ward2NurseIds.map(async (nurseId) => {
+      if (nurseId != ward2HeadNurseId) {
         await callApiRequest(
           `${SERVER_URL}/nurse/${nurseId}`,
           "PUT",
@@ -315,8 +318,9 @@ async function initialiseDb() {
           },
           "mobile"
         );
-      })
-    );
+      }
+    })
+  );
 
   // create smart wearables
   const smartWearableIds = await Promise.all(
