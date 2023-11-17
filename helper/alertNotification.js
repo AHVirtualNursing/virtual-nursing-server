@@ -48,14 +48,18 @@ const sendAlert = async (alert) => {
     }
 
     for (const nurse of nurses) {
-      const body = patient.name + ": " + alert.description;
-      await pushNotification.sendPushNotification(
-        nurse.mobilePushNotificationToken,
-        alertTitle,
-        body,
-        "sendAlert",
-        alert._id.toString()
-      );
+      try {
+        const body = patient.name + ": " + alert.description;
+        await pushNotification.sendPushNotification(
+          nurse.mobilePushNotificationToken,
+          alertTitle,
+          body,
+          "sendAlert",
+          alert._id.toString()
+        );
+      } catch (error) {
+        console.error("Error sending alert push noti", error);
+      }
     }
 
     if (!alert.redelegate) {
