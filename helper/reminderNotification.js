@@ -22,7 +22,6 @@ const reminderJob = schedule.scheduleJob("* * * * * ", async () => {
           return this;
         },
       };
-
       await patientController.getNursesByPatientId(req, res);
       const nurses = res.jsonData;
       for (const nurse of nurses) {

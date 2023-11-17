@@ -47,18 +47,19 @@ const sendAlert = async (alert) => {
       alertTitle = "Bed Alert";
     }
 
-    try {
-      for (const nurse of nurses) {
-      const body = patient.name + ": " + alert.description;
-      await pushNotification.sendPushNotification(
-        nurse.mobilePushNotificationToken,
-        alertTitle,
-        body,
-        "sendAlert",
-        alert._id.toString()
-      );
-    }} catch (error) {
-      console.log("Error sending to mobile:", error)
+    for (const nurse of nurses) {
+      try {
+        const body = patient.name + ": " + alert.description;
+        await pushNotification.sendPushNotification(
+          nurse.mobilePushNotificationToken,
+          alertTitle,
+          body,
+          "sendAlert",
+          alert._id.toString()
+        );
+      } catch (error) {
+        console.error("Error sending alert push noti", error);
+      }
     }
     
 

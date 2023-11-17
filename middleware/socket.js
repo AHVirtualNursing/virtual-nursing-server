@@ -17,7 +17,7 @@ const configureSocket = (server) => {
     const clientSocket = clientConnections.get(clientConnectionIdentifier);
     if (clientSocket) {
       return clientSocket;
-    };
+    }
   };
 
   io.on("connection", (socket) => {
@@ -63,6 +63,7 @@ const configureSocket = (server) => {
     });
 
     socket.on("update-vitals", async (vital, patient) => {
+      try {
       const req = { params: { id: patient } };
       const res = {
         statusCode: null,
@@ -84,9 +85,15 @@ const configureSocket = (server) => {
       if (clientSocket) {
         clientSocket.emit("updatedVitals", { vital: vital, patient: patient });
       }
+
+      } catch(e) {
+
+      }
+      
     });
 
     socket.on("new-alert", async (alert) => {
+      try {
       const req = { params: { id: alert.patient } };
       const res = {
         statusCode: null,
@@ -121,6 +128,11 @@ const configureSocket = (server) => {
           patient: patient,
         });
       }
+
+      } catch(e) {
+
+      }
+      
     });
 
     socket.on("delete-alert", async (alert) => {
@@ -159,7 +171,6 @@ const configureSocket = (server) => {
 
     socket.on("virtualToBedsideNurseChatUpdate", (chat) => {
       const clientSocket = findClientSocket(chat.bedsideNurse._id);
-
       if (clientSocket) {
         clientSocket.emit("updateBedsideNurseChat", chat);
       }
@@ -174,6 +185,7 @@ const configureSocket = (server) => {
     });
 
     socket.on("update-smartbed", async (smartbed) => {
+      try{
       const req = { params: { id: smartbed.patient._id } };
       const res = {
         statusCode: null,
@@ -195,9 +207,14 @@ const configureSocket = (server) => {
       if (clientSocket) {
         clientSocket.emit("updatedSmartbed", smartbed);
       }
+      } catch(e){
+
+      }
+      
     });
 
     socket.on("update-patient", async (patient) => {
+      try {
       const req = { params: { id: patient._id } };
       const res = {
         statusCode: null,
@@ -219,9 +236,14 @@ const configureSocket = (server) => {
       if (clientSocket) {
         clientSocket.emit("updatedPatient", patient);
       }
+
+      } catch(e){
+
+      }
     });
 
     socket.on("update-alert", async (alert) => {
+      try {
       const req = { params: { id: alert.patient } };
       const res = {
         statusCode: null,
@@ -236,25 +258,38 @@ const configureSocket = (server) => {
         },
       };
 
+      const smartbed = await SmartBed.find({patient: alert.patient})
+
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
       const alertSocket = findClientSocket(virtualNurse._id.toString());
 
       if (alertSocket) {
-        alertSocket.emit("updatedAlert", alert);
+        alertSocket.emit("updatedAlert", alert, smartbed._id);
       }
+
+      } catch(e) {
+
+      }
+      
     });
 
 
-    socket.on("discharge-patient", async (patient, virtualNurse) => {
-    
+    socket.on("discharge-patient", (patient, virtualNurse) => {
+      try {
       const clientSocket = findClientSocket(virtualNurse._id.toString());
-      if(clientSocket){
+      if (clientSocket) {
         clientSocket.emit("dischargePatient", patient);
       }
+
+      } catch(e) {
+
+      }
+    
     });
 
-    socket.on("admit-patient", async(smartbed) =>  {
+    socket.on("admit-patient", async (smartbed) =>  {
+      try {
       const req = { params: { id: smartbed.patient._id } };
       const res = {
         statusCode: null,
@@ -277,6 +312,10 @@ const configureSocket = (server) => {
         clientSocket.emit("admitPatient", smartbed);
       }
 
+      } catch(e) {
+
+      }
+      
     })
 
     socket.on("disconnect", () => {
