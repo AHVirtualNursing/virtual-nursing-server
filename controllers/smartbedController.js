@@ -121,7 +121,7 @@ const updateSmartBedById = async (req, res) => {
       isBedExitAlarmOn,
       isPatientOnBed,
       bedAlarmProtocolBreachReason,
-      patient
+      
     } = req.body;
 
     if (name) {
@@ -153,19 +153,18 @@ const updateSmartBedById = async (req, res) => {
     }
     if (isPatientOnBed != undefined) {
       smartbed.isPatientOnBed = isPatientOnBed;
-      console.log("before enter if")
+      
       if(!smartbed.isPatientOnBed && smartbed.isBedExitAlarmOn){
-        console.log("sending alert")
         sendBedAlarmAlert(smartbed.patient._id)
       }
     }
-    if (bedAlarmProtocolBreachReason) {
+    
+    if (bedAlarmProtocolBreachReason != undefined && bedAlarmProtocolBreachReason != null) {
       smartbed.bedAlarmProtocolBreachReason = bedAlarmProtocolBreachReason;
     }
-
-    console.log(smartbed.patient);
+    
     const updatedSmartBed = await smartbed.save();
-    socket.emit("update-smartbed", updatedSmartBed);
+    socket.emit("update-smartbed", updatedSmartBed);  
     res.status(200).json(updatedSmartBed);
   } catch (e) {
     if (e.name === "ValidationError") {
