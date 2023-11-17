@@ -221,7 +221,7 @@ async function initialiseDb() {
   let ward2HeadNurseId;
   const ward1NurseIds = [];
   const ward2NurseIds = [];
-  await Promise.all(
+  const nurseIds = await Promise.all(
     nurses.map(async (nurse, index) => {
       const nurseId = await callApiRequest(
         `${SERVER_URL}/auth/register?default=true`,
@@ -237,9 +237,9 @@ async function initialiseDb() {
       );
 
       if (nurse.nurseStatus == "head" && nurse.wardIndex == 0) {
-        ward1HeadNurseId = nurseId
+        ward1HeadNurseId = nurseId;
       } else if (nurse.nurseStatus == "head" && nurse.wardIndex == 1) {
-        ward2HeadNurseId = nurseId
+        ward2HeadNurseId = nurseId;
       }
 
       if (!ward1NurseIds.includes(nurseId) && nurse.wardIndex == 0) {
@@ -248,60 +248,67 @@ async function initialiseDb() {
         ward2NurseIds.push(nurseId);
       }
 
-      // assigning unassigned beds to all nurses in same ward
-      if (nurse.wardIndex == 0) {
-        await callApiRequest(
-          `${SERVER_URL}/smartbed/${smartbedIds[20]}/nurses`,
-          "PUT",
-          {
-            newNurses: ward1NurseIds,
-          }
-        );
-
-        await callApiRequest(
-          `${SERVER_URL}/smartbed/${smartbedIds[21]}/nurses`,
-          "PUT",
-          {
-            newNurses: ward1NurseIds,
-          }
-        );
-      } else {
-        await callApiRequest(
-          `${SERVER_URL}/smartbed/${smartbedIds[22]}/nurses`,
-          "PUT",
-          {
-            newNurses: ward2NurseIds,
-          }
-        );
-        await callApiRequest(
-          `${SERVER_URL}/smartbed/${smartbedIds[23]}/nurses`,
-          "PUT",
-          {
-            newNurses: ward2NurseIds,
-          }
-        );
-        await callApiRequest(
-          `${SERVER_URL}/smartbed/${smartbedIds[24]}/nurses`,
-          "PUT",
-          {
-            newNurses: ward2NurseIds,
-          }
-        );
-      }
-
-      const headNurseId =
-        nurse.wardIndex == 0 ? ward1HeadNurseId : ward2HeadNurseId
-
-      // assigning bed to nurse of same index
-      await callApiRequest(
-        `${SERVER_URL}/smartbed/${smartbedIds[index]}/nurses`,
-        "PUT",
-        {
-          newNurses: [nurseId, headNurseId],
-        }
-      );
+      return nurseId;
     })
   );
+
+  await callApiRequest(
+    `${SERVER_URL}/smartbed/${smartbedIds[20]}/nurses`,
+    "PUT",
+    {
+      newNurses: ward1NurseIds,
+    }
+  );
+
+  await callApiRequest(
+    `${SERVER_URL}/smartbed/${smartbedIds[21]}/nurses`,
+    "PUT",
+    {
+      newNurses: ward1NurseIds,
+    }
+  );
+
+  await callApiRequest(
+    `${SERVER_URL}/smartbed/${smartbedIds[22]}/nurses`,
+    "PUT",
+    {
+      newNurses: ward2NurseIds,
+    }
+  );
+  await callApiRequest(
+    `${SERVER_URL}/smartbed/${smartbedIds[23]}/nurses`,
+    "PUT",
+    {
+      newNurses: ward2NurseIds,
+    }
+  );
+  await callApiRequest(
+    `${SERVER_URL}/smartbed/${smartbedIds[24]}/nurses`,
+    "PUT",
+    {
+      newNurses: ward2NurseIds,
+    }
+  );
+
+  nurseIds.map(async (nurseId, index) => {
+    if (nurses[index].nurseStatus == "normal") {
+      await Promise.all(
+        nurses[index].smartbeds.map(async (smartbed) => {
+          const headNurseId =
+            index % 2 == 0 ? ward1HeadNurseId : ward2HeadNurseId;
+
+          // assigning bed to nurse and also headnurse
+          await callApiRequest(
+            `${SERVER_URL}/smartbed/${smartbedIds[smartbed]}/nurses`,
+            "PUT",
+            {
+              newNurses: [nurseId, headNurseId],
+            }
+          );
+        })
+      );
+    }
+  });
 
   // assign nurses to head nurse
   await Promise.all(
