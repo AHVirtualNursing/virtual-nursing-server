@@ -1,7 +1,7 @@
 const socket = require("socket.io");
 const vitalController = require("../controllers/vitalController");
 const patientController = require("../controllers/patientController");
-const SmartBed = require("../models/smartbed");
+const { SmartBed } = require("../models/smartbed");
 
 const configureSocket = (server) => {
   const io = socket(server, {
@@ -17,7 +17,7 @@ const configureSocket = (server) => {
     const clientSocket = clientConnections.get(clientConnectionIdentifier);
     if (clientSocket) {
       return clientSocket;
-    };
+    }
   };
 
   io.on("connection", (socket) => {
@@ -108,6 +108,8 @@ const configureSocket = (server) => {
         },
       };
 
+      const smartbed = await SmartBed.find({patient: alert.patient})
+
       await patientController.getVirtualNurseByPatientId(req, res);
       const virtualNurse = res.jsonData;
 
@@ -120,7 +122,7 @@ const configureSocket = (server) => {
       const alertList = res.jsonData;
 
       if (clientSocket) {
-        clientSocket.emit("alertIncoming", { alert: alert, patient: patient });
+        clientSocket.emit("alertIncoming", { alert: alert, patient: patient, smartbed: smartbed});
         clientSocket.emit("patientAlertAdded", {
           alertList: alertList,
           patient: patient,
@@ -169,7 +171,6 @@ const configureSocket = (server) => {
 
     socket.on("virtualToBedsideNurseChatUpdate", (chat) => {
       const clientSocket = findClientSocket(chat.bedsideNurse._id);
-
       if (clientSocket) {
         clientSocket.emit("updateBedsideNurseChat", chat);
       }
@@ -277,7 +278,7 @@ const configureSocket = (server) => {
     socket.on("discharge-patient", (patient, virtualNurse) => {
       try {
       const clientSocket = findClientSocket(virtualNurse._id.toString());
-      if(clientSocket){
+      if (clientSocket) {
         clientSocket.emit("dischargePatient", patient);
       }
 

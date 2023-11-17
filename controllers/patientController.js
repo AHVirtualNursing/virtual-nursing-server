@@ -287,14 +287,15 @@ const dischargePatientById = async (req, res) => {
         .json({ message: `cannot find any patient with ID ${id}` });
     }
 
-    await migratePatient(
-      patient,
-      patient.alerts,
-      patient.alertConfig,
-      patient.reminders,
-      patient.vital,
-      patient.reports
-    );
+    /* commented out for demo during steps, mongo cannot connect to AH db - gj 15/11 */
+    // await migratePatient(
+    //   patient,
+    //   patient.alerts,
+    //   patient.alertConfig,
+    //   patient.reminders,
+    //   patient.vital,
+    //   patient.reports
+    // );
 
     const request = { params: { id: id } };
     const result = {
@@ -336,7 +337,7 @@ const dischargePatientById = async (req, res) => {
       smartWearable.patient = undefined;
       await smartWearable.save();
     }
-
+    await socket.emit("discharge-patient", patient, virtualNurse);
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
@@ -384,7 +385,6 @@ const dischargePatientById = async (req, res) => {
 
     await patient.save();
 
-    socket.emit("discharge-patient", patient, virtualNurse);
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {

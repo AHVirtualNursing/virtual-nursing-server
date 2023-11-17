@@ -1,8 +1,8 @@
 const { SmartBed } = require("../models/smartbed");
-const { Nurse }= require("../models/nurse");
+const { Nurse } = require("../models/nurse");
 const { Patient } = require("../models/patient");
 const Ward = require("../models/ward");
-const {alertTypeEnum} = require("../models/alert");
+const { alertTypeEnum } = require("../models/alert");
 const AlertController = require("../controllers/alertController");
 const { io } = require("socket.io-client");
 const SERVER_URL = "http://localhost:3001";
@@ -102,7 +102,7 @@ const getNursesBySmartBedId = async (req, res) => {
 const updateSmartBedById = async (req, res) => {
   try {
     const { id } = req.params;
-    const smartbed = await SmartBed.findById(id).populate("patient ward");;
+    const smartbed = await SmartBed.findById(id).populate("patient ward");
     if (!smartbed) {
       return res
         .status(500)
@@ -179,6 +179,7 @@ const updateSmartBedById = async (req, res) => {
     }
   }
 };
+
 
 const unassignSmartBedFromWard = async (req, res) => {
   try {
@@ -313,13 +314,12 @@ const deleteSmartBedById = async (req, res) => {
 };
 
 const sendBedAlarmAlert = async (patient) => {
-
   const request = {
     body: {
       patient: patient,
       description: "Bed Exit Alarm is Triggered",
       notes: [],
-      alertType: alertTypeEnum[1]
+      alertType: alertTypeEnum[1],
     },
   };
 
@@ -337,8 +337,7 @@ const sendBedAlarmAlert = async (patient) => {
   };
 
   await AlertController.createAlert(request, result);
-
-}
+};
 
 module.exports = {
   createSmartBed,
