@@ -17,7 +17,7 @@ const configureSocket = (server) => {
     const clientSocket = clientConnections.get(clientConnectionIdentifier);
     if (clientSocket) {
       return clientSocket;
-    };
+    }
   };
 
   io.on("connection", (socket) => {
@@ -159,7 +159,6 @@ const configureSocket = (server) => {
 
     socket.on("virtualToBedsideNurseChatUpdate", (chat) => {
       const clientSocket = findClientSocket(chat.bedsideNurse._id);
-
       if (clientSocket) {
         clientSocket.emit("updateBedsideNurseChat", chat);
       }
@@ -245,16 +244,14 @@ const configureSocket = (server) => {
       }
     });
 
-
     socket.on("discharge-patient", async (patient, virtualNurse) => {
-    
       const clientSocket = findClientSocket(virtualNurse._id.toString());
-      if(clientSocket){
+      if (clientSocket) {
         clientSocket.emit("dischargePatient", patient);
       }
     });
 
-    socket.on("admit-patient", async(smartbed) =>  {
+    socket.on("admit-patient", async (smartbed) => {
       const req = { params: { id: smartbed.patient._id } };
       const res = {
         statusCode: null,
@@ -276,8 +273,7 @@ const configureSocket = (server) => {
       if (clientSocket) {
         clientSocket.emit("admitPatient", smartbed);
       }
-
-    })
+    });
 
     socket.on("disconnect", () => {
       clientConnections.delete(socket.id);

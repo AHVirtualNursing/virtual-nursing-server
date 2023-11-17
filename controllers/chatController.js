@@ -99,6 +99,7 @@ const createChatMessage = async (req, res) => {
     };
 
     existingChat.messages.push(newChatMessage);
+    existingChat.isArchived = false;
     await existingChat.save();
 
     existingChat = await Chat.findById(chatId).populate([
@@ -190,7 +191,7 @@ const updateChatMessage = async (req, res) => {
 
     const chat = await Chat.findOneAndUpdate(
       { _id: chatId, "messages._id": msgId },
-      { $set: { "messages.$.content": content } }
+      { $set: { "messages.$.content": content, isArchived: false } }
     );
 
     if (!chat) {
@@ -391,6 +392,9 @@ const deleteChatMessageById = async (req, res) => {
         .status(500)
         .json({ message: `cannot find any chat with ID ${id}` });
     }
+
+    chat.isArchived = false;
+    await chat.save();
 
     const updatedChat = await Chat.findById(chatId).populate([
       { path: "virtualNurse" },
