@@ -47,7 +47,8 @@ const sendAlert = async (alert) => {
       alertTitle = "Bed Alert";
     }
 
-    for (const nurse of nurses) {
+    try {
+      for (const nurse of nurses) {
       const body = patient.name + ": " + alert.description;
       await pushNotification.sendPushNotification(
         nurse.mobilePushNotificationToken,
@@ -56,7 +57,10 @@ const sendAlert = async (alert) => {
         "sendAlert",
         alert._id.toString()
       );
+    }} catch (error) {
+      console.log("Error sending to mobile:", error)
     }
+    
 
     if (!alert.redelegate) {
       startAlertStatusCheckTimer(alert);
