@@ -166,7 +166,14 @@ const updateNurseById = async (req, res) => {
       nurse.smartBeds = smartBeds;
     }
     if (headNurse !== undefined) {
-      nurse.headNurse = headNurse;
+      hn = await Nurse.findById(headNurse);
+      if (hn) {
+        nurse.headNurse = headNurse;
+      } else {
+        return res
+          .status(500)
+          .json({ message: `cannot find any head nurse with ID ${headNurse}` });
+      }
     }
     if (nurseStatus) {
       nurse.nurseStatus = nurseStatus;
@@ -227,19 +234,21 @@ const deleteNurseById = async (req, res) => {
 const getNursesByHeadNurseId = async (req, res) => {
   try {
     const { id } = req.params;
+    const headNurse = await Nurse.findById(id);
+    if (!headNurse) {
+      return res
+        .status(500)
+        .json({ message: `cannot find any headNurse with ID ${id}` });
+    }
     const nurses = await Nurse.find({ headNurse: id }).populate([
       { path: "smartBeds" },
       { path: "headNurse" },
       { path: "ward" },
     ]);
-    if (!nurses) {
-      return res
-        .status(404)
-        .json({ message: `cannot find any headNurse with ID ${id}` });
-    }
+
     res.status(200).json(nurses);
   } catch (e) {
-    res.status(400).json({ success: false, error: e.message });
+    res.status(500).json({ success: false, error: e.message });
   }
 };
 
