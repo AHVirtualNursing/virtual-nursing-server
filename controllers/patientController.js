@@ -29,7 +29,9 @@ const createPatient = async (req, res) => {
         condition: req.body.condition,
         infoLogs: req.body.infoLogs,
         copd: req.body.copd,
-        admissionDateTime: new Date(),
+        admissionDateTime: req.body.admissionDateTime
+          ? req.body.admissionDateTime
+          : new Date(),
       });
       newPatientRecord = await Patient.create(patient);
       await patient.save();
@@ -285,14 +287,15 @@ const dischargePatientById = async (req, res) => {
         .json({ message: `cannot find any patient with ID ${id}` });
     }
 
-    await migratePatient(
-      patient,
-      patient.alerts,
-      patient.alertConfig,
-      patient.reminders,
-      patient.vital,
-      patient.reports
-    );
+    /* commented out for demo during steps, mongo cannot connect to AH db - gj 15/11 */
+    // await migratePatient(
+    //   patient,
+    //   patient.alerts,
+    //   patient.alertConfig,
+    //   patient.reminders,
+    //   patient.vital,
+    //   patient.reports
+    // );
 
     const request = { params: { id: id } };
     const result = {
@@ -322,20 +325,20 @@ const dischargePatientById = async (req, res) => {
     smartBed.patient = null;
     await smartBed.save();
 
-    // const smartWearable = await SmartWearable.findOne({ patient: id });
+    const smartWearable = await SmartWearable.findOne({ patient: id });
 
-    // if (!smartWearable) {
-    //   return res.status(500).json({
-    //     message: `cannot find any smart wearable with Patient ID ${id}`,
-    //   });
-    // }
+    if (!smartWearable) {
+      return res.status(500).json({
+        message: `cannot find any smart wearable with Patient ID ${id}`,
+      });
+    }
 
-    // if (smartWearable.patient != undefined) {
-    //   smartWearable.patient = undefined;
-    //   await smartWearable.save();
-    // }
-
-    const browser = await puppeteer.launch();
+    if (smartWearable.patient != undefined) {
+      smartWearable.patient = undefined;
+      await smartWearable.save();
+    }
+    await socket.emit("discharge-patient", patient, virtualNurse);
+    const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
 
     try {
@@ -343,8 +346,8 @@ const dischargePatientById = async (req, res) => {
         waitUntil: "networkidle0",
       });
 
-      await page.type("#identifier", process.env.DEFAULT_USERNAME);
-      await page.type("#password", process.env.DEFAULT_PASSWORD);
+      await page.type("#identifier", process.env.PUPPETEER_USERNAME);
+      await page.type("#password", process.env.PUPPETEER_PASSWORD);
 
       await page.click("#submit");
       await page.waitForNavigation();
@@ -382,7 +385,6 @@ const dischargePatientById = async (req, res) => {
 
     await patient.save();
 
-    socket.emit("discharge-patient", patient, virtualNurse);
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {
@@ -409,7 +411,7 @@ const admitPatientById = async (req, res) => {
     patient.consciousness = consciousness;
     await patient.save();
 
-    const smartBed = await SmartBed.findOne({ patient: id });
+    const smartBed = await SmartBed.findOne({ patient: id }).populate('patient');
 
     if (!smartBed) {
       return res
@@ -427,7 +429,7 @@ const admitPatientById = async (req, res) => {
     }
     smartWearable.patient = id;
     await smartWearable.save();
-    socket.emit("update-smartbed", smartBed);
+    socket.emit("admit-patient", smartBed);
     res.status(200).json(patient);
   } catch (e) {
     if (e.name === "ValidationError") {

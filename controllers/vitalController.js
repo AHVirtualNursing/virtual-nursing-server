@@ -277,10 +277,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
 
     socket.emit("update-vitals", updatedVital, patient._id);
 
-    console.log(request.body.alertVitals);
-
     const alerts = patient.alerts;
-    console.log("Alerts Length: " + alerts.length);
     if (request.body.description != "") {
       if (alerts.length == 0) {
         await AlertController.createAlert(request, result);
@@ -305,7 +302,6 @@ const processVitalForPatient = async (patientId, vitalsData) => {
           lastAlert.notes.push(noteLog);
           await lastAlert.save();
           await updateAlert(lastAlert);
-          console.log(lastAlert.alertVitals);
         } else {
           await AlertController.createAlert(request, result);
         }

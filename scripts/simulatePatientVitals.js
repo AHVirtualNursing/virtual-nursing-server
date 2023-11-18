@@ -1,6 +1,7 @@
 const { io } = require("socket.io-client");
-const { initialiseDb } = require("./initialiseDb");
-const { sendMockPatientVitals } = require("./sendMockPatientVitals");
+const { initialiseDb, populateVitalsForPatient } = require("./initialiseDb");
+const { sendMockPatientVitals } = require("../middleware/sendMockData");
+const mongoose = require("mongoose");
 const { Patient } = require("../models/patient");
 const patientController = require("../controllers/patientController");
 const { mongooseConnect } = require("../middleware/mongoose");
@@ -84,7 +85,7 @@ async function simulatePatientVitals() {
   }
 
   async function simulateFallRisk() {
-    mongooseConnect();
+    await mongooseConnect();
     const fallRiskValues = ["Low", "Medium", "High"];
     let index = 0;
 
@@ -117,8 +118,6 @@ async function simulatePatientVitals() {
 
       if (patient && virtualNurseId)
         socket.emit("fallRiskUpdate", [patient, virtualNurseId]);
-
-      console.log(`Updated patient fall risk to ${fallRiskValue}`);
       index++;
 
       setTimeout(updateFallRisk, 10000);
@@ -129,7 +128,10 @@ async function simulatePatientVitals() {
 
   if (vitalType) {
     if (vitalType === "s3") {
-      sendMockPatientVitals(patientId);
+      sendMockPatientVitals();
+    } else if (vitalType === "db") {
+      await initialiseDb();
+      populateVitalsForPatient();
     } else {
       if (!patientId) {
         patientId = await initialiseDb();

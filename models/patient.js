@@ -132,4 +132,6 @@ const Patient =
 module.exports = {
   Patient,
   patientSchema,
+  patientO2IntakeEnum,
+  patientConsciousnessEnum
 };

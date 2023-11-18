@@ -1,10 +1,15 @@
 const schedule = require('node-schedule');
 const patientController = require("../controllers/patientController");
 const vitalController = require("../controllers/vitalController");
-const patientO2IntakeEnum = ["air", "oxygen"];
-const patientConsciousnessEnum = ["alert", "cvpu"];
+const { patientO2IntakeEnum } = require("../models/patient");
+const { patientConsciousnessEnum } = require("../models/patient");
+const { io } = require("socket.io-client");
+const SERVER_URL = "http://localhost:3001";
+const socket = io(SERVER_URL);
 
-const scheduleNews2 = schedule.scheduleJob("* /5 * * * ", async () => {
+const scheduleNews2 = schedule.scheduleJob("*/5 * * * *", async () => {
+  try{
+  
   const req = {};
   const res = {
     statusCode: null,
@@ -21,13 +26,18 @@ const scheduleNews2 = schedule.scheduleJob("* /5 * * * ", async () => {
 
   await patientController.getPatients(req, res);
   const patients = res.jsonData;
- 
+  
   for (const patient of patients) {
     await calculateNews2(patient);
   }
+  } catch (error) {
+    console.error("Error updating News2:", error);
+  }
+  
 });
 
 const calculateNews2 = async (patient) => {
+  try {
   const req = { params: { id: patient.vital } };
   const res = {
     statusCode: null,
@@ -43,7 +53,6 @@ const calculateNews2 = async (patient) => {
   };
 
   score = 0;
-
   if (!patient.vital) {
     return;
   }
@@ -121,12 +130,17 @@ const calculateNews2 = async (patient) => {
     reading: score,
     datetime: new Date(),
   };
-
+  
   vital.news2Score.push(vitalsReading);
-  await vital.save();
+  const updatedVital = await vital.save();
+  socket.emit("update-vitals", updatedVital, patient._id);
+  } catch (error) {
+    console.error("Error updating News2:", error);
+  }
+  
 };
 
 
 
 
-module.exports = {scheduleNews2}
+module.exports = { scheduleNews2 };

@@ -1,7 +1,10 @@
 const { s3 } = require("../middleware/awsClient");
 const { PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const { sendMockPatientVitals } = require("../scripts/sendMockPatientVitals");
+const {
+  sendMockPatientVitals,
+  clearInterval,
+} = require("../middleware/sendMockData");
 
 const uploadFile = async (req, res) => {
   try {
@@ -85,8 +88,18 @@ const uploadAndParseMockData = async (req, res) => {
   }
 };
 
+const stopMockDataSimulation = async (req, res) => {
+  try {
+    clearInterval();
+    res.status(200).json({ success: "Stopped mock data simulation"})
+  } catch (error) {
+    res.status(500).json({ error: "Failed to stop mock data simulation" });
+  }
+};
+
 module.exports = {
   uploadFile,
   retrieveFileWithPresignedUrl,
   uploadAndParseMockData,
+  stopMockDataSimulation,
 };
