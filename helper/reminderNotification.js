@@ -4,7 +4,6 @@ const pushNotification = require("./pushNotification");
 const patientController = require("../controllers/patientController");
 
 const reminderJob = schedule.scheduleJob("* * * * * ", async () => {
-
   try {
     const dueReminders = await getDueReminders();
     for (const reminder of dueReminders) {
@@ -25,14 +24,18 @@ const reminderJob = schedule.scheduleJob("* * * * * ", async () => {
       await patientController.getNursesByPatientId(req, res);
       const nurses = res.jsonData;
       for (const nurse of nurses) {
-        const body = reminder.patient.name + ": " + reminder.content; 
-        await pushNotification.sendPushNotification(
-          nurse.mobilePushNotificationToken,
-          "Patient Reminder",
-          body,
-          "sendReminder",
-          reminder._id.toString()
-        );
+        const body = reminder.patient.name + ": " + reminder.content;
+        try {
+          await pushNotification.sendPushNotification(
+            nurse.mobilePushNotificationToken,
+            "Patient Reminder",
+            body,
+            "sendReminder",
+            reminder._id.toString()
+          );
+        } catch (e) {
+          console.error("Error sending reminder noti for nurse", nurse.name);
+        }
       }
       if (reminder.interval != 0) {
         updateReminderNextScheduledTime(reminder);
@@ -54,7 +57,9 @@ async function getDueReminders() {
     const dueReminders = await Reminder.find({
       time: { $gte: nextMinute, $lt: minuteLater },
       isComplete: false,
-    }).populate({ path: "patient" }).exec();
+    })
+      .populate({ path: "patient" })
+      .exec();
 
     return dueReminders;
   } catch (error) {
