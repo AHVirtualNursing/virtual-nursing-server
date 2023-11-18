@@ -375,6 +375,7 @@ const dischargePatientById = async (req, res) => {
     patient.consciousness = undefined;
     patient.alerts = undefined;
     patient.reminders = undefined;
+    patient.vital = undefined;
     patient.order = undefined;
     patient.alertConfig = undefined;
     patient.infoLogs = undefined;

@@ -298,7 +298,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
           const noteLog = {
             info: request.body.description,
             datetime: vitalsData.datetime,
-            addedBy: "System"
+            addedBy: "System",
           };
           lastAlert.notes.push(noteLog);
           await lastAlert.save();
@@ -376,8 +376,8 @@ const updateAlertVitals = async (currentAlertVitals, newAlertVitals) => {
   return currentAlertVitals;
 };
 
-const updateAlert = async(alert) => {
-  const req = { params: { id: alert._id } , body: {}};
+const updateAlert = async (alert) => {
+  const req = { params: { id: alert._id }, body: {} };
   const res = {
     statusCode: null,
     jsonData: null,
@@ -392,7 +392,7 @@ const updateAlert = async(alert) => {
   };
 
   await AlertController.updateAlertById(req, res);
-}
+};
 module.exports = {
   addVitalForPatient,
   processVitalForPatient,
