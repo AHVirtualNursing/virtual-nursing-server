@@ -41,6 +41,7 @@ async function sendMockPatientVitals() {
   };
 
   const patientFallRisk = [];
+  const patientAcuityLevel = [];
 
   function getCurrentFormattedDatetime() {
     const now = new Date();
@@ -76,6 +77,7 @@ async function sendMockPatientVitals() {
               patientMap.set(patientNric, {
                 patientId: patient._id.toString(),
                 patientFallRisk: patientFallRisk,
+                patientAcuityLevel: patientAcuityLevel,
                 smartbedId: smartbed._id.toString(),
                 smartbedStatus: smartbedStatus,
                 vitals: vitals,
@@ -188,6 +190,15 @@ async function sendMockPatientVitals() {
             "PUT",
             {
               fallRisk: patientData.patientFallRisk[index],
+            }
+          );
+          index++;
+        } else if (bedStatusType === "acuityLevel") {
+          await callApiRequest(
+            `${SERVER_URL}/patient/${patientData.patientId}`,
+            "PUT",
+            {
+              acuityLevel: patientData.patientAcuityLevel[index],
             }
           );
           index++;
@@ -332,6 +343,9 @@ async function sendMockPatientVitals() {
   setTimeout(() => {
     sendBedStatus("fallRisk");
   }, 1400);
+  setTimeout(() => {
+    sendBedStatus("acuityLevel");
+  }, 1500);
 }
 
 async function parseMockDataFromS3() {
