@@ -279,18 +279,22 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     socket.emit("update-vitals", updatedVital, patient._id);
 
     const alerts = patient.alerts;
-    if(!alerts){
-      alerts = []
+    if (!alerts) {
+      alerts = [];
     }
-    vitalAlerts = alerts.filter((alert) => alert.alertType === alertTypeEnum[0]);
+    vitalAlerts = alerts.filter(
+      (alert) => alert.alertType === alertTypeEnum[0]
+    );
 
     if (request.body.description != "") {
       if (alerts.length == 0 || vitalAlerts.length == 0) {
         await AlertController.createAlert(request, result);
-      } else { 
-        var lastAlert = vitalAlerts[vitalAlerts.length - 1]
-        if (lastAlert.status === alertStatusEnum[0] ||
-            lastAlert.status === alertStatusEnum[1]) {
+      } else {
+        var lastAlert = vitalAlerts[vitalAlerts.length - 1];
+        if (
+          lastAlert.status === alertStatusEnum[0] ||
+          lastAlert.status === alertStatusEnum[1]
+        ) {
           lastAlert.alertVitals = await updateAlertVitals(
             lastAlert.alertVitals,
             request.body.alertVitals
@@ -303,7 +307,6 @@ const processVitalForPatient = async (patientId, vitalsData) => {
           lastAlert.notes.push(noteLog);
           await lastAlert.save();
           await updateAlert(lastAlert);
-
         } else {
           await AlertController.createAlert(request, result);
         }
@@ -393,6 +396,7 @@ const updateAlert = async (alert) => {
 
   await AlertController.updateAlertById(req, res);
 };
+
 module.exports = {
   addVitalForPatient,
   processVitalForPatient,

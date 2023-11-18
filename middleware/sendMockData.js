@@ -132,50 +132,50 @@ async function sendMockPatientVitals() {
       sendVitals("heartRate", patientData);
       setTimeout(() => {
         sendVitals("spO2", patientData);
-      }, 100);
+      }, 1000);
       setTimeout(() => {
         sendVitals("bloodPressure", patientData);
-      }, 200);
+      }, 2000);
       setTimeout(() => {
         sendVitals("temperature", patientData);
-      }, 300);
+      }, 3000);
       setTimeout(() => {
         sendVitals("respRate", patientData);
-      }, 400);
+      }, 4000);
 
       setTimeout(() => {
         sendBedStatus("bedPosition", patientData);
-      }, 500);
+      }, 5000);
       setTimeout(() => {
         sendBedStatus("isRightUpperRail", patientData);
-      }, 600);
+      }, 6000);
       setTimeout(() => {
         sendBedStatus("isRightLowerRail", patientData);
-      }, 700);
+      }, 7000);
       setTimeout(() => {
         sendBedStatus("isLeftUpperRail", patientData);
-      }, 800);
+      }, 8000);
       setTimeout(() => {
         sendBedStatus("isLeftLowerRail", patientData);
-      }, 900);
+      }, 9000);
       setTimeout(() => {
         sendBedStatus("isBrakeSet", patientData);
-      }, 1000);
+      }, 10000);
       setTimeout(() => {
         sendBedStatus("isLowestPosition", patientData);
-      }, 1100);
+      }, 11000);
       setTimeout(() => {
         sendBedStatus("isBedExitAlarmOn", patientData);
-      }, 1200);
+      }, 12000);
       setTimeout(() => {
         sendBedStatus("isPatientOnBed", patientData);
-      }, 1300);
+      }, 13000);
       setTimeout(() => {
         sendBedStatus("fallRisk", patientData);
-      }, 1400);
+      }, 14000);
       setTimeout(() => {
         sendBedStatus("acuityLevel", patientData);
-      }, 1500);
+      }, 15000);
     }
 
     function sendVitals(vitalType, patient) {
@@ -374,6 +374,11 @@ async function sendMockPatientVitals() {
 
   await processData(data);
   sendData();
+  console.log("MOCKKKK");
+  return {
+    success: true,
+    message: "Mock Data processed and sent successfully.",
+  };
 }
 
 async function parseMockDataFromS3() {

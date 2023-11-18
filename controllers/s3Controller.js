@@ -80,10 +80,9 @@ const uploadAndParseMockData = async (req, res) => {
     await s3.send(command);
     //await this function
     //return, FE will change the state of the button
-    await sendMockPatientVitals(patientId);
-    res
-      .status(200)
-      .json({ success: "Stopped uploading and processing mock data" });
+    const responseMockData = await sendMockPatientVitals(patientId);
+    console.log("responseMockData", responseMockData);
+    return responseMockData;
   } catch (error) {
     console.error(error);
     res
