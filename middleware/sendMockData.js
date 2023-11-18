@@ -403,7 +403,7 @@ async function sendMockPatientVitals() {
       }
       index++;
       // }
-    }, 8000);
+    }, 2000);
   }
 
   const data = await parseMockDataFromS3();
