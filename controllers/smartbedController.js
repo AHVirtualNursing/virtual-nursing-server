@@ -166,7 +166,7 @@ const updateSmartBedById = async (req, res) => {
     }
 
     const updatedSmartBed = await smartbed.save();
-    console.log("SEND UPDATED SMARTBED");
+    
     socket.emit("update-smartbed", updatedSmartBed);
     res.status(200).json(updatedSmartBed);
   } catch (e) {

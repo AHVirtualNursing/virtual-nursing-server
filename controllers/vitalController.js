@@ -282,7 +282,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     if(!alerts){
       alerts = []
     }
-    vitalAlerts = alerts.filter((alert) => alert.alertType === "Vital");
+    vitalAlerts = alerts.filter((alert) => alert.alertType === alertTypeEnum[0]);
 
     if (request.body.description != "") {
       if (alerts.length == 0 || vitalAlerts.length == 0) {
