@@ -18,21 +18,6 @@ async function sendMockPatientVitals() {
   const socket = io(SERVER_URL);
   const patientMap = new Map();
 
-  const smartbedStatus = {
-    bedPosition: [],
-    isRightUpperRail: [],
-    isRightLowerRail: [],
-    isLeftUpperRail: [],
-    isLeftLowerRail: [],
-    isBrakeSet: [],
-    isLowestPosition: [],
-    isBedExitAlarmOn: [],
-    isPatientOnBed: [],
-  };
-
-  const patientFallRisk = [];
-  const patientAcuityLevel = [];
-
   function getCurrentFormattedDatetime() {
     const now = new Date();
     const year = now.getFullYear();
@@ -59,26 +44,35 @@ async function sendMockPatientVitals() {
           const patient = await Patient.findOne({ nric: patientNric });
 
           if (patient) {
-            patientMap.set(patientNric, {
-              patientId: patient._id.toString(),
-              vitals: {
-                heartRate: [],
-                respRate: [],
-                spO2: [],
-                bloodPressureSys: [],
-                bloodPressureDia: [],
-                temperature: [],
-              },
+            const smartbed = await SmartBed.findOne({
+              patient: patient._id.toString(),
             });
 
             if (smartbed) {
               patientMap.set(patientNric, {
                 patientId: patient._id.toString(),
-                patientFallRisk: patientFallRisk,
-                patientAcuityLevel: patientAcuityLevel,
+                patientFallRisk: [],
+                patientAcuityLevel: [],
                 smartbedId: smartbed._id.toString(),
-                smartbedStatus: smartbedStatus,
-                vitals: vitals,
+                smartbedStatus: {
+                  bedPosition: [],
+                  isRightUpperRail: [],
+                  isRightLowerRail: [],
+                  isLeftUpperRail: [],
+                  isLeftLowerRail: [],
+                  isBrakeSet: [],
+                  isLowestPosition: [],
+                  isBedExitAlarmOn: [],
+                  isPatientOnBed: [],
+                },
+                vitals: {
+                  heartRate: [],
+                  respRate: [],
+                  spO2: [],
+                  bloodPressureSys: [],
+                  bloodPressureDia: [],
+                  temperature: [],
+                },
               });
             } else {
               console.error(
@@ -112,6 +106,7 @@ async function sendMockPatientVitals() {
           .get(patientNric)
           .vitals["bloodPressureDia"].push(bpReadings[1]);
       } else if (
+        vitalType === "bedPosition" ||
         vitalType === "isRightUpperRail" ||
         vitalType === "isRightLowerRail" ||
         vitalType === "isLeftUpperRail" ||
@@ -124,6 +119,8 @@ async function sendMockPatientVitals() {
         patientMap.get(patientNric).smartbedStatus[vitalType].push(vitalValue);
       } else if (vitalType === "fallRisk") {
         patientMap.get(patientNric).patientFallRisk.push(vitalValue);
+      } else if (vitalType === "acuityLevel") {
+        patientMap.get(patientNric).patientAcuityLevel.push(vitalValue);
       } else {
         patientMap.get(patientNric).vitals[vitalType].push(vitalValue);
       }
@@ -149,35 +146,38 @@ async function sendMockPatientVitals() {
       }, 400);
 
       setTimeout(() => {
-        sendBedStatus("bedPosition");
+        sendBedStatus("bedPosition", patientData);
       }, 500);
       setTimeout(() => {
-        sendBedStatus("isRightUpperRail");
+        sendBedStatus("isRightUpperRail", patientData);
       }, 600);
       setTimeout(() => {
-        sendBedStatus("isRightLowerRail");
+        sendBedStatus("isRightLowerRail", patientData);
       }, 700);
       setTimeout(() => {
-        sendBedStatus("isLeftUpperRail");
+        sendBedStatus("isLeftUpperRail", patientData);
       }, 800);
       setTimeout(() => {
-        sendBedStatus("isLeftLowerRail");
+        sendBedStatus("isLeftLowerRail", patientData);
       }, 900);
       setTimeout(() => {
-        sendBedStatus("isBrakeSet");
+        sendBedStatus("isBrakeSet", patientData);
       }, 1000);
       setTimeout(() => {
-        sendBedStatus("isLowestPosition");
+        sendBedStatus("isLowestPosition", patientData);
       }, 1100);
       setTimeout(() => {
-        sendBedStatus("isBedExitAlarmOn");
+        sendBedStatus("isBedExitAlarmOn", patientData);
       }, 1200);
       setTimeout(() => {
-        sendBedStatus("isPatientOnBed");
+        sendBedStatus("isPatientOnBed", patientData);
       }, 1300);
       setTimeout(() => {
-        sendBedStatus("fallRisk");
+        sendBedStatus("fallRisk", patientData);
       }, 1400);
+      setTimeout(() => {
+        sendBedStatus("acuityLevel", patientData);
+      }, 1500);
     }
 
     function sendVitals(vitalType, patient) {
@@ -260,119 +260,150 @@ async function sendMockPatientVitals() {
     }
   }
 
-  async function sendBedStatus(bedStatusType) {
+  async function sendBedStatus(bedStatusType, patient) {
     let index = 0;
-    intervalId = setInterval(async () => {
-      for (const patientData of patientMap.values()) {
-        if (bedStatusType === "fallRisk") {
+    const intervalId = setInterval(async () => {
+      // for (const patientData of patientMap.values()) {
+      if (bedStatusType === "fallRisk") {
+        if (index < patient.patientFallRisk.length) {
           await callApiRequest(
-            `${SERVER_URL}/patient/${patientData.patientId}`,
+            `${SERVER_URL}/patient/${patient.patientId}`,
             "PUT",
             {
-              fallRisk: patientData.patientFallRisk[index],
+              fallRisk: patient.patientFallRisk[index],
             }
           );
-          index++;
-        } else if (bedStatusType === "acuityLevel") {
+        } else {
+          clearInterval(intervalId);
+        }
+      } else if (bedStatusType === "acuityLevel") {
+        if (index < patient.patientAcuityLevel.length) {
           await callApiRequest(
-            `${SERVER_URL}/patient/${patientData.patientId}`,
+            `${SERVER_URL}/patient/${patient.patientId}`,
             "PUT",
             {
-              acuityLevel: patientData.patientAcuityLevel[index],
+              acuityLevel: patient.patientAcuityLevel[index],
             }
           );
-          index++;
-        } else if (bedStatusType === "bedPosition") {
+        } else {
+          clearInterval(intervalId);
+        }
+      } else if (bedStatusType === "bedPosition") {
+        if (index < patient.smartbedStatus["bedPosition"].length) {
           await callApiRequest(
-            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            `${SERVER_URL}/smartbed/${patient.smartbedId}`,
             "PUT",
             {
-              bedPosition: patientData.smartbedStatus["bedPosition"][index],
+              bedPosition: patient.smartbedStatus["bedPosition"][index],
             }
           );
-          index++;
-        } else if (bedStatusType === "isRightUpperRail") {
+        } else {
+          clearInterval(intervalId);
+        }
+      } else if (bedStatusType === "isRightUpperRail") {
+        if (index < patient.smartbedStatus["isRightUpperRail"].length) {
           await callApiRequest(
-            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            `${SERVER_URL}/smartbed/${patient.smartbedId}`,
             "PUT",
             {
               isRightUpperRail:
-                patientData.smartbedStatus["isRightUpperRail"][index],
+                patient.smartbedStatus["isRightUpperRail"][index],
             }
           );
-          index++;
-        } else if (bedStatusType === "isRightLowerRail") {
+        } else {
+          clearInterval(intervalId);
+        }
+      } else if (bedStatusType === "isRightLowerRail") {
+        if (index < patient.smartbedStatus["isRightLowerRail"].length) {
           await callApiRequest(
-            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            `${SERVER_URL}/smartbed/${patient.smartbedId}`,
             "PUT",
             {
               isRightLowerRail:
-                patientData.smartbedStatus["isRightLowerRail"][index],
+                patient.smartbedStatus["isRightLowerRail"][index],
             }
           );
-          index++;
-        } else if (bedStatusType === "isLeftUpperRail") {
+        } else {
+          clearInterval(intervalId);
+        }
+      } else if (bedStatusType === "isLeftUpperRail") {
+        if (index < patient.smartbedStatus["isLeftUpperRail"].length) {
           await callApiRequest(
-            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            `${SERVER_URL}/smartbed/${patient.smartbedId}`,
             "PUT",
             {
-              isLeftUpperRail:
-                patientData.smartbedStatus["isLeftUpperRail"][index],
+              isLeftUpperRail: patient.smartbedStatus["isLeftUpperRail"][index],
             }
           );
-          index++;
-        } else if (bedStatusType === "isLeftLowerRail") {
+        } else {
+          clearInterval(intervalId);
+        }
+      } else if (bedStatusType === "isLeftLowerRail") {
+        if (index < patient.smartbedStatus["isLeftLowerRail"].length) {
           await callApiRequest(
-            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            `${SERVER_URL}/smartbed/${patient.smartbedId}`,
             "PUT",
             {
-              isLeftLowerRail:
-                patientData.smartbedStatus["isLeftLowerRail"][index],
+              isLeftLowerRail: patient.smartbedStatus["isLeftLowerRail"][index],
             }
           );
-          index++;
-        } else if (bedStatusType === "isBrakeSet") {
+        } else {
+          clearInterval(intervalId);
+        }
+      } else if (bedStatusType === "isBrakeSet") {
+        if (index < patient.smartbedStatus["isBrakeSet"].length) {
           await callApiRequest(
-            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            `${SERVER_URL}/smartbed/${patient.smartbedId}`,
             "PUT",
             {
-              isBrakeSet: patientData.smartbedStatus["isBrakeSet"][index],
+              isBrakeSet: patient.smartbedStatus["isBrakeSet"][index],
             }
           );
-          index++;
-        } else if (bedStatusType === "isLowestPosition") {
+        } else {
+          clearInterval(intervalId);
+        }
+      } else if (bedStatusType === "isLowestPosition") {
+        if (index < patient.smartbedStatus["isLowestPosition"].length) {
           await callApiRequest(
-            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            `${SERVER_URL}/smartbed/${patient.smartbedId}`,
             "PUT",
             {
               isLowestPosition:
-                patientData.smartbedStatus["isLowestPosition"][index],
+                patient.smartbedStatus["isLowestPosition"][index],
             }
           );
-          index++;
-        } else if (bedStatusType === "isBedExitAlarmOn") {
+        } else {
+          clearInterval(intervalId);
+        }
+      } else if (bedStatusType === "isBedExitAlarmOn") {
+        if (index < patient.smartbedStatus["isBedExitAlarmOn"].length) {
           await callApiRequest(
-            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            `${SERVER_URL}/smartbed/${patient.smartbedId}`,
             "PUT",
             {
               isBedExitAlarmOn:
-                patientData.smartbedStatus["isBedExitAlarmOn"][index],
+                patient.smartbedStatus["isBedExitAlarmOn"][index],
             }
           );
-          index++;
-        } else if (bedStatusType === "isPatientOnBed") {
+        } else {
+          clearInterval(intervalId);
+        }
+      } else if (bedStatusType === "isPatientOnBed") {
+        if (index < patient.smartbedStatus["isPatientOnBed"].length) {
           await callApiRequest(
-            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            `${SERVER_URL}/smartbed/${patient.smartbedId}`,
             "PUT",
             {
-              isPatientOnBed:
-                patientData.smartbedStatus["isPatientOnBed"][index],
+              isPatientOnBed: patient.smartbedStatus["isPatientOnBed"][index],
             }
           );
-          index++;
+        } else {
+          clearInterval(intervalId);
         }
       }
-    }, 2000);
+      index++;
+      // }
+    }, 8000);
   }
 
   const data = await parseMockDataFromS3();
