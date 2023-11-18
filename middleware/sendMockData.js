@@ -92,8 +92,6 @@ async function sendMockPatientVitals() {
         }
       }
 
-      // Add in Bed Status
-
       const vitalType = vital["TYPE"];
       const vitalValue = vital["VALUE"];
 
@@ -183,38 +181,6 @@ async function sendMockPatientVitals() {
     function sendVitals(vitalType, patient) {
       let index = 0;
 
-      // intervalId = setInterval(() => {
-      //   for (const patientData of patientMap.values()) {
-      //     if (vitalType === "bloodPressure") {
-      //       const bpsVital = {
-      //         datetime: getCurrentFormattedDatetime(),
-      //         patientId: patientData.patientId,
-      //         bloodPressureSys: parseInt(
-      //           patientData.vitals["bloodPressureSys"][index]
-      //         ),
-      //       };
-      //       const bpdVital = {
-      //         datetime: getCurrentFormattedDatetime(),
-      //         patientId: patientData.patientId,
-      //         bloodPressureDia: parseInt(
-      //           patientData.vitals["bloodPressureDia"][index]
-      //         ),
-      //       };
-      //       socket.emit("watchData", bpsVital);
-      //       socket.emit("watchData", bpdVital);
-      //       index++;
-      //     } else if (
-      //       vitalType === "heartRate" ||
-      //       vitalType === "respRate" ||
-      //       vitalType === "spO2" ||
-      //       vitalType === "temperature"
-      //     ) {
-      //       const vital = {
-      //         datetime: getCurrentFormattedDatetime(),
-      //         patientId: patientData.patientId,
-      //         [vitalType]: parseInt(patientData.vitals[vitalType][index]),
-      //       };
-
       const intervalId = setInterval(() => {
         if (vitalType === "bloodPressure") {
           if (index < patient.vitals["bloodPressureSys"].length) {
@@ -263,7 +229,6 @@ async function sendMockPatientVitals() {
   async function sendBedStatus(bedStatusType, patient) {
     let index = 0;
     const intervalId = setInterval(async () => {
-      // for (const patientData of patientMap.values()) {
       if (bedStatusType === "fallRisk") {
         if (index < patient.patientFallRisk.length) {
           await callApiRequest(
@@ -402,7 +367,6 @@ async function sendMockPatientVitals() {
         }
       }
       index++;
-      // }
     }, 2000);
   }
 
