@@ -56,7 +56,10 @@ const configureSocket = (server) => {
       await vitalController.processVitalForPatient(patientId, vitalsData);
 
       if (clientSocket) {
-        clientSocket.emit("updateVitals", vitals);
+        clientSocket.emit("updatedVitals", {
+          vital: vitals,
+          patient: patientId,
+        });
       } else {
         console.log(`No dashboard found for patient ID ${patientId}`);
       }
