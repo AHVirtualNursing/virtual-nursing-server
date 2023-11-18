@@ -1,13 +1,14 @@
 require("dotenv").config();
-const {mongooseConnect} = require("../middleware/mongoose");
+const { mongooseConnect } = require("../middleware/mongoose");
 const { io } = require("socket.io-client");
 const axios = require("axios");
 const xlsx = require("xlsx");
 const { GetObjectCommand } = require("@aws-sdk/client-s3");
 const { s3 } = require("./awsClient");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const { initialiseDb } = require("../scripts/initialiseDb");
-const {Patient} = require("../models/patient");
+const { initialiseDb, callApiRequest } = require("../scripts/initialiseDb");
+const { Patient } = require("../models/patient");
+const { SmartBed } = require("../models/smartbed");
 
 const SERVER_URL = "http://localhost:3001";
 let intervalId;
@@ -26,6 +27,20 @@ async function sendMockPatientVitals() {
     bloodPressureDia: [],
     temperature: [],
   };
+
+  const smartbedStatus = {
+    bedPosition: [],
+    isRightUpperRail: [],
+    isRightLowerRail: [],
+    isLeftUpperRail: [],
+    isLeftLowerRail: [],
+    isBrakeSet: [],
+    isLowestPosition: [],
+    isBedExitAlarmOn: [],
+    isPatientOnBed: [],
+  };
+
+  const patientFallRisk = [];
 
   function getCurrentFormattedDatetime() {
     const now = new Date();
@@ -53,10 +68,24 @@ async function sendMockPatientVitals() {
           const patient = await Patient.findOne({ nric: patientNric });
 
           if (patient) {
-            patientMap.set(patientNric, {
-              patientId: patient._id.toString(),
-              vitals: vitals,
+            const smartbed = await SmartBed.findOne({
+              patient: patient._id.toString(),
             });
+
+            if (smartbed) {
+              patientMap.set(patientNric, {
+                patientId: patient._id.toString(),
+                patientFallRisk: patientFallRisk,
+                smartbedId: smartbed._id.toString(),
+                smartbedStatus: smartbedStatus,
+                vitals: vitals,
+              });
+            } else {
+              console.error(
+                `Patient of NRIC: ${patientNric} does not have valid smartbed`
+              );
+              return;
+            }
           } else {
             console.error(`Patient not found for NRIC: ${patientNric}`);
             return;
@@ -69,6 +98,8 @@ async function sendMockPatientVitals() {
         }
       }
 
+      // Add in Bed Status
+
       const vitalType = vital["TYPE"];
       const vitalValue = vital["VALUE"];
 
@@ -80,6 +111,19 @@ async function sendMockPatientVitals() {
         patientMap
           .get(patientNric)
           .vitals["bloodPressureDia"].push(bpReadings[1]);
+      } else if (
+        vitalType === "isRightUpperRail" ||
+        vitalType === "isRightLowerRail" ||
+        vitalType === "isLeftUpperRail" ||
+        vitalType === "isLeftLowerRail" ||
+        vitalType === "isBrakeSet" ||
+        vitalType === "isLowestPosition" ||
+        vitalType === "isBedExitAlarmOn" ||
+        vitalType === "isPatientOnBed"
+      ) {
+        patientMap.get(patientNric).smartbedStatus[vitalType].push(vitalValue);
+      } else if (vitalType === "fallRisk") {
+        patientMap.get(patientNric).patientFallRisk.push(vitalValue);
       } else {
         patientMap.get(patientNric).vitals[vitalType].push(vitalValue);
       }
@@ -115,7 +159,12 @@ async function sendMockPatientVitals() {
           socket.emit("watchData", bpsVital);
           socket.emit("watchData", bpdVital);
           index++;
-        } else {
+        } else if (
+          vitalType === "heartRate" ||
+          vitalType === "respRate" ||
+          vitalType === "spO2" ||
+          vitalType === "temperature"
+        ) {
           const vital = {
             datetime: getCurrentFormattedDatetime(),
             patientId: patientData.patientId,
@@ -123,6 +172,112 @@ async function sendMockPatientVitals() {
           };
 
           socket.emit("watchData", vital);
+          index++;
+        }
+      }
+    }, 2000);
+  }
+
+  async function sendBedStatus(bedStatusType) {
+    let index = 0;
+    intervalId = setInterval(async () => {
+      for (const patientData of patientMap.values()) {
+        if (bedStatusType === "fallRisk") {
+          await callApiRequest(
+            `${SERVER_URL}/patient/${patientData.patientId}`,
+            "PUT",
+            {
+              fallRisk: patientData.patientFallRisk[index],
+            }
+          );
+          index++;
+        } else if (bedStatusType === "bedPosition") {
+          await callApiRequest(
+            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            "PUT",
+            {
+              bedPosition: patientData.smartbedStatus["bedPosition"][index],
+            }
+          );
+          index++;
+        } else if (bedStatusType === "isRightUpperRail") {
+          await callApiRequest(
+            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            "PUT",
+            {
+              isRightUpperRail:
+                patientData.smartbedStatus["isRightUpperRail"][index],
+            }
+          );
+          index++;
+        } else if (bedStatusType === "isRightLowerRail") {
+          await callApiRequest(
+            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            "PUT",
+            {
+              isRightLowerRail:
+                patientData.smartbedStatus["isRightLowerRail"][index],
+            }
+          );
+          index++;
+        } else if (bedStatusType === "isLeftUpperRail") {
+          await callApiRequest(
+            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            "PUT",
+            {
+              isLeftUpperRail:
+                patientData.smartbedStatus["isLeftUpperRail"][index],
+            }
+          );
+          index++;
+        } else if (bedStatusType === "isLeftLowerRail") {
+          await callApiRequest(
+            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            "PUT",
+            {
+              isLeftLowerRail:
+                patientData.smartbedStatus["isLeftLowerRail"][index],
+            }
+          );
+          index++;
+        } else if (bedStatusType === "isBrakeSet") {
+          await callApiRequest(
+            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            "PUT",
+            {
+              isBrakeSet: patientData.smartbedStatus["isBrakeSet"][index],
+            }
+          );
+          index++;
+        } else if (bedStatusType === "isLowestPosition") {
+          await callApiRequest(
+            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            "PUT",
+            {
+              isLowestPosition:
+                patientData.smartbedStatus["isLowestPosition"][index],
+            }
+          );
+          index++;
+        } else if (bedStatusType === "isBedExitAlarmOn") {
+          await callApiRequest(
+            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            "PUT",
+            {
+              isBedExitAlarmOn:
+                patientData.smartbedStatus["isBedExitAlarmOn"][index],
+            }
+          );
+          index++;
+        } else if (bedStatusType === "isPatientOnBed") {
+          await callApiRequest(
+            `${SERVER_URL}/smartbed/${patientData.smartbedId}`,
+            "PUT",
+            {
+              isPatientOnBed:
+                patientData.smartbedStatus["isPatientOnBed"][index],
+            }
+          );
           index++;
         }
       }
@@ -146,6 +301,37 @@ async function sendMockPatientVitals() {
   setTimeout(() => {
     sendVitals("respRate");
   }, 400);
+
+  setTimeout(() => {
+    sendBedStatus("bedPosition");
+  }, 500);
+  setTimeout(() => {
+    sendBedStatus("isRightUpperRail");
+  }, 600);
+  setTimeout(() => {
+    sendBedStatus("isRightLowerRail");
+  }, 700);
+  setTimeout(() => {
+    sendBedStatus("isLeftUpperRail");
+  }, 800);
+  setTimeout(() => {
+    sendBedStatus("isLeftLowerRail");
+  }, 900);
+  setTimeout(() => {
+    sendBedStatus("isBrakeSet");
+  }, 1000);
+  setTimeout(() => {
+    sendBedStatus("isLowestPosition");
+  }, 1100);
+  setTimeout(() => {
+    sendBedStatus("isBedExitAlarmOn");
+  }, 1200);
+  setTimeout(() => {
+    sendBedStatus("isPatientOnBed");
+  }, 1300);
+  setTimeout(() => {
+    sendBedStatus("fallRisk");
+  }, 1400);
 }
 
 async function parseMockDataFromS3() {

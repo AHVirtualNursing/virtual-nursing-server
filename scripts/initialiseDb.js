@@ -531,4 +531,5 @@ function datetimeInADay(date) {
 module.exports = {
   initialiseDb,
   populateVitalsForPatient,
+  callApiRequest,
 };
