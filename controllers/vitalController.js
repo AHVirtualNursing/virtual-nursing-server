@@ -50,7 +50,8 @@ const processVitalForPatient = async (patientId, vitalsData) => {
   try {
     const patient = await Patient.findById(patientId)
       .populate("vital")
-      .populate("alertConfig");
+      .populate("alertConfig")
+      .populate("alerts");
 
     if (!patient) {
       throw new Error(`Cannot find any patient with Patient ID ${patientId}`);
@@ -282,14 +283,12 @@ const processVitalForPatient = async (patientId, vitalsData) => {
       if (alerts.length == 0) {
         await AlertController.createAlert(request, result);
       } else {
-        var lastAlert = alerts[alerts.length - 1];
+        const vitalAlerts = alerts.filter((alert) => alert.alertType === "Vital");
+        var lastAlert = vitalAlerts[vitalAlerts.length - 1]
         lastAlert = await Alert.findById(lastAlert);
-
-        if (
-          lastAlert.alertType === alertTypeEnum[0] &&
-          (lastAlert.status === alertStatusEnum[0] ||
-            lastAlert.status === alertStatusEnum[1])
-        ) {
+       
+        if (lastAlert.status === alertStatusEnum[0] ||
+            lastAlert.status === alertStatusEnum[1]) {
           lastAlert.alertVitals = await updateAlertVitals(
             lastAlert.alertVitals,
             request.body.alertVitals
