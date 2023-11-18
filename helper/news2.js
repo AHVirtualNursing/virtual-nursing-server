@@ -3,6 +3,9 @@ const patientController = require("../controllers/patientController");
 const vitalController = require("../controllers/vitalController");
 const { patientO2IntakeEnum } = require("../models/patient");
 const { patientConsciousnessEnum } = require("../models/patient");
+const { io } = require("socket.io-client");
+const SERVER_URL = "http://localhost:3001";
+const socket = io(SERVER_URL);
 
 const scheduleNews2 = schedule.scheduleJob("*/5 * * * *", async () => {
   try{
@@ -129,8 +132,8 @@ const calculateNews2 = async (patient) => {
   };
   
   vital.news2Score.push(vitalsReading);
-  await vital.save();
-
+  const updatedVital = await vital.save();
+  socket.emit("update-vitals", updatedVital, patient._id);
   } catch (error) {
     console.error("Error updating News2:", error);
   }
