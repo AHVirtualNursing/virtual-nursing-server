@@ -10,6 +10,7 @@ router.get("/:id/reminders", Patient.getRemindersByPatientId);
 router.get("/:id/nurses", Patient.getNursesByPatientId);
 router.get("/:id/vital", Patient.getVitalByPatientId);
 router.get("/:id/smartbed", Patient.getSmartBedByPatientId);
+router.get("/:id/virtualNurse", Patient.getVirtualNurseByPatientId);
 router.post("/", Patient.createPatient);
 router.put("/:id", Patient.updatePatientById);
 router.put("/:id/discharge", Patient.dischargePatientById);
