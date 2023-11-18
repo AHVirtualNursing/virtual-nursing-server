@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb");
-const { Nurse }= require("../models/nurse");
+const { Nurse } = require("../models/nurse");
 const { SmartBed } = require("../models/smartbed");
 const Ward = require("../models/ward");
 
@@ -28,7 +28,7 @@ const createNurse = async (req, res, session) => {
       {
         new: true,
         runValidators: true,
-        session,
+        // session,
       }
     );
 
@@ -58,7 +58,9 @@ const getNurses = async (req, res) => {
             }
             return nurse;
           } else {
-            return res.status(500).json({ message: `${id} is in wrong format` });
+            return res
+              .status(500)
+              .json({ message: `${id} is in wrong format` });
           }
         })
       );

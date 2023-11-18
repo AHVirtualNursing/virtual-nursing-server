@@ -1,5 +1,5 @@
 require("dotenv").config();
-const {mongooseConnect} = require("../middleware/mongoose");
+const { mongooseConnect } = require("../middleware/mongoose");
 const { io } = require("socket.io-client");
 const axios = require("axios");
 const xlsx = require("xlsx");
@@ -7,25 +7,15 @@ const { GetObjectCommand } = require("@aws-sdk/client-s3");
 const { s3 } = require("./awsClient");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { initialiseDb } = require("../scripts/initialiseDb");
-const {Patient} = require("../models/patient");
+const { Patient } = require("../models/patient");
 
 const SERVER_URL = "http://localhost:3001";
-let intervalId;
 
 async function sendMockPatientVitals() {
   await mongooseConnect();
 
   const socket = io(SERVER_URL);
   const patientMap = new Map();
-
-  const vitals = {
-    heartRate: [],
-    respRate: [],
-    spO2: [],
-    bloodPressureSys: [],
-    bloodPressureDia: [],
-    temperature: [],
-  };
 
   function getCurrentFormattedDatetime() {
     const now = new Date();
@@ -45,18 +35,27 @@ async function sendMockPatientVitals() {
       await initialiseDb();
     }
 
-    const promises = data.map(async (vital) => {
+    for (const vital of data) {
       const patientNric = vital["PATIENT_NRIC"].toString();
 
-      if (!patientMap.get(patientNric)) {
+      if (!patientMap.has(patientNric)) {
         try {
           const patient = await Patient.findOne({ nric: patientNric });
 
           if (patient) {
             patientMap.set(patientNric, {
               patientId: patient._id.toString(),
-              vitals: vitals,
+              vitals: {
+                heartRate: [],
+                respRate: [],
+                spO2: [],
+                bloodPressureSys: [],
+                bloodPressureDia: [],
+                temperature: [],
+              },
             });
+            console.log("MAP");
+            console.log(patientMap.keys());
           } else {
             console.error(`Patient not found for NRIC: ${patientNric}`);
             return;
@@ -83,69 +82,128 @@ async function sendMockPatientVitals() {
       } else {
         patientMap.get(patientNric).vitals[vitalType].push(vitalValue);
       }
-    });
-
-    await Promise.all(promises);
+    }
   }
 
-  function sendVitals(vitalType) {
-    let index = 0;
-
+  function sendData() {
     for (const patientData of patientMap.values()) {
       socket.emit("connectSmartWatch", patientData.patientId);
+      sendVitals("heartRate", patientData);
+
+      setTimeout(() => {
+        sendVitals("spO2", patientData);
+      }, 100);
+      setTimeout(() => {
+        sendVitals("bloodPressure", patientData);
+      }, 200);
+      setTimeout(() => {
+        sendVitals("temperature", patientData);
+      }, 300);
+      setTimeout(() => {
+        sendVitals("respRate", patientData);
+      }, 400);
     }
 
-    intervalId = setInterval(() => {
-      for (const patientData of patientMap.values()) {
-        if (vitalType === "bloodPressure") {
-          const bpsVital = {
-            datetime: getCurrentFormattedDatetime(),
-            patientId: patientData.patientId,
-            bloodPressureSys: parseInt(
-              patientData.vitals["bloodPressureSys"][index]
-            ),
-          };
-          const bpdVital = {
-            datetime: getCurrentFormattedDatetime(),
-            patientId: patientData.patientId,
-            bloodPressureDia: parseInt(
-              patientData.vitals["bloodPressureDia"][index]
-            ),
-          };
-          socket.emit("watchData", bpsVital);
-          socket.emit("watchData", bpdVital);
-          index++;
-        } else {
-          const vital = {
-            datetime: getCurrentFormattedDatetime(),
-            patientId: patientData.patientId,
-            [vitalType]: parseInt(patientData.vitals[vitalType][index]),
-          };
+    //   intervalId = setInterval(() => {
+    //     for (const patientData of patientMap.values()) {
+    //       console.log(patientData.patientId);
+    //       if (vitalType === "bloodPressure") {
+    //         const bpsVital = {
+    //           datetime: getCurrentFormattedDatetime(),
+    //           patientId: patientData.patientId,
+    //           bloodPressureSys: parseInt(
+    //             patientData.vitals["bloodPressureSys"][index]
+    //           ),
+    //         };
+    //         const bpdVital = {
+    //           datetime: getCurrentFormattedDatetime(),
+    //           patientId: patientData.patientId,
+    //           bloodPressureDia: parseInt(
+    //             patientData.vitals["bloodPressureDia"][index]
+    //           ),
+    //         };
+    //         socket.emit("watchData", bpsVital);
+    //         socket.emit("watchData", bpdVital);
+    //         index++;
+    //       } else {
+    //         const vital = {
+    //           datetime: getCurrentFormattedDatetime(),
+    //           patientId: patientData.patientId,
+    //           [vitalType]: parseInt(patientData.vitals[vitalType][index]),
+    //         };
+    //         console.log(index);
 
-          socket.emit("watchData", vital);
-          index++;
+    //         console.log(vital);
+
+    //         socket.emit("watchData", vital);
+    //         index++;
+    //       }
+    //     }
+    //   }, 2000);
+    // }
+
+    function sendVitals(vitalType, patient) {
+      let index = 0;
+
+      const intervalId = setInterval(() => {
+        if (vitalType === "bloodPressure") {
+          if (index < patient.vitals["bloodPressureSys"].length) {
+            const bpsVital = {
+              datetime: getCurrentFormattedDatetime(),
+              patientId: patient.patientId,
+              bloodPressureSys: parseInt(
+                patient.vitals["bloodPressureSys"][index]
+              ),
+            };
+            const bpdVital = {
+              datetime: getCurrentFormattedDatetime(),
+              patientId: patient.patientId,
+              bloodPressureDia: parseInt(
+                patient.vitals["bloodPressureDia"][index]
+              ),
+            };
+            socket.emit("watchData", bpsVital);
+            socket.emit("watchData", bpdVital);
+          } else {
+            clearInterval(intervalId);
+          }
+        } else {
+          if (index < patient.vitals[vitalType].length) {
+            const vital = {
+              datetime: getCurrentFormattedDatetime(),
+              patientId: patient.patientId,
+              [vitalType]: parseInt(patient.vitals[vitalType][index]),
+            };
+
+            console.log(index);
+            console.log(vital);
+
+            socket.emit("watchData", vital);
+          } else {
+            clearInterval(intervalId);
+          }
         }
-      }
-    }, 2000);
+
+        index++;
+      }, 2000);
+    }
   }
 
   const data = await parseMockDataFromS3();
 
   await processData(data);
 
-  sendVitals("heartRate");
-  setTimeout(() => {
-    sendVitals("spO2");
-  }, 100);
-  setTimeout(() => {
-    sendVitals("bloodPressure");
-  }, 200);
-  setTimeout(() => {
-    sendVitals("temperature");
-  }, 300);
-  setTimeout(() => {
-    sendVitals("respRate");
-  }, 400);
+  console.log(patientMap.values());
+  sendData();
+  // sendVitals("heartRate");
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
+  // sendVitals("spO2");
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
+  // sendVitals("bloodPressure");
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
+  // sendVitals("temperature");
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
+  // sendVitals("respRate");
 }
 
 async function parseMockDataFromS3() {
@@ -168,11 +226,6 @@ async function parseMockDataFromS3() {
 
     return data;
   }
-}
-
-function clearInterval() {
-  console.log("Clearing mock data simulation interval");
-  clearInterval(intervalId);
 }
 
 module.exports = {
