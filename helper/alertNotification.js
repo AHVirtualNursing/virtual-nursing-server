@@ -58,10 +58,9 @@ const sendAlert = async (alert) => {
           alert._id.toString()
         );
       } catch (error) {
-        console.error("Error sending alert push noti", error);
+        console.error("Error sending admit alert noti for nurse", nurse.name);
       }
     }
-    
 
     if (!alert.redelegate) {
       startAlertStatusCheckTimer(alert);
