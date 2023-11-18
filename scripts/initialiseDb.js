@@ -261,14 +261,6 @@ async function initialiseDb() {
   );
 
   await callApiRequest(
-    `${SERVER_URL}/smartbed/${smartbedIds[21]}/nurses`,
-    "PUT",
-    {
-      newNurses: ward1NurseIds,
-    }
-  );
-
-  await callApiRequest(
     `${SERVER_URL}/smartbed/${smartbedIds[22]}/nurses`,
     "PUT",
     {
