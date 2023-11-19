@@ -217,9 +217,6 @@ const assignNurseToWard = async (req, res) => {
         .json({ message: `cannot find any nurse with ID ${nurseId}` });
     }
 
-    ward.nurses.push(nurseId);
-    await ward.save();
-
     const oldWard = nurse.ward;
 
     await Ward.findOneAndUpdate(
@@ -230,6 +227,9 @@ const assignNurseToWard = async (req, res) => {
         runValidators: true,
       }
     );
+
+    ward.nurses.push(nurseId);
+    await ward.save();
 
     await Nurse.findOneAndUpdate(
       { _id: nurseId },
@@ -268,9 +268,7 @@ const assignVirtualNurseToWard = async (req, res) => {
       });
     }
 
-    virtualNurseInstance.wards.push(id);
-    await virtualNurseInstance.save();
-
+    
     const prevVirtualNurse = ward.virtualNurse;
 
     await virtualNurse.findOneAndUpdate(
@@ -281,6 +279,9 @@ const assignVirtualNurseToWard = async (req, res) => {
         runValidators: true,
       }
     );
+
+    virtualNurseInstance.wards.push(id);
+    await virtualNurseInstance.save();
 
     const updatedWard = await Ward.findOneAndUpdate(
       { _id: id },
