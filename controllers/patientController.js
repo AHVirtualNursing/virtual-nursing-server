@@ -2,10 +2,15 @@ const puppeteer = require("puppeteer");
 const { Alert } = require("../models/alert");
 const { AlertConfig } = require("../models/alertConfig");
 const { Patient } = require("../models/patient");
-const { SmartBed, bedStatusEnum } = require("../models/smartbed");
+const {
+  SmartBed,
+  bedStatusEnum,
+  bedPositionEnum,
+} = require("../models/smartbed");
 const SmartWearable = require("../models/smartWearable");
 const { Reminder } = require("../models/reminder");
 const { Nurse } = require("../models/nurse");
+const { Vital } = require("../models/vital");
 const Ward = require("../models/ward");
 const virtualNurse = require("../models/virtualNurse");
 const { io } = require("socket.io-client");
@@ -127,7 +132,6 @@ const getSmartBedByPatientId = async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 };
-
 
 const getPatientByNric = async (req, res) => {
   try {
@@ -350,7 +354,6 @@ const dischargePatientById = async (req, res) => {
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(0);
 
-
     try {
       await page.goto(process.env.DVS_DEVELOPMENT_URL, {
         waitUntil: "networkidle0",
@@ -390,7 +393,7 @@ const dischargePatientById = async (req, res) => {
     patient.dischargeDateTime = new Date(
       new Date().getTime() + 8 * 60 * 60 * 1000
     );
-    
+
     for (const alertId of patient.alerts) {
       await Alert.deleteOne({ _id: alertId });
     }
@@ -432,7 +435,9 @@ const admitPatientById = async (req, res) => {
     patient.consciousness = consciousness;
     await patient.save();
 
-    const smartBed = await SmartBed.findOne({ patient: id }).populate('patient');
+    const smartBed = await SmartBed.findOne({ patient: id }).populate(
+      "patient"
+    );
 
     if (!smartBed) {
       return res

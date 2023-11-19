@@ -38,7 +38,6 @@ const patientSchema = new mongoose.Schema(
     },
     condition: {
       type: String,
-      required: true,
     },
     infoLogs: {
       type: [infoLog],
@@ -68,26 +67,26 @@ const patientSchema = new mongoose.Schema(
       enum: {
         values: patientAcuityLevelEnum,
         message: "Invalid patient acuity level: {VALUE}",
-      }, 
-      default: patientAcuityLevelEnum[3]
+      },
+      default: patientAcuityLevelEnum[3],
     },
     fallRisk: {
       type: String,
       enum: {
         values: patientFallRiskEnum,
         message: "Invalid patient patient fall risk: {VALUE}",
-      }, 
-      default: patientFallRiskEnum[3]
+      },
+      default: patientFallRiskEnum[3],
     },
     isDischarged: {
       type: Boolean,
       default: false,
     },
     admissionDateTime: {
-      type: Date
+      type: Date,
     },
     dischargeDateTime: {
-      type: Date
+      type: Date,
     },
     alerts: [
       {
@@ -117,8 +116,8 @@ const patientSchema = new mongoose.Schema(
     ],
     order: {
       type: [String],
-      default: ["hr", "bpSys", "bpDia"]
-    }
+      default: ["hr", "bpSys", "bpDia"],
+    },
   },
   {
     timestamps: true,
@@ -132,5 +131,5 @@ module.exports = {
   Patient,
   patientSchema,
   patientO2IntakeEnum,
-  patientConsciousnessEnum
+  patientConsciousnessEnum,
 };

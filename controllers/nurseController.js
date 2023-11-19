@@ -36,9 +36,9 @@ const createNurse = async (req, res, session) => {
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
-      throw {validationErrors};
+      throw { validationErrors };
     } else {
-      throw {e};
+      throw { e };
     }
   }
 };
