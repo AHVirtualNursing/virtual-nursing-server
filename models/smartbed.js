@@ -106,5 +106,5 @@ const smartBedSchema = new mongoose.Schema(
 
 const SmartBed = mongoose.models.SmartBed || mongoose.model("SmartBed", smartBedSchema);
 
-module.exports = {SmartBed, bedStatusEnum};
+module.exports = {SmartBed, bedStatusEnum, bedPositionEnum};
   
