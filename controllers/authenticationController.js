@@ -65,6 +65,7 @@ const register = async (req, res) => {
 
     return res.status(201).json({ data: { _id: newUser._id } });
   } catch (error) {
+    session.endSession();
     return res.status(500).json({ message: error.message });
   }
 };

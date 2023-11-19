@@ -202,7 +202,7 @@ const updateWardById = async (req, res) => {
 const assignNurseToWard = async (req, res) => {
   try {
     const { id } = req.params;
-    const ward = await Ward.findById(id);
+    var ward = await Ward.findById(id);
     if (!ward) {
       return res
         .status(500)
@@ -218,7 +218,7 @@ const assignNurseToWard = async (req, res) => {
     }
 
     const oldWard = nurse.ward;
-
+    
     await Ward.findOneAndUpdate(
       { _id: oldWard },
       { $pull: { nurses: nurseId } },
@@ -227,7 +227,8 @@ const assignNurseToWard = async (req, res) => {
         runValidators: true,
       }
     );
-
+    
+    ward = await Ward.findById(id);
     ward.nurses.push(nurseId);
     await ward.save();
 

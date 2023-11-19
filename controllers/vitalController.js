@@ -50,7 +50,8 @@ const processVitalForPatient = async (patientId, vitalsData) => {
   try {
     const patient = await Patient.findById(patientId)
       .populate("vital")
-      .populate("alertConfig");
+      .populate("alertConfig")
+      .populate("alerts");
 
     if (!patient) {
       throw new Error(`Cannot find any patient with Patient ID ${patientId}`);
@@ -278,17 +279,21 @@ const processVitalForPatient = async (patientId, vitalsData) => {
     socket.emit("update-vitals", updatedVital, patient._id);
 
     const alerts = patient.alerts;
+    if (!alerts) {
+      alerts = [];
+    }
+    vitalAlerts = alerts.filter(
+      (alert) => alert.alertType === alertTypeEnum[0]
+    );
+
     if (request.body.description != "") {
-      if (alerts.length == 0) {
+      if (alerts.length == 0 || vitalAlerts.length == 0) {
         await AlertController.createAlert(request, result);
       } else {
-        var lastAlert = alerts[alerts.length - 1];
-        lastAlert = await Alert.findById(lastAlert);
-
+        var lastAlert = vitalAlerts[vitalAlerts.length - 1];
         if (
-          lastAlert.alertType === alertTypeEnum[0] &&
-          (lastAlert.status === alertStatusEnum[0] ||
-            lastAlert.status === alertStatusEnum[1])
+          lastAlert.status === alertStatusEnum[0] ||
+          lastAlert.status === alertStatusEnum[1]
         ) {
           lastAlert.alertVitals = await updateAlertVitals(
             lastAlert.alertVitals,
@@ -297,7 +302,7 @@ const processVitalForPatient = async (patientId, vitalsData) => {
           const noteLog = {
             info: request.body.description,
             datetime: vitalsData.datetime,
-            addedBy: "System"
+            addedBy: "System",
           };
           lastAlert.notes.push(noteLog);
           await lastAlert.save();
@@ -351,7 +356,7 @@ const getVitalById = async (req, res) => {
     if (!vital) {
       return res
         .status(500)
-        .json({ message: `cannot find any vital with ID ${id}` }); //status 400?
+        .json({ message: `cannot find any vital with ID ${id}` }); 
     }
     res.status(200).json(vital);
   } catch (e) {
@@ -374,8 +379,8 @@ const updateAlertVitals = async (currentAlertVitals, newAlertVitals) => {
   return currentAlertVitals;
 };
 
-const updateAlert = async(alert) => {
-  const req = { params: { id: alert._id } , body: {}};
+const updateAlert = async (alert) => {
+  const req = { params: { id: alert._id }, body: {} };
   const res = {
     statusCode: null,
     jsonData: null,
@@ -390,7 +395,8 @@ const updateAlert = async(alert) => {
   };
 
   await AlertController.updateAlertById(req, res);
-}
+};
+
 module.exports = {
   addVitalForPatient,
   processVitalForPatient,
