@@ -3,9 +3,7 @@ const { Alert, alertSchema } = require("../models/alert");
 const { AlertConfig, alertConfigSchema } = require("../models/alertConfig");
 const { Reminder, reminderSchema } = require("../models/reminder");
 const { Vital, vitalSchema } = require("../models/vital");
-const { Report, reportSchema } = require("../models/report");
 const { mongooseCreateConnection } = require("../middleware/mongoose");
-const { deleteReport } = require("./report");
 
 const migratePatient = async (
   patient,
@@ -17,7 +15,7 @@ const migratePatient = async (
 ) => {
   let ahDbConnection;
   try {
-    ahDbConnection = mongooseCreateConnection(process.env.MONGODB_AH_URI);
+    ahDbConnection = mongooseCreateConnection(process.env.MONGODB_AH_LOCAL_URI);
     const Patient = ahDbConnection.model("patient", patientSchema);
     const MigratedAlert = ahDbConnection.model("alert", alertSchema);
     const MigratedAlertConfig = ahDbConnection.model(
@@ -26,7 +24,6 @@ const migratePatient = async (
     );
     const MigratedReminder = ahDbConnection.model("reminder", reminderSchema);
     const MigratedVital = ahDbConnection.model("vital", vitalSchema);
-    const MigratedReport = ahDbConnection.model("report", reportSchema);
 
     const migratedAlertIds = [];
     if (alerts) {
@@ -101,45 +98,10 @@ const migratePatient = async (
       migratedVitalId = await migratedVital.save();
     }
 
-    const migratedReportIds = [];
-    if (reports) {
-      reports.map(async (reportId) => {
-        const report = await Report.findById(reportId);
-        const reportData = {
-          name: report.name,
-          type: report.type,
-          content: report.content,
-          url: report.url,
-        };
-        if (report.type == "event") {
-          console.log("Deleting event report, ", report);
-          await deleteReport(reportId);
-        } else if (report.type == "discharge") {
-          const migratedReport = new MigratedReport(reportData);
-          const migratedReportId = await migratedReport.save();
-          migratedReportIds.push(migratedReportId);
-        }
-      });
-    }
-
     const migratedPatientData = {
       name: patient.name,
       nric: patient.nric,
-      picture: patient.picture,
-      condition: patient.condition,
-      infoLogs: patient.infoLogs,
-      copd: patient.copd,
-      o2Intake: patient.o2Intake,
-      consciousness: patient.consciousness,
-      acuityLevel: patient.acuityLevel,
-      fallRisk: patient.fallRisk,
-      admissionDateTime: patient.admissionDateTime,
-      dischargeDateTime: patient.dischargeDateTime,
-      alerts: migratedAlertIds,
-      alertConfig: migratedAlertConfigId,
-      reminders: migratedReminderIds,
-      vital: migratedVitalId,
-      reports: migratedReportIds,
+      
     };
 
     const newPatient = new Patient(migratedPatientData);

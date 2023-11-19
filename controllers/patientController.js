@@ -287,15 +287,14 @@ const dischargePatientById = async (req, res) => {
         .json({ message: `cannot find any patient with ID ${id}` });
     }
 
-    /* commented out for demo during steps, mongo cannot connect to AH db - gj 15/11 */
-    // await migratePatient(
-    //   patient,
-    //   patient.alerts,
-    //   patient.alertConfig,
-    //   patient.reminders,
-    //   patient.vital,
-    //   patient.reports
-    // );
+    await migratePatient(
+      patient,
+      patient.alerts,
+      patient.alertConfig,
+      patient.reminders,
+      patient.vital,
+      patient.reports
+    );
 
     const request = { params: { id: id } };
     const result = {
@@ -323,6 +322,15 @@ const dischargePatientById = async (req, res) => {
     }
     smartBed.bedStatus = bedStatusEnum[1];
     smartBed.patient = null;
+    smartBed.bedPosition = bedPositionEnum[2];
+    smartBed.isRightUpperRail = true;
+    smartBed.isLeftUpperRail = true;
+    smartBed.isRightLowerRail = true;
+    smartBed.isLeftLowerRail = true;
+    smartBed.isBrakeSet = true;
+    smartBed.isLowestPosition = true;
+    smartBed.isBedExitAlarmOn = true;
+    smartBed.isPatientOnBed = true;
     await smartBed.save();
 
     const smartWearable = await SmartWearable.findOne({ patient: id });
@@ -340,6 +348,8 @@ const dischargePatientById = async (req, res) => {
     await socket.emit("discharge-patient", patient, virtualNurse);
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(0);
+
 
     try {
       await page.goto(process.env.DVS_DEVELOPMENT_URL, {
@@ -368,21 +378,31 @@ const dischargePatientById = async (req, res) => {
       await browser.close();
     }
 
-    // patient.condition = undefined;
+    patient.condition = undefined;
     patient.infoLogs = undefined;
     patient.copd = undefined;
     patient.o2Intake = undefined;
     patient.consciousness = undefined;
-    patient.alerts = undefined;
-    patient.reminders = undefined;
-    patient.vital = undefined;
     patient.order = undefined;
-    patient.alertConfig = undefined;
-    patient.infoLogs = undefined;
+    patient.acuityLevel = undefined;
+    patient.fallRisk = undefined;
     patient.isDischarged = true;
     patient.dischargeDateTime = new Date(
       new Date().getTime() + 8 * 60 * 60 * 1000
     );
+    
+    for (const alertId of patient.alerts) {
+      await Alert.deleteOne({ _id: alertId });
+    }
+    patient.alerts = undefined;
+    for (const reminderId of patient.reminders) {
+      await Reminder.deleteOne({ _id: reminderId });
+    }
+    patient.reminders = undefined;
+    await AlertConfig.deleteOne({ _id: patient.alertConfig });
+    patient.alertConfig = undefined;
+    await Vital.deleteOne({ _id: patient.vital });
+    patient.vital = undefined;
 
     await patient.save();
 
