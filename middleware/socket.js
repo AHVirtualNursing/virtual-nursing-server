@@ -186,6 +186,14 @@ const configureSocket = (server) => {
       }
     });
 
+    socket.on("bedsideToVirtualNurseChatUpdateNewMessage", (chat) => {
+      const clientSocket = findClientSocket(chat.virtualNurse._id);
+
+      if (clientSocket) {
+        clientSocket.emit("updateVirtualNurseChatNewMessage", chat);
+      }
+    });
+
     socket.on("update-smartbed", async (smartbed) => {
       try {
         const req = { params: { id: smartbed.patient._id } };
