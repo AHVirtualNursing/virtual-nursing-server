@@ -351,7 +351,7 @@ const getVitalById = async (req, res) => {
     if (!vital) {
       return res
         .status(500)
-        .json({ message: `cannot find any vital with ID ${id}` }); //status 400?
+        .json({ message: `cannot find any vital with ID ${id}` }); 
     }
     res.status(200).json(vital);
   } catch (e) {
@@ -391,6 +391,7 @@ const updateAlert = async(alert) => {
 
   await AlertController.updateAlertById(req, res);
 }
+
 module.exports = {
   addVitalForPatient,
   processVitalForPatient,
