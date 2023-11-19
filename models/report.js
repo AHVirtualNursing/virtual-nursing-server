@@ -16,9 +16,6 @@ const reportSchema = new mongoose.Schema(
       },
       require: true,
     },
-    content: {
-      type: String,
-    },
     url: {
       type: String,
       require: true,

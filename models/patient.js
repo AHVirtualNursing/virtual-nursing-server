@@ -38,7 +38,7 @@ const patientSchema = new mongoose.Schema(
     },
     condition: {
       type: String,
-      required: true,
+      required: false,
     },
     infoLogs: {
       type: [infoLog],
@@ -98,6 +98,7 @@ const patientSchema = new mongoose.Schema(
     alertConfig: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "AlertConfig",
+      required: false
     },
     reminders: [
       {

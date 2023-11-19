@@ -78,9 +78,6 @@ const smartBedSchema = new mongoose.Schema(
       default: true,
       required: true
     },
-    bedAlarmProtocolBreachReason: {
-      type: String
-    },
     patient: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Patient",
@@ -106,5 +103,5 @@ const smartBedSchema = new mongoose.Schema(
 
 const SmartBed = mongoose.models.SmartBed || mongoose.model("SmartBed", smartBedSchema);
 
-module.exports = {SmartBed, bedStatusEnum};
+module.exports = {SmartBed, bedStatusEnum, bedPositionEnum};
   
