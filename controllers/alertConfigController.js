@@ -99,7 +99,6 @@ const updateAlertConfigById = async (req, res) => {
   }
 };
 
-// should we even allow alert config to be deleted?
 const deleteAlertConfigById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -110,7 +109,7 @@ const deleteAlertConfigById = async (req, res) => {
         .json({ message: `cannot find any alertConfig with ID ${id}` });
     }
 
-    //Remove link from Patient to Alert
+    //Remove link from Patient to Alert Config
     const updatedPatient = await Patient.findOneAndUpdate(
       { alertConfig: id },
       { $unset: { alertConfig: 1 } },
@@ -121,7 +120,7 @@ const deleteAlertConfigById = async (req, res) => {
     );
     if (!updatedPatient) {
       return res.status(500).json({
-        message: `cannot find any patient tagged to this alert with ID ${alert.patient}`,
+        message: `cannot find any patient tagged to this alertConfig with ID ${alertConfig.patient}`,
       });
     }
     await AlertConfig.deleteOne({ _id: id });
