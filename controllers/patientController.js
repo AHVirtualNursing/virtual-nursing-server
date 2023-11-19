@@ -382,11 +382,7 @@ const dischargePatientById = async (req, res) => {
     patient.copd = undefined;
     patient.o2Intake = undefined;
     patient.consciousness = undefined;
-    patient.alerts = undefined;
-    patient.reminders = undefined;
-    patient.vital = undefined;
     patient.order = undefined;
-    patient.infoLogs = undefined;
     patient.isDischarged = true;
     patient.dischargeDateTime = new Date(
       new Date().getTime() + 8 * 60 * 60 * 1000
