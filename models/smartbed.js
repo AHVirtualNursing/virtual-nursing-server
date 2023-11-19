@@ -1,9 +1,7 @@
 const mongoose = require("mongoose");
 
 const bedStatusEnum = ["occupied", "vacant"];
-const bedPositionEnum = ["upright", "incline", "flat"]
-
-
+const bedPositionEnum = ["upright", "incline", "flat"];
 
 const smartBedSchema = new mongoose.Schema(
   {
@@ -41,22 +39,22 @@ const smartBedSchema = new mongoose.Schema(
     isRightUpperRail: {
       type: Boolean,
       default: true,
-      required: true
+      required: true,
     },
     isRightLowerRail: {
       type: Boolean,
       default: true,
-      required: true
+      required: true,
     },
     isLeftUpperRail: {
       type: Boolean,
       default: true,
-      required: true
+      required: true,
     },
     isLeftLowerRail: {
       type: Boolean,
       default: true,
-      required: true
+      required: true,
     },
     isBrakeSet: {
       type: Boolean,
@@ -74,12 +72,12 @@ const smartBedSchema = new mongoose.Schema(
       required: true,
     },
     isPatientOnBed: {
-      type:Boolean,
+      type: Boolean,
       default: true,
-      required: true
+      required: true,
     },
     bedAlarmProtocolBreachReason: {
-      type: String
+      type: String,
     },
     patient: {
       type: mongoose.Schema.Types.ObjectId,
@@ -104,7 +102,7 @@ const smartBedSchema = new mongoose.Schema(
   }
 );
 
-const SmartBed = mongoose.models.SmartBed || mongoose.model("SmartBed", smartBedSchema);
+const SmartBed =
+  mongoose.models.SmartBed || mongoose.model("SmartBed", smartBedSchema);
 
-module.exports = {SmartBed, bedStatusEnum, bedPositionEnum};
-  
+module.exports = { SmartBed, bedStatusEnum, bedPositionEnum };
