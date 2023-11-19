@@ -189,57 +189,6 @@ async function sendMockPatientVitals() {
           console.error(`Error: ${error}`);
           return { success: false };
         });
-
-      // sendVitals("heartRate", patientData);
-      // setTimeout(() => {
-      //   sendVitals("spO2", patientData);
-      // }, 1000);
-      // setTimeout(() => {
-      //   sendVitals("bloodPressure", patientData);
-      // }, 2000);
-      // setTimeout(() => {
-      //   sendVitals("temperature", patientData);
-      // }, 3000);
-      // setTimeout(() => {
-      //   sendVitals("respRate", patientData);
-      // }, 4000);
-
-      // setTimeout(() => {
-      //   sendBedStatus("bedPosition", patientData);
-      // }, 5000);
-      // setTimeout(() => {
-      //   sendBedStatus("isRightUpperRail", patientData);
-      // }, 6000);
-      // setTimeout(() => {
-      //   sendBedStatus("isRightLowerRail", patientData);
-      // }, 7000);
-      // setTimeout(() => {
-      //   sendBedStatus("isLeftUpperRail", patientData);
-      // }, 8000);
-      // setTimeout(() => {
-      //   sendBedStatus("isLeftLowerRail", patientData);
-      // }, 9000);
-      // setTimeout(() => {
-      //   sendBedStatus("isBrakeSet", patientData);
-      // }, 10000);
-      // setTimeout(() => {
-      //   sendBedStatus("isLowestPosition", patientData);
-      // }, 11000);
-      // setTimeout(() => {
-      //   sendBedStatus("isBedExitAlarmOn", patientData);
-      // }, 12000);
-      // setTimeout(() => {
-      //   sendBedStatus("isPatientOnBed", patientData);
-      // }, 13000);
-      // setTimeout(() => {
-      //   sendBedStatus("fallRisk", patientData);
-      // }, 14000);
-      // setTimeout(() => {
-      //   sendBedStatus("acuityLevel", patientData);
-      // }, 15000);
-
-      // console.log("here");
-      // return { success: true };
     }
 
     function delay(ms) {
