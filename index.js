@@ -36,7 +36,8 @@ const news2Scheduler = require("./helper/news2");
 const app = express();
 
 
-mongooseConnect()
+mongooseConnect(
+)
   .then(() => {
     console.log("MongoDB connected");
   })

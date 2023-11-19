@@ -29,9 +29,9 @@ const createVirtualNurse = async (req, res) => {
   } catch (e) {
     if (e.name === "ValidationError") {
       const validationErrors = Object.values(e.errors).map((e) => e.message);
-      return res.status(400).json({ validationErrors });
+      throw {validationErrors};
     } else {
-      res.status(500).json({ success: false, error: e.message });
+      throw {e};
     }
   }
 };

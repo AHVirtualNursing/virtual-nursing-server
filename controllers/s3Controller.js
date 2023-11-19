@@ -78,8 +78,14 @@ const uploadAndParseMockData = async (req, res) => {
     });
 
     await s3.send(command);
-
-    sendMockPatientVitals(patientId);
+    const responseMockData = await sendMockPatientVitals(patientId);
+    if (responseMockData.success) {
+      res.status(200).json({ responseMockData });
+    } else {
+      res
+        .status(500)
+        .json({ error: "Error uploading or parsing mock data from S3" });
+    }
   } catch (error) {
     console.error(error);
     res
@@ -91,7 +97,7 @@ const uploadAndParseMockData = async (req, res) => {
 const stopMockDataSimulation = async (req, res) => {
   try {
     clearInterval();
-    res.status(200).json({ success: "Stopped mock data simulation"})
+    res.status(200).json({ success: "Stopped mock data simulation" });
   } catch (error) {
     res.status(500).json({ error: "Failed to stop mock data simulation" });
   }

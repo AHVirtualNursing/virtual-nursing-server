@@ -261,14 +261,6 @@ async function initialiseDb() {
   );
 
   await callApiRequest(
-    `${SERVER_URL}/smartbed/${smartbedIds[21]}/nurses`,
-    "PUT",
-    {
-      newNurses: ward1NurseIds,
-    }
-  );
-
-  await callApiRequest(
     `${SERVER_URL}/smartbed/${smartbedIds[22]}/nurses`,
     "PUT",
     {
@@ -374,42 +366,106 @@ async function initialiseDb() {
       await callApiRequest(`${SERVER_URL}/patient/${patientId}/admit`, "PUT", {
         smartWearableId: smartWearableIds[index],
       });
+
+      // configure acuity level and fall risk
+      await callApiRequest(`${SERVER_URL}/patient/${patientId}`, "PUT", {
+        acuityLevel: patient.acuityLevel,
+        fallRisk: patient.fallRisk,
+      });
+
       return patientId;
     })
   );
 
-  // create abnormal vitals for a patient to trigger alert
+  // create abnormal vitals for a patient to trigger alert and complete it
   await callApiRequest(`${SERVER_URL}/vital`, "POST", {
-    patient: patientIds[2],
+    patient: patientIds[6],
     heartRate: 140,
     respRate: 15,
     bloodPressureSys: 67,
     bloodPressureDia: 80,
     spO2: 96,
     temperature: 36,
-    datetime: "2023-11-14T14:30:00",
+    datetime: "2023-11-18T10:32:00",
   });
 
-  // set alert status to complete
   let alert = await callApiRequest(`${SERVER_URL}/alert`, "GET");
   await callApiRequest(`${SERVER_URL}/alert/${alert.data[0]._id}`, "PUT", {
     status: "complete",
+    handledBy: {
+      info: "Patient was excited.",
+      datetime: "2023-11-18T14:30:00",
+      addedBy: "Nurse Anna",
+    },
   });
 
+  // create abnormal vitals for a patient to trigger alert and handle it
   await callApiRequest(`${SERVER_URL}/vital`, "POST", {
-    patient: patientIds[2],
-    heartRate: 80,
+    patient: patientIds[7],
+    heartRate: 119,
     respRate: 15,
-    bloodPressureSys: 67,
-    bloodPressureDia: 80,
+    bloodPressureSys: 90,
+    bloodPressureDia: 125,
     spO2: 96,
-    temperature: 40,
-    datetime: "2023-11-14T17:34:25",
+    temperature: 36,
+    datetime: "2023-11-18T11:30:00",
   });
 
   alert = await callApiRequest(`${SERVER_URL}/alert`, "GET");
   await callApiRequest(`${SERVER_URL}/alert/${alert.data[1]._id}`, "PUT", {
+    status: "handling",
+    handledBy: {
+      info: "Patient was sleeping.",
+      datetime: "2023-11-18T14:40:30",
+      addedBy: "Nurse Anna",
+    },
+  });
+
+  // create abnormal vitals for a patient to trigger alert and leave it open
+  await callApiRequest(`${SERVER_URL}/vital`, "POST", {
+    patient: patientIds[8],
+    heartRate: 119,
+    respRate: 15,
+    bloodPressureSys: 77,
+    bloodPressureDia: 89,
+    spO2: 92,
+    temperature: 36,
+    datetime: "2023-11-18T18:21:00",
+  });
+
+  // Create a bed alarm alert for Pooh and close it
+  await callApiRequest(`${SERVER_URL}/smartbed/${smartbedIds[3]}`, "PUT", {
+    isPatientOnBed: "false",
+  });
+
+  alert = await callApiRequest(`${SERVER_URL}/alert`, "GET");
+  await callApiRequest(`${SERVER_URL}/alert/${alert.data[3]._id}`, "PUT", {
     status: "complete",
+    handledBy: {
+      info: "Patient had friends visiting.",
+      datetime: "2023-11-17T14:32:50",
+      addedBy: "Nurse Elsa",
+    },
+  });
+
+  // Create a bed alarm alert for Chip and handle it
+  await callApiRequest(`${SERVER_URL}/smartbed/${smartbedIds[4]}`, "PUT", {
+    isPatientOnBed: "false",
+  });
+  alert = await callApiRequest(`${SERVER_URL}/alert`, "GET");
+  
+  await callApiRequest(`${SERVER_URL}/alert/${alert.data[4]._id}`, "PUT", {
+    status: "handling",
+    handledBy: {
+      info: "Patient had family over.",
+      datetime: "2023-11-18T12:55:00",
+      addedBy: "Nurse Elsa",
+    },
+  });
+
+  // Create a bed alarm alert for Dale and leave it open
+  await callApiRequest(`${SERVER_URL}/smartbed/${smartbedIds[5]}`, "PUT", {
+    isPatientOnBed: "false",
   });
 
   console.log("\x1b[34m", "****** DB INITIALISED ******");
@@ -531,4 +587,5 @@ function datetimeInADay(date) {
 module.exports = {
   initialiseDb,
   populateVitalsForPatient,
+  callApiRequest,
 };
