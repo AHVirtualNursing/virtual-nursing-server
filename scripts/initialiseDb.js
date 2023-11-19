@@ -453,7 +453,7 @@ async function initialiseDb() {
     isPatientOnBed: "false",
   });
   alert = await callApiRequest(`${SERVER_URL}/alert`, "GET");
-  
+
   await callApiRequest(`${SERVER_URL}/alert/${alert.data[4]._id}`, "PUT", {
     status: "handling",
     handledBy: {

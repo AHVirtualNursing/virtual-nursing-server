@@ -3,6 +3,7 @@ const { Alert, alertSchema } = require("../models/alert");
 const { AlertConfig, alertConfigSchema } = require("../models/alertConfig");
 const { Reminder, reminderSchema } = require("../models/reminder");
 const { Vital, vitalSchema } = require("../models/vital");
+const { Report, reportSchema } = require("../models/report");
 const { mongooseCreateConnection } = require("../middleware/mongoose");
 
 const migratePatient = async (

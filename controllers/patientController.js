@@ -2,7 +2,11 @@ const puppeteer = require("puppeteer");
 const { Alert } = require("../models/alert");
 const { AlertConfig } = require("../models/alertConfig");
 const { Patient } = require("../models/patient");
-const { SmartBed, bedStatusEnum, bedPositionEnum } = require("../models/smartbed");
+const {
+  SmartBed,
+  bedStatusEnum,
+  bedPositionEnum,
+} = require("../models/smartbed");
 const SmartWearable = require("../models/smartWearable");
 const { Reminder } = require("../models/reminder");
 const { Nurse } = require("../models/nurse");
@@ -128,7 +132,6 @@ const getSmartBedByPatientId = async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 };
-
 
 const getPatientByNric = async (req, res) => {
   try {
@@ -288,14 +291,14 @@ const dischargePatientById = async (req, res) => {
         .json({ message: `cannot find any patient with ID ${id}` });
     }
 
-     await migratePatient(
-       patient,
-       patient.alerts,
-       patient.alertConfig,
-       patient.reminders,
-       patient.vital,
-       patient.reports
-     );
+    await migratePatient(
+      patient,
+      patient.alerts,
+      patient.alertConfig,
+      patient.reminders,
+      patient.vital,
+      patient.reports
+    );
 
     const request = { params: { id: id } };
     const result = {
@@ -331,7 +334,7 @@ const dischargePatientById = async (req, res) => {
     smartBed.isBrakeSet = true;
     smartBed.isLowestPosition = true;
     smartBed.isBedExitAlarmOn = true;
-    smartBed.isPatientOnBed = true
+    smartBed.isPatientOnBed = true;
     await smartBed.save();
 
     const smartWearable = await SmartWearable.findOne({ patient: id });
@@ -349,6 +352,7 @@ const dischargePatientById = async (req, res) => {
     await socket.emit("discharge-patient", patient, virtualNurse);
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(0);
 
     try {
       await page.goto(process.env.DVS_DEVELOPMENT_URL, {
@@ -383,6 +387,8 @@ const dischargePatientById = async (req, res) => {
     patient.o2Intake = undefined;
     patient.consciousness = undefined;
     patient.order = undefined;
+    patient.acuityLevel = undefined;
+    patient.fallRisk = undefined;
     patient.isDischarged = true;
     patient.dischargeDateTime = new Date(
       new Date().getTime() + 8 * 60 * 60 * 1000
@@ -429,7 +435,9 @@ const admitPatientById = async (req, res) => {
     patient.consciousness = consciousness;
     await patient.save();
 
-    const smartBed = await SmartBed.findOne({ patient: id }).populate('patient');
+    const smartBed = await SmartBed.findOne({ patient: id }).populate(
+      "patient"
+    );
 
     if (!smartBed) {
       return res
